@@ -18,7 +18,7 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
 bp = Blueprint("admin_users", __name__, url_prefix="/api/v1/admin/users")
 
 
-# TODO: all logic must be in service, no orchestration in router
+# TODO: All logic must be in service, no orchestration in router
 @bp.get("/<uuid:user_id>")
 @jwt_required()
 def get_user(user_id: UUID):
@@ -68,7 +68,6 @@ def handle_exception(e: Exception):
     return construct_error(e)
 
 
-# TODO: 4.
-# read users list (GDPR safe fields only)
-# add filters for users list
-# add sorting for users list
+# TODO: Read users list (GDPR safe fields only)
+# TODO: Add filters for users list
+# TODO: Add sorting for users list

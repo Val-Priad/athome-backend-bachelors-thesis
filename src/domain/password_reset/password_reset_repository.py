@@ -13,6 +13,7 @@ class PasswordResetRepository:
     def try_deactivate_all_user_tokens(
         db: Session, user_id: uuid.UUID
     ) -> None:
+        # TODO: Silent/Not Silent Rules #5 - Return bool or ensure guaranteed effect (best-effort operation)
         db.execute(
             update(PasswordReset)
             .where(
@@ -29,6 +30,7 @@ class PasswordResetRepository:
         hashed_token: bytes,
         expires_at: datetime,
     ) -> None:
+        # TODO: Repository Rules #2 - Add db.flush() after db.add() if generated id or dependent operations needed
         db.add(
             PasswordReset(
                 user_id=user_id, token_hash=hashed_token, expires_at=expires_at

@@ -68,6 +68,7 @@ class EmailVerificationService:
         return self.create_token(db, user_id, invalidate_previous=True)
 
     def verify_token(self, db: Session, raw_token):
+        # TODO: Repository Rules #3 - Verify UPDATE on is_email_verified (status field) using .returning()
         token = self.email_verification_repository.get_valid_token(
             db, self.token_hasher.hash_token(raw_token)
         )

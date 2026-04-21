@@ -1,1 +1,1 @@
-# TODO: 2. create endpoint that allows any user to obtain agent description
+# TODO: Create endpoint that allows any user to obtain agent description

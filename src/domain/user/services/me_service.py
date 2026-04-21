@@ -23,11 +23,13 @@ class MeService:
         return self.user_repository.get_user_by_id(db, user_id)
 
     def delete_user_by_id(self, db: Session, user_id: UUID) -> None:
+        # TODO: Repository Rules #4 - Verify that row was deleted using .returning()
         db.delete(self.user_repository.get_user_by_id(db, user_id))
 
     def update_password(
         self, db: Session, user_id: UUID, raw_password: str
     ) -> None:
+        # TODO: Repository Rules #3 - Verify that row was updated using .returning()
         user = self.user_repository.get_user_by_id(db, user_id)
         user.password_hash = self.password_hasher.hash_password(raw_password)
 
@@ -47,6 +49,7 @@ class MeService:
     def update_personal_data(
         self, db: Session, user_id: UUID, data: UpdateUserPersonalDataRequest
     ):
+        # TODO: Repository Rules #3 - Verify UPDATE operations on ORM objects
         user = self.user_repository.get_user_by_id(db, user_id)
 
         updates = data.model_dump(exclude_unset=True)

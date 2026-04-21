@@ -49,5 +49,5 @@ class Mailer:
         resend.Emails.send(params)  # type: ignore
 
 
-# TODO: implement sending email to agent
-# TODO: create clean HTML email markup
+# TODO: Implement sending email to agent
+# TODO: Create clean HTML email markup

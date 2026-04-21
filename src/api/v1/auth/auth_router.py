@@ -29,24 +29,13 @@ from schemas.auth_schemas.auth_requests import (
 bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 
 
-# TODO: All logic must be in service, no orchestration in router
 @bp.post("/register")
 @limiter.limit("2/minute")
 def register():
     data = EmailPasswordRequest.from_request(request.json)
 
     try:
-        with db_session() as session:
-            user = auth_service.create_user(session, data.email, data.password)
-
-            raw_token = email_verification_service.create_token(
-                session,
-                user.id,
-            )
-
-            email_verification_service.send_verification_email(
-                user.email, raw_token
-            )
+        auth_service.register_user(data)
     except (UserAlreadyExistsError, EmailSendError):
         pass
     return construct_response(

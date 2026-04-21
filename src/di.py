@@ -39,6 +39,8 @@ password_reset_service = PasswordResetService(
     password_hasher,
 )
 
-auth_service = AuthService(user_repository, password_hasher)
+auth_service = AuthService(
+    user_repository, password_hasher, email_verification_service
+)
 me_service = MeService(user_repository, password_hasher)
 admin_users_service = AdminUsersService(user_repository)

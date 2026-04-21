@@ -18,17 +18,13 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
 bp = Blueprint("admin_users", __name__, url_prefix="/api/v1/admin/users")
 
 
-# TODO: All logic must be in service, no orchestration in router
 @bp.get("/<uuid:user_id>")
 @jwt_required()
 def get_user(user_id: UUID):
     requester_id = get_jwt_user_uuid()
 
     with db_session() as session:
-        admin_users_service.ensure_has_rights(
-            session, requester_id, UserRole.admin
-        )
-        user = admin_users_service.get_user_by_id(session, user_id)
+        user = admin_users_service.get_user(session, requester_id, user_id)
 
         return construct_response(data=UserResponse.from_model(user))
 

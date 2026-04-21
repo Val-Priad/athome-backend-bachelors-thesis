@@ -5,7 +5,6 @@ from flask_jwt_extended import jwt_required
 
 from api.v1.responses import construct_error, construct_response
 from di import admin_users_service
-from domain.user.user_model import UserRole
 from infrastructure.db import db_session
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
 from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
@@ -50,11 +49,7 @@ def delete_user(user_id: UUID):
     requester_id = get_jwt_user_uuid()
 
     with db_session() as session:
-        admin_users_service.ensure_has_rights(
-            session, requester_id, UserRole.admin
-        )
-
-        admin_users_service.delete_user_by_id(session, user_id)
+        admin_users_service.delete_user(session, requester_id, user_id)
 
         return construct_response()
 

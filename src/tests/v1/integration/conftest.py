@@ -1,13 +1,12 @@
 from types import SimpleNamespace
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask.testing import FlaskClient
 from pytest import FixtureRequest, fixture
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import create_app
-from config import TestingConfig
 from domain.user.user_model import User, UserRole
 from infrastructure import db as db_module
 from security.password_crypto import PasswordCrypto
@@ -20,6 +19,11 @@ ADMIN_USERS_PATH = "/admin/users"
 
 @fixture
 def app() -> Flask:
+    load_dotenv()
+
+    from app import create_app
+    from config import TestingConfig
+
     return create_app(TestingConfig)
 
 

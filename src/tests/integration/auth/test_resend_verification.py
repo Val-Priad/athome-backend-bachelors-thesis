@@ -21,7 +21,9 @@ def unverified_user(db_session):
 
 @pytest.fixture
 def verified_user(db_session):
-    user = User(email="user@example.com", password_hash=b"hash", is_email_verified=True)
+    user = User(
+        email="user@example.com", password_hash=b"hash", is_email_verified=True
+    )
     db_session.add(user)
     db_session.flush()
     return user
@@ -39,7 +41,9 @@ def previous_token(db_session, unverified_user):
     return email_verification
 
 
-def test_resend_verification_valid(client, unverified_user, db_session, previous_token):
+def test_resend_verification_valid(
+    client, unverified_user, db_session, previous_token
+):
     previous_token_id = previous_token.id
     unverified_user_id = unverified_user.id
 
@@ -109,7 +113,7 @@ def test_resend_verification_if_user_already_verified(client, verified_user):
 def test_resend_verification_on_server_error_returns_500(
     client, unverified_user, monkeypatch
 ):
-    def boom(db, user_id):
+    def boom(*args, **kwargs):  # Do not touch arguments!
         raise Exception("boom")
 
     monkeypatch.setattr(email_verification_service, "get_resend_token", boom)

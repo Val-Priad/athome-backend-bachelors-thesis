@@ -22,7 +22,7 @@ def verified_user(db_session, client):
 
 
 @pytest.fixture
-def unverified_user(client, db_session):
+def unverified_user(client):
     email = "user@example.com"
     password = "12345678"
     response = client.post(
@@ -44,11 +44,9 @@ def test_login_and_log_out(client, verified_user):
     )
     assert login_response.status_code == 200
 
-    csrf = client.get_cookie("csrf_access_token").value
-
     logout_response = client.post(
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/logout",
-        headers={"X-CSRF-TOKEN": csrf},
+        headers={"X-CSRF-TOKEN": client.get_cookie("csrf_access_token").value},
     )
     assert logout_response.status_code == 200
 

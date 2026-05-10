@@ -19,7 +19,9 @@ def test_register_valid(client, db_session):
 
     assert response.status_code == 202
 
-    user = db_session.scalar(select(User).where(User.email == "user@example.com"))
+    user = db_session.scalar(
+        select(User).where(User.email == "user@example.com")
+    )
     assert user is not None
     assert PasswordCrypto.verify_password(password, user.password_hash) is None
 
@@ -61,7 +63,7 @@ def test_register_user_validation_error(client, payload):
 
 
 def test_register_internal_error_rolls_back(client, db_session, monkeypatch):
-    def boom(db, email, password):
+    def boom(db, email, password):  # Do not touch arguments!
         user = User(email=email, password_hash=b"hash")
         db.add(user)
         db.flush()
@@ -75,5 +77,7 @@ def test_register_internal_error_rolls_back(client, db_session, monkeypatch):
     )
     assert response.status_code == 500
 
-    saved_user = db_session.scalar(select(User).where(User.email == "user@example.com"))
+    saved_user = db_session.scalar(
+        select(User).where(User.email == "user@example.com")
+    )
     assert saved_user is None

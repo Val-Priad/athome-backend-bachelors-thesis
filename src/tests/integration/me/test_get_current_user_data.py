@@ -16,7 +16,7 @@ def test_get_current_user_data_valid(client, logged_in_user, db_session):
     )
 
 
-def test_get_current_user_data_csrf_absent(client, db_session):
+def test_get_current_user_data_csrf_absent(client):
     response = client.get(
         f"{API_PREFIX}{ME_ENDPOINT_PATH}/",
     )

@@ -11,10 +11,9 @@ from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_get_user_by_id_valid(client, logged_in_user, any_user):
-    csrf = client.get_cookie("csrf_access_token").value
     response = client.get(
         f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
-        headers={"X-CSRF-TOKEN": csrf},
+        headers=logged_in_user.headers,
     )
     assert response.status_code == 200
 
@@ -28,11 +27,10 @@ def test_get_user_by_id_valid(client, logged_in_user, any_user):
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_get_user_by_id_user_not_found(client, logged_in_user, any_user):
-    csrf = client.get_cookie("csrf_access_token").value
+def test_get_user_by_id_user_not_found(client, logged_in_user):
     response = client.get(
         f"{API_PREFIX}{ADMIN_USERS_PATH}/{uuid4()}",
-        headers={"X-CSRF-TOKEN": csrf},
+        headers=logged_in_user.headers,
     )
     assert response.status_code == 404
     assert response.get_json()["error"]["code"] == "user_not_found"
@@ -42,10 +40,9 @@ def test_get_user_by_id_user_not_found(client, logged_in_user, any_user):
     "logged_in_user", [UserRole.agent, UserRole.user], indirect=True
 )
 def test_get_user_by_id_forbidden(client, logged_in_user, any_user):
-    csrf = client.get_cookie("csrf_access_token").value
     response = client.get(
         f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
-        headers={"X-CSRF-TOKEN": csrf},
+        headers=logged_in_user.headers,
     )
     assert response.status_code == 403
     assert response.get_json()["error"]["code"] == "forbidden"

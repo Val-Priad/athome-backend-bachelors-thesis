@@ -10,7 +10,7 @@ def register_jwt_handlers(app: Flask):
     @app.after_request
     def refresh_expiring_jwts(response):
         try:
-            if request.path == "/api/v1/auth/logout":
+            if request.path == "/api/auth/logout":
                 return response
 
             exp_timestamp = get_jwt()["exp"]

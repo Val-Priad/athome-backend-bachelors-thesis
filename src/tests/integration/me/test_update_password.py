@@ -1,5 +1,4 @@
 import pytest
-from conftest import API_PREFIX, ME_ENDPOINT_PATH
 from sqlalchemy import select
 
 from domain.user.user_model import User
@@ -7,6 +6,7 @@ from exceptions.custom_exceptions.user_exceptions import (
     PasswordVerificationError,
 )
 from security.password_crypto import PasswordCrypto
+from tests.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
 
 
 def test_update_user_password_valid(client, db_session, logged_in_user):

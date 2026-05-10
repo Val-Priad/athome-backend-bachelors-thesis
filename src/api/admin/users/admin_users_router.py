@@ -3,7 +3,7 @@ from uuid import UUID
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.v1.responses import construct_error, construct_response
+from api.responses import construct_error, construct_response
 from composition_root import (
     change_user_role_use_case,
     delete_admin_user_use_case,
@@ -14,7 +14,7 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
     RoleRequest,
 )
 
-bp = Blueprint("admin_users", __name__, url_prefix="/api/v1/admin/users")
+bp = Blueprint("admin_users", __name__, url_prefix="/api/admin/users")
 
 
 @bp.get("/<uuid:user_id>")

@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.v1.responses import construct_error, construct_response
+from api.responses import construct_error, construct_response
 from composition_root import (
     delete_me_use_case,
     get_me_use_case,
@@ -14,7 +14,7 @@ from schemas.me_schemas.me_requests import (
     UpdateUserPersonalDataRequest,
 )
 
-bp = Blueprint("users_me", __name__, url_prefix="/api/v1/users/me")
+bp = Blueprint("users_me", __name__, url_prefix="/api/users/me")
 
 
 # TODO: All logic must be in service, no orchestration in router

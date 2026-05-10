@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 from sqlalchemy import select
 
 from domain.password_reset.password_reset_model import PasswordReset
 from domain.user.user_model import User
+from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 
 
 @pytest.fixture

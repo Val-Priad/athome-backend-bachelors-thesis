@@ -1,5 +1,4 @@
 import pytest
-from conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 from sqlalchemy import select
 
 from composition_root import auth_service
@@ -8,6 +7,7 @@ from domain.email_verification.email_verification_model import (
 )
 from domain.user.user_model import User
 from security import PasswordCrypto
+from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 
 
 def test_register_valid(client, db_session):
@@ -34,7 +34,7 @@ def test_register_valid(client, db_session):
 def test_register_user_already_exists(client):
     payload = {"email": "user@example.com", "password": "some_password"}
     client.post(f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register", json=payload)
-    response = client.post("/api/v1/auth/register", json=payload)
+    response = client.post("/api/auth/register", json=payload)
     assert response.status_code == 202
 
 

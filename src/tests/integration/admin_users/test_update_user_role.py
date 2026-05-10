@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import select
 
 from domain.user.user_model import User, UserRole
-from tests.v1.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
+from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)

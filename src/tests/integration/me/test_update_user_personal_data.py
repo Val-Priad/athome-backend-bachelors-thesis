@@ -1,8 +1,8 @@
 import pytest
-from conftest import API_PREFIX, ME_ENDPOINT_PATH
 from sqlalchemy import select
 
 from domain.user.user_model import User
+from tests.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
 
 
 def test_update_user_personal_data_valid(client, db_session, logged_in_user):

@@ -1,12 +1,12 @@
 from uuid import uuid4
 
 import pytest
-from conftest import ADMIN_USERS_PATH, API_PREFIX
 
 from domain.user.user_model import UserRole
 from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
     UserResponse,
 )
+from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)

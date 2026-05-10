@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from domain.user.user_model import User
-from tests.v1.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
+from tests.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
 
 
 def test_delete_me_valid(client, logged_in_user, db_session):

@@ -2,7 +2,7 @@ from sqlalchemy import select
 
 from domain.user.user_model import User
 from schemas.me_schemas.me_responses import MeResponse
-from tests.v1.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
+from tests.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
 
 
 def test_get_current_user_data_valid(client, logged_in_user, db_session):

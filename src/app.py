@@ -1,8 +1,8 @@
 from flask import Flask
 
-from api.v1.admin.users.admin_users_router import bp as admin_users_bp
-from api.v1.auth.auth_router import bp as auth_bp
-from api.v1.users.me.me_router import bp as me_bp
+from api.admin.users.admin_users_router import bp as admin_users_bp
+from api.auth.auth_router import bp as auth_bp
+from api.users.me.me_router import bp as me_bp
 from config import DevelopmentConfig, FlaskConfig
 from exceptions.error_catalog import register_errors
 from infrastructure.db import get_engine

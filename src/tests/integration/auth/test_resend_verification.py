@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 from sqlalchemy import select
 
 from composition_root import email_verification_service
@@ -9,6 +8,7 @@ from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
 from domain.user.user_model import User
+from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 
 
 @pytest.fixture

@@ -11,7 +11,7 @@ from domain.user.user_model import User, UserRole
 from infrastructure import db as db_module
 from security.password_crypto import PasswordCrypto
 
-API_PREFIX = "/api/v1"
+API_PREFIX = "/api"
 AUTH_ENDPOINT_PATH = "/auth"
 ME_ENDPOINT_PATH = "/users/me"
 ADMIN_USERS_PATH = "/admin/users"
@@ -77,7 +77,7 @@ def logged_in_user(
     password = "12345678"
     payload = {"email": email, "password": password}
 
-    register_response = client.post("/api/v1/auth/register", json=payload)
+    register_response = client.post("/api/auth/register", json=payload)
     assert register_response.status_code == 202
 
     user = db_session.scalar(select(User).where(User.email == email))
@@ -91,7 +91,7 @@ def logged_in_user(
     user.role = user_role
     db_session.flush()
 
-    login_response = client.post("/api/v1/auth/login", json=payload)
+    login_response = client.post("/api/auth/login", json=payload)
     assert login_response.status_code == 200
 
     cookie = client.get_cookie("csrf_access_token")

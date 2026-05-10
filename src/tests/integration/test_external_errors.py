@@ -1,4 +1,4 @@
-from tests.v1.integration.conftest import (
+from tests.integration.conftest import (
     ADMIN_USERS_PATH,
     API_PREFIX,
     AUTH_ENDPOINT_PATH,

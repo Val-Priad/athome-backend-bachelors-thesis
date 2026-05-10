@@ -6,7 +6,7 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 
-from api.v1.responses import construct_error, construct_response
+from api.responses import construct_error, construct_response
 from composition_root import (
     login_user_use_case,
     register_user_use_case,
@@ -32,7 +32,7 @@ from schemas.auth_schemas.auth_requests import (
     TokenRequest,
 )
 
-bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
+bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 @bp.post("/register")

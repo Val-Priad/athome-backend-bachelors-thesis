@@ -1,6 +1,9 @@
 from application.admin.change_user_role_use_case import ChangeUserRoleUseCase
 from application.admin.delete_admin_user_use_case import DeleteAdminUserUseCase
 from application.admin.get_admin_user_use_case import GetAdminUserUseCase
+from application.agent.get_agent_description_use_case import (
+    GetAgentDescriptionUseCase,
+)
 from application.auth.login_user_use_case import LoginUserUseCase
 from application.auth.register_user_use_case import RegisterUserUseCase
 from application.auth.resend_verification_use_case import (
@@ -28,6 +31,7 @@ from domain.password_reset.password_reset_repository import (
     PasswordResetRepository,
 )
 from domain.password_reset.password_reset_service import PasswordResetService
+from domain.user.services.agent_service import AgentService
 from domain.user.services.auth_service import AuthService
 from domain.user.services.me_service import MeService
 from domain.user.user_repository import UserRepository
@@ -83,3 +87,6 @@ update_personal_data_use_case = UpdatePersonalDataUseCase(me_service)
 get_admin_user_use_case = GetAdminUserUseCase(admin_users_service)
 change_user_role_use_case = ChangeUserRoleUseCase(admin_users_service)
 delete_admin_user_use_case = DeleteAdminUserUseCase(admin_users_service)
+
+agent_service = AgentService(user_repository)
+get_agent_description_use_case = GetAgentDescriptionUseCase(agent_service)

@@ -45,8 +45,14 @@ class UserStateConflictError(DomainError):
     pass
 
 
+class AgentNotFoundError(DomainError):
+    pass
+
+
 def register_user_errors():
-    register_custom_error(UserNotFoundError, "user_not_found", 404, "User not found")
+    register_custom_error(
+        UserNotFoundError, "user_not_found", 404, "User not found"
+    )
 
     register_custom_error(
         UserIsNotVerifiedError,
@@ -66,7 +72,9 @@ def register_user_errors():
         "User was already verified",
     )
 
-    register_custom_error(TokenVerificationError, "token_invalid", 401, "Token invalid")
+    register_custom_error(
+        TokenVerificationError, "token_invalid", 401, "Token invalid"
+    )
 
     register_custom_error(
         UserAlreadyExistsError,
@@ -108,4 +116,8 @@ def register_user_errors():
         "user_state_conflict",
         409,
         "Operation conflict with domain rules",
+    )
+
+    register_custom_error(
+        AgentNotFoundError, "agent_not_found", 404, "Agent not found"
     )

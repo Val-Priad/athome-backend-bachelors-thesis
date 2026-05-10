@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -47,7 +48,7 @@ class MeService:
         self,
         db: Session,
         user_id: UUID,
-        updates: dict,
+        updates: dict[str, Any],
     ):
         user = self.user_repository.get_user_by_id(db, user_id)
 

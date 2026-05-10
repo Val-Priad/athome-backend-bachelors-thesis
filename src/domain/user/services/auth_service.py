@@ -17,11 +17,9 @@ class AuthService:
         self,
         user_repository: UserRepository,
         password_hasher: PasswordCrypto,
-        email_verification_service: EmailVerificationService,
     ):
         self.user_repository = user_repository
         self.password_hasher = password_hasher
-        self.email_verification_service = email_verification_service
 
     def create_user(self, db: Session, email: str, password: str) -> User:
         if self.user_repository.exists_by_email(db, email):

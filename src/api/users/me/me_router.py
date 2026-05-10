@@ -17,7 +17,6 @@ from schemas.me_schemas.me_requests import (
 bp = Blueprint("users_me", __name__, url_prefix="/api/users/me")
 
 
-# TODO: All logic must be in service, no orchestration in router
 @bp.get("/")
 @jwt_required()
 def get_me():
@@ -42,7 +41,9 @@ def patch_password():
     data = PasswordRequest.from_request(request.json)
 
     user_id = get_jwt_user_uuid()
-    update_password_use_case.execute(user_id, data.old_password, data.new_password)
+    update_password_use_case.execute(
+        user_id, data.old_password, data.new_password
+    )
     return construct_response()
 
 

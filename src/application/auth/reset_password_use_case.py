@@ -12,4 +12,7 @@ class ResetPasswordUseCase:
                 session, email
             )
             raw_token = self.password_reset_service.get_token(session, user.id)
-        self.password_reset_service.send_reset_password_email(email, raw_token)
+            email_to = user.email
+        self.password_reset_service.send_reset_password_email(
+            email_to, raw_token
+        )

@@ -64,7 +64,7 @@ def test_reset_password_token_no_user(client):
 
 def test_reset_password_token_invalid_email(client):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/resend-verification",
+        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/reset-password",
         json={"email": "invalid_email"},
     )
 

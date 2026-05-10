@@ -8,7 +8,6 @@ from exceptions.custom_exceptions.user_exceptions import (
     MissingUpdateDataError,
     NewPasswordMatchesOldError,
 )
-from schemas.me_schemas.me_requests import UpdateUserPersonalDataRequest
 from security import PasswordCrypto
 
 
@@ -25,25 +24,33 @@ class MeService:
     def delete_user_by_id(self, db: Session, user_id: UUID) -> None:
         db.delete(self.user_repository.get_user_by_id(db, user_id))
 
-    def update_password(self, db: Session, user_id: UUID, raw_password: str) -> None:
+    def update_password(
+        self, db: Session, user_id: UUID, raw_password: str
+    ) -> None:
         user = self.user_repository.get_user_by_id(db, user_id)
         user.password_hash = self.password_hasher.hash_password(raw_password)
 
     @staticmethod
-    def ensure_new_password_differs(old_password: str, new_password: str) -> None:
+    def ensure_new_password_differs(
+        old_password: str, new_password: str
+    ) -> None:
         if old_password == new_password:
-            raise NewPasswordMatchesOldError
+            raise NewPasswordMatchesOldError()
 
-    def verify_password(self, db: Session, user_id: UUID, raw_password: str) -> None:
+    def verify_password(
+        self, db: Session, user_id: UUID, raw_password: str
+    ) -> None:
         user = self.user_repository.get_user_by_id(db, user_id)
         self.password_hasher.verify_password(raw_password, user.password_hash)
 
     def update_personal_data(
-        self, db: Session, user_id: UUID, data: UpdateUserPersonalDataRequest
+        self,
+        db: Session,
+        user_id: UUID,
+        updates: dict,
     ):
         user = self.user_repository.get_user_by_id(db, user_id)
 
-        updates = data.model_dump(exclude_unset=True)
         if not updates:
             raise MissingUpdateDataError()
 

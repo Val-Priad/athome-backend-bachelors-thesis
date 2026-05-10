@@ -10,7 +10,12 @@ class UpdatePersonalDataUseCase:
     def __init__(self, me_service: MeService):
         self.me_service = me_service
 
-    def execute(self, user_id: UUID, data: UpdateUserPersonalDataRequest) -> MeResponse:
+    def execute(
+        self, user_id: UUID, data: UpdateUserPersonalDataRequest
+    ) -> MeResponse:
         with db_session() as session:
-            user = self.me_service.update_personal_data(session, user_id, data)
+            updates = data.model_dump(exclude_unset=True)
+            user = self.me_service.update_personal_data(
+                session, user_id, updates
+            )
             return MeResponse.from_model(user)

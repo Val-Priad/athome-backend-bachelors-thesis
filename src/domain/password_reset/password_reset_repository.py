@@ -9,8 +9,9 @@ from exceptions.custom_exceptions.user_exceptions import TokenVerificationError
 
 
 class PasswordResetRepository:
-    @staticmethod
-    def try_deactivate_all_user_tokens(db: Session, user_id: uuid.UUID) -> None:
+    def try_deactivate_all_user_tokens(
+        self, db: Session, user_id: uuid.UUID
+    ) -> None:
         # TODO: Silent/Not Silent Rules #5 - Return bool or ensure guaranteed effect (best-effort operation)
         db.execute(
             update(PasswordReset)
@@ -21,8 +22,8 @@ class PasswordResetRepository:
             .values(expires_at=datetime.now(timezone.utc))
         )
 
-    @staticmethod
     def add_token(
+        self,
         db: Session,
         user_id: uuid.UUID,
         hashed_token: bytes,
@@ -34,8 +35,9 @@ class PasswordResetRepository:
             )
         )
 
-    @staticmethod
-    def get_valid_token(db: Session, hashed_token: bytes) -> PasswordReset:
+    def get_valid_token(
+        self, db: Session, hashed_token: bytes
+    ) -> PasswordReset:
         token = db.scalar(
             select(PasswordReset).where(
                 PasswordReset.token_hash == hashed_token,

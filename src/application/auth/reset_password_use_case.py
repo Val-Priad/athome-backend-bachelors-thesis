@@ -8,6 +8,8 @@ class ResetPasswordUseCase:
 
     def execute(self, email: str) -> None:
         with db_session() as session:
-            user = self.password_reset_service.get_user_by_email(session, email)
+            user = self.password_reset_service.get_user_by_email(
+                session, email
+            )
             raw_token = self.password_reset_service.get_token(session, user.id)
-            self.password_reset_service.send_reset_password_email(email, raw_token)
+        self.password_reset_service.send_reset_password_email(email, raw_token)

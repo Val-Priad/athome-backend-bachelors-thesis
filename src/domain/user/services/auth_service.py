@@ -1,8 +1,5 @@
 from sqlalchemy.orm import Session
 
-from domain.email_verification.email_verification_service import (
-    EmailVerificationService,
-)
 from domain.user.user_model import User
 from domain.user.user_repository import UserRepository
 from exceptions.custom_exceptions.user_exceptions import (

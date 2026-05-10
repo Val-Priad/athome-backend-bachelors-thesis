@@ -2,7 +2,6 @@ import pytest
 from sqlalchemy import select
 
 from domain.user.user_model import User, UserRole
-from exceptions.custom_exceptions.user_exceptions import UserNotFoundError
 from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
 
 

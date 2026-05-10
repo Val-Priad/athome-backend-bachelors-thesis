@@ -36,9 +36,9 @@ def delete_me():
     return construct_response()
 
 
-@bp.patch("/update_password")
+@bp.patch("/password")
 @jwt_required()
-def update_password():
+def patch_password():
     data = PasswordRequest.from_request(request.json)
 
     user_id = get_jwt_user_uuid()
@@ -46,9 +46,9 @@ def update_password():
     return construct_response()
 
 
-@bp.patch("/update-personal-data")
+@bp.patch("/profile")
 @jwt_required()
-def update_personal_data():
+def patch_profile():
     data = UpdateUserPersonalDataRequest.from_request(request.json)
 
     user_id = get_jwt_user_uuid()

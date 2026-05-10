@@ -12,7 +12,7 @@ from tests.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
 def test_update_user_password_valid(client, db_session, logged_in_user):
     new_password = "new-password"
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/update_password",
+        f"{API_PREFIX}{ME_ENDPOINT_PATH}/password",
         json={
             "old_password": logged_in_user.password,
             "new_password": new_password,
@@ -33,7 +33,7 @@ def test_update_user_password_valid(client, db_session, logged_in_user):
 
 def test_update_user_password_old_password_matches_new(client, logged_in_user):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/update_password",
+        f"{API_PREFIX}{ME_ENDPOINT_PATH}/password",
         json={
             "old_password": logged_in_user.password,
             "new_password": logged_in_user.password,
@@ -46,7 +46,7 @@ def test_update_user_password_old_password_matches_new(client, logged_in_user):
 
 def test_update_user_password_old_password_is_wrong(client, logged_in_user):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/update_password",
+        f"{API_PREFIX}{ME_ENDPOINT_PATH}/password",
         json={
             "old_password": "invalid-old-password",
             "new_password": logged_in_user.password,

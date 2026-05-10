@@ -7,7 +7,14 @@ from flask_jwt_extended import (
 )
 
 from api.v1.responses import construct_error, construct_response
-from di import auth_service, email_verification_service, password_reset_service
+from composition_root import (
+    login_user_use_case,
+    register_user_use_case,
+    resend_verification_use_case,
+    reset_password_use_case,
+    verify_email_use_case,
+    verify_new_password_use_case,
+)
 from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
 from exceptions.custom_exceptions.user_exceptions import (
     InvalidCredentialsError,
@@ -17,7 +24,6 @@ from exceptions.custom_exceptions.user_exceptions import (
     UserIsNotVerifiedError,
     UserNotFoundError,
 )
-from infrastructure.db import db_session
 from infrastructure.rate_limiting.limiter_config import limiter
 from schemas.auth_schemas.auth_requests import (
     EmailPasswordRequest,
@@ -35,7 +41,7 @@ def register():
     data = EmailPasswordRequest.from_request(request.json)
 
     try:
-        auth_service.register_user(data)
+        register_user_use_case.execute(data)
     except (UserAlreadyExistsError, EmailSendError):
         pass
     return construct_response(
@@ -48,9 +54,7 @@ def register():
 def verify_token():
     data = TokenRequest.from_request((request.json))
 
-    with db_session() as session:
-        email_verification_service.verify_token(session, data.token)
-
+    verify_email_use_case.execute(data.token)
     return construct_response()
 
 
@@ -60,18 +64,7 @@ def resend_verification():
     data = EmailRequest.from_request(request.json)
 
     try:
-        with db_session() as session:
-            user = email_verification_service.get_user_by_email(
-                session, data.email
-            )
-            email_verification_service.ensure_user_is_not_verified(user)
-            raw_token = email_verification_service.get_resend_token(
-                session, user.id
-            )
-
-            email_verification_service.send_verification_email(
-                user.email, raw_token
-            )
+        resend_verification_use_case.execute(data.email)
     except (UserNotFoundError, UserAlreadyVerifiedError, EmailSendError):
         pass
 
@@ -86,12 +79,7 @@ def login():
     data = EmailPasswordRequest.from_request(request.json)
 
     try:
-        with db_session() as session:
-            user = auth_service.verify_password(
-                session, data.email, data.password
-            )
-            user_id = user.id
-
+        user_id = login_user_use_case.execute(data.email, data.password)
     except (
         UserNotFoundError,
         UserIsNotVerifiedError,
@@ -118,15 +106,7 @@ def reset_password():
     data = EmailRequest.from_request(request.json)
 
     try:
-        with db_session() as session:
-            user = password_reset_service.get_user_by_email(
-                session, data.email
-            )
-            raw_token = password_reset_service.get_token(session, user.id)
-
-            password_reset_service.send_reset_password_email(
-                data.email, raw_token
-            )
+        reset_password_use_case.execute(data.email)
     except (UserNotFoundError, EmailSendError):
         pass
 
@@ -139,10 +119,7 @@ def reset_password():
 def verify_new_password():
     data = TokenPasswordRequest.from_request(request.json)
 
-    with db_session() as session:
-        password_reset_service.reset_password(
-            session, data.token, data.password
-        )
+    verify_new_password_use_case.execute(data.token, data.password)
     return construct_response()
 
 

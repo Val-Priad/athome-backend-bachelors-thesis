@@ -2,6 +2,7 @@ import pytest
 from conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 from sqlalchemy import select
 
+from composition_root import auth_service
 from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
@@ -68,9 +69,7 @@ def test_register_internal_error_rolls_back(client, db_session, monkeypatch):
         db.flush()
         raise Exception("boom")
 
-    monkeypatch.setattr(
-        "api.v1.auth.auth_router.auth_service.create_user", boom
-    )
+    monkeypatch.setattr(auth_service, "create_user", boom)
 
     response = client.post(
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",

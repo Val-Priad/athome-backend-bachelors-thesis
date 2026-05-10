@@ -4,14 +4,14 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
 from api.v1.responses import construct_error, construct_response
-from di import admin_users_service
-from infrastructure.db import db_session
+from composition_root import (
+    change_user_role_use_case,
+    delete_admin_user_use_case,
+    get_admin_user_use_case,
+)
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
 from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
     RoleRequest,
-)
-from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
-    UserResponse,
 )
 
 bp = Blueprint("admin_users", __name__, url_prefix="/api/v1/admin/users")
@@ -21,11 +21,8 @@ bp = Blueprint("admin_users", __name__, url_prefix="/api/v1/admin/users")
 @jwt_required()
 def get_user(user_id: UUID):
     requester_id = get_jwt_user_uuid()
-
-    with db_session() as session:
-        user = admin_users_service.get_user(session, requester_id, user_id)
-
-        return construct_response(data=UserResponse.from_model(user))
+    user_response = get_admin_user_use_case.execute(requester_id, user_id)
+    return construct_response(data=user_response)
 
 
 @bp.patch("/<uuid:user_id>/role")
@@ -35,11 +32,7 @@ def change_user_role(user_id: UUID):
 
     data = RoleRequest.from_request(request.json)
 
-    with db_session() as session:
-        admin_users_service.change_user_role(
-            session, requester_id, user_id, data.role
-        )
-
+    change_user_role_use_case.execute(requester_id, user_id, data.role)
     return construct_response()
 
 
@@ -48,10 +41,8 @@ def change_user_role(user_id: UUID):
 def delete_user(user_id: UUID):
     requester_id = get_jwt_user_uuid()
 
-    with db_session() as session:
-        admin_users_service.delete_user(session, requester_id, user_id)
-
-        return construct_response()
+    delete_admin_user_use_case.execute(requester_id, user_id)
+    return construct_response()
 
 
 @bp.errorhandler(Exception)

@@ -9,7 +9,6 @@ from exceptions.custom_exceptions.user_exceptions import (
     UserAlreadyExistsError,
     UserIsNotVerifiedError,
 )
-from infrastructure.db import db_session
 from security import PasswordCrypto
 
 
@@ -23,20 +22,6 @@ class AuthService:
         self.user_repository = user_repository
         self.password_hasher = password_hasher
         self.email_verification_service = email_verification_service
-
-    def register_user(self, data):
-        with db_session() as session:
-            user = self.create_user(session, data.email, data.password)
-
-            raw_token = self.email_verification_service.create_token(
-                session,
-                user.id,
-            )
-            email_to = user.email
-
-        self.email_verification_service.send_verification_email(
-            email_to, raw_token
-        )
 
     def create_user(self, db: Session, email: str, password: str) -> User:
         if self.user_repository.exists_by_email(db, email):

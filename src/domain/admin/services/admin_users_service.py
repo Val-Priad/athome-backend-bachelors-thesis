@@ -14,10 +14,6 @@ class AdminUsersService:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
-    def get_user(self, db, requester_id, user_id):
-        self.ensure_has_rights(db, requester_id, UserRole.admin)
-        return self.get_user_by_id(db, user_id)
-
     def delete_user(self, db, requester_id, user_id):
         self.ensure_has_rights(db, requester_id, UserRole.admin)
         self.delete_user_by_id(db, user_id)

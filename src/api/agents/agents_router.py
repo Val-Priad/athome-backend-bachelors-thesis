@@ -1,5 +1,3 @@
-# TODO: Create endpoint that allows any user to obtain agent description
-
 from uuid import UUID
 
 from flask import Blueprint

@@ -15,6 +15,7 @@ API_PREFIX = "/api"
 AUTH_ENDPOINT_PATH = "/auth"
 ME_ENDPOINT_PATH = "/users/me"
 ADMIN_USERS_PATH = "/admin/users"
+AGENT_PATH = "/agent"
 
 
 @fixture
@@ -51,7 +52,9 @@ def db_session(app: Flask, monkeypatch):
         session = TestingSessionFactory()
         session.begin_nested()
 
-        monkeypatch.setattr(db_module, "_SessionFactory", TestingSessionFactory)
+        monkeypatch.setattr(
+            db_module, "_SessionFactory", TestingSessionFactory
+        )
 
         @event.listens_for(session, "after_transaction_end")
         def restart_savepoint(session, transaction_):
@@ -66,7 +69,9 @@ def db_session(app: Flask, monkeypatch):
 
 
 @fixture
-def logged_in_user(request: FixtureRequest, client: FlaskClient, db_session: Session):
+def logged_in_user(
+    request: FixtureRequest, client: FlaskClient, db_session: Session
+):
     user_role = getattr(request, "param", UserRole.user)
 
     email = "logged_in_user@example.com"

@@ -24,7 +24,6 @@ class AdminUsersService:
     def change_user_role(
         self, db: Session, requester_id: UUID, user_id: UUID, role: UserRole
     ):
-        # TODO: Repository Rules #3 - Verify that row was updated using .returning()
         self.ensure_has_rights(db, requester_id, UserRole.admin)
 
         user = self.user_repository.get_user_by_id(db, user_id)
@@ -37,7 +36,6 @@ class AdminUsersService:
         user.role = role
 
     def delete_user_by_id(self, db: Session, user_id: UUID) -> None:
-        # TODO: Repository Rules #4 - Verify that row was deleted using .returning()
         db.delete(self.user_repository.get_user_by_id(db, user_id))
 
     def ensure_has_rights(

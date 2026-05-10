@@ -8,6 +8,8 @@ from exceptions.custom_exceptions.user_exceptions import UserNotFoundError
 
 
 class UserRepository:
+    """Read-only repository for user lookup in ORM-style unit of work."""
+
     @staticmethod
     def exists_by_email(db: Session, email: str) -> bool:
         return db.execute(

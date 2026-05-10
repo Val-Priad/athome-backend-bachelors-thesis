@@ -32,7 +32,6 @@ class EmailVerificationRepository:
         hashed_token: bytes,
         expires_at: datetime,
     ) -> None:
-        # TODO: Repository Rules #2 - Add db.flush() after db.add() if generated id or dependent operations needed
         db.add(
             EmailVerification(
                 user_id=user_id, token_hash=hashed_token, expires_at=expires_at

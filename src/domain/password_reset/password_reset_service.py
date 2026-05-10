@@ -56,7 +56,6 @@ class PasswordResetService:
         return raw_token
 
     def reset_password(self, db: Session, raw_token: str, password: str):
-        # TODO: Repository Rules #3 - Verify UPDATE on password (sensitive field) using .returning()
         token = self.password_reset_repository.get_valid_token(
             db, self.token_hasher.hash_token(raw_token)
         )

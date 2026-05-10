@@ -21,9 +21,7 @@ def construct_response(
     return make_response(jsonify(payload), status)
 
 
-def construct_error(
-    e: Exception | None = None, code: str | None = None
-) -> Response:
+def construct_error(e: Exception | None = None, code: str | None = None) -> Response:
     if code is not None:
         description = get_description(code)
     elif e and _is_external_exception(e):

@@ -24,8 +24,6 @@ def cleanup_unverified_users():
                     )
                 ),
             )
-        _logger.info(
-            "Successfully deleted %s unverified users", result.rowcount
-        )
+        _logger.info("Successfully deleted %s unverified users", result.rowcount)
     except Exception:
         _logger.exception("Error occurred during deletion of unverified users")

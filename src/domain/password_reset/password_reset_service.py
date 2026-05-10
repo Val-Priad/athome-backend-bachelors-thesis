@@ -47,12 +47,8 @@ class PasswordResetService:
         raw_token = self.token_hasher.generate_token()
         token_hash = self.token_hasher.hash_token(raw_token)
 
-        self.password_reset_repository.try_deactivate_all_user_tokens(
-            db, user_id
-        )
-        self.password_reset_repository.add_token(
-            db, user_id, token_hash, expires_at
-        )
+        self.password_reset_repository.try_deactivate_all_user_tokens(db, user_id)
+        self.password_reset_repository.add_token(db, user_id, token_hash, expires_at)
         return raw_token
 
     def reset_password(self, db: Session, raw_token: str, password: str):
@@ -63,6 +59,4 @@ class PasswordResetService:
         token.used_at = datetime.now(timezone.utc)
         token.user.password_hash = self.password_hasher.hash_password(password)
 
-        self.password_reset_repository.try_deactivate_all_user_tokens(
-            db, token.user.id
-        )
+        self.password_reset_repository.try_deactivate_all_user_tokens(db, token.user.id)

@@ -42,9 +42,7 @@ def update_password():
     data = PasswordRequest.from_request(request.json)
 
     user_id = get_jwt_user_uuid()
-    update_password_use_case.execute(
-        user_id, data.old_password, data.new_password
-    )
+    update_password_use_case.execute(user_id, data.old_password, data.new_password)
     return construct_response()
 
 

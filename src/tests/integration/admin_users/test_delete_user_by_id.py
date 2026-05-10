@@ -22,15 +22,10 @@ def test_delete_user_by_id_valid(logged_in_user, any_user, client, db_session):
 @pytest.mark.parametrize(
     "logged_in_user", [UserRole.user, UserRole.agent], indirect=True
 )
-def test_delete_user_by_id_forbidden(
-    logged_in_user, any_user, client, db_session
-):
+def test_delete_user_by_id_forbidden(logged_in_user, any_user, client, db_session):
     response = client.delete(
         f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 403
-    assert (
-        db_session.scalar(select(User).where(User.id == any_user.id))
-        is not None
-    )
+    assert db_session.scalar(select(User).where(User.id == any_user.id)) is not None

@@ -23,9 +23,7 @@ class EmailVerification(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    token_hash: Mapped[bytes] = mapped_column(
-        LargeBinary, nullable=False, unique=True
-    )
+    token_hash: Mapped[bytes] = mapped_column(LargeBinary, nullable=False, unique=True)
     expires_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )

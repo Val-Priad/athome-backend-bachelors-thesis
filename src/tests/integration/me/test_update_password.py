@@ -23,14 +23,10 @@ def test_update_user_password_valid(client, db_session, logged_in_user):
     assert response.status_code == 200
 
     db_session.expire_all()
-    user = db_session.scalar(
-        select(User).where(User.email == logged_in_user.email)
-    )
+    user = db_session.scalar(select(User).where(User.email == logged_in_user.email))
 
     with pytest.raises(PasswordVerificationError):
-        PasswordCrypto.verify_password(
-            logged_in_user.password, user.password_hash
-        )
+        PasswordCrypto.verify_password(logged_in_user.password, user.password_hash)
 
     PasswordCrypto.verify_password(new_password, user.password_hash)
 

@@ -51,9 +51,7 @@ def expired_raw_token_verification_id_user_id(db_session):
 def test_token_verification_valid(
     client, raw_token_verification_id_user_id, db_session
 ):
-    raw_token, email_verification_id, user_id = (
-        raw_token_verification_id_user_id
-    )
+    raw_token, email_verification_id, user_id = raw_token_verification_id_user_id
 
     now = datetime.now(timezone.utc)
 
@@ -64,9 +62,7 @@ def test_token_verification_valid(
     assert response.status_code == 200
 
     email_verification = db_session.scalar(
-        select(EmailVerification).where(
-            EmailVerification.id == email_verification_id
-        )
+        select(EmailVerification).where(EmailVerification.id == email_verification_id)
     )
     assert email_verification.used_at >= now
 

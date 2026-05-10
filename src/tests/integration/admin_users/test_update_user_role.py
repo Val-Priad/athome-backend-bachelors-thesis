@@ -6,9 +6,7 @@ from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_admin_can_promote_user_to_agent(
-    logged_in_user, client, any_user, db_session
-):
+def test_admin_can_promote_user_to_agent(logged_in_user, client, any_user, db_session):
     response = client.patch(
         f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}/role",
         json={"role": "agent"},
@@ -23,9 +21,7 @@ def test_admin_can_promote_user_to_agent(
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 @pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
-def test_admin_can_demote_agent_to_user(
-    logged_in_user, client, any_user, db_session
-):
+def test_admin_can_demote_agent_to_user(logged_in_user, client, any_user, db_session):
     response = client.patch(
         f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}/role",
         json={"role": "user"},

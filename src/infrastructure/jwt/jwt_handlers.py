@@ -17,9 +17,7 @@ def register_jwt_handlers(app: Flask):
             now = datetime.now(timezone.utc)
             target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
             if target_timestamp > exp_timestamp:
-                access_token = create_access_token(
-                    identity=get_jwt_user_uuid()
-                )
+                access_token = create_access_token(identity=get_jwt_user_uuid())
                 set_access_cookies(response, access_token)
             return response
         except (RuntimeError, KeyError):

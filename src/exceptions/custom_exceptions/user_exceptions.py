@@ -46,9 +46,7 @@ class UserStateConflictError(DomainError):
 
 
 def register_user_errors():
-    register_custom_error(
-        UserNotFoundError, "user_not_found", 404, "User not found"
-    )
+    register_custom_error(UserNotFoundError, "user_not_found", 404, "User not found")
 
     register_custom_error(
         UserIsNotVerifiedError,
@@ -68,9 +66,7 @@ def register_user_errors():
         "User was already verified",
     )
 
-    register_custom_error(
-        TokenVerificationError, "token_invalid", 401, "Token invalid"
-    )
+    register_custom_error(TokenVerificationError, "token_invalid", 401, "Token invalid")
 
     register_custom_error(
         UserAlreadyExistsError,

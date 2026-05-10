@@ -34,9 +34,7 @@ def map_code(code: str, status: int, message: str):
 
 def map_exception(exception_type: Type[Exception], code: str):
     if exception_type in EXCEPTION_TO_CODE:
-        raise ValueError(
-            f"Exception already mapped: {exception_type.__name__}"
-        )
+        raise ValueError(f"Exception already mapped: {exception_type.__name__}")
     EXCEPTION_TO_CODE[exception_type] = code
 
 

@@ -96,9 +96,7 @@ def test_verify_new_password_valid(client, set_token, db_session):
         ),
     ],
 )
-def test_verify_new_password_validation(
-    client, set_token, db_session, payload
-):
+def test_verify_new_password_validation(client, set_token, db_session, payload):
     response = client.post(
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-new-password",
         json=payload(set_token),

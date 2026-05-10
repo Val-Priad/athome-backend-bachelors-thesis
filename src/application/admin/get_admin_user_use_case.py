@@ -9,25 +9,11 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
 
 
 class GetAdminUserUseCase:
-    """Use Case для получения пользователя администратором."""
-
     def __init__(self, admin_users_service: AdminUsersService):
         self.admin_users_service = admin_users_service
 
     def execute(self, requester_id: UUID, user_id: UUID) -> UserResponse:
-        """
-        Получает данные пользователя (только администратор).
-
-        Args:
-            requester_id: ID пользователя, делающего запрос
-            user_id: ID пользователя для получения
-
-        Returns:
-            UserResponse с данными пользователя
-        """
         with db_session() as db:
-            self.admin_users_service.ensure_has_rights(
-                db, requester_id, UserRole.admin
-            )
+            self.admin_users_service.ensure_has_rights(db, requester_id, UserRole.admin)
             user = self.admin_users_service.get_user_by_id(db, user_id)
             return UserResponse.from_model(user)

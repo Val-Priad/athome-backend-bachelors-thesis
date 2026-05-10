@@ -25,9 +25,7 @@ def test_update_user_personal_data_valid(client, db_session, logged_in_user):
     assert data["description"] is None
 
     db_session.expire_all()
-    user = db_session.scalar(
-        select(User).where(User.email == logged_in_user.email)
-    )
+    user = db_session.scalar(select(User).where(User.email == logged_in_user.email))
     assert user.name is None
     assert user.avatar_key is None
     assert user.phone_number is None

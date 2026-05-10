@@ -58,20 +58,14 @@ password_reset_service = PasswordResetService(
     password_hasher,
 )
 
-auth_service = AuthService(
-    user_repository, password_hasher, email_verification_service
-)
+auth_service = AuthService(user_repository, password_hasher, email_verification_service)
 me_service = MeService(user_repository, password_hasher)
 admin_users_service = AdminUsersService(user_repository)
 
 
-register_user_use_case = RegisterUserUseCase(
-    auth_service, email_verification_service
-)
+register_user_use_case = RegisterUserUseCase(auth_service, email_verification_service)
 verify_email_use_case = VerifyEmailUseCase(email_verification_service)
-resend_verification_use_case = ResendVerificationUseCase(
-    email_verification_service
-)
+resend_verification_use_case = ResendVerificationUseCase(email_verification_service)
 login_user_use_case = LoginUserUseCase(auth_service)
 reset_password_use_case = ResetPasswordUseCase(password_reset_service)
 verify_new_password_use_case = VerifyNewPasswordUseCase(password_reset_service)

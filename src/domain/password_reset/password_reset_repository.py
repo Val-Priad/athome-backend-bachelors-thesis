@@ -9,10 +9,9 @@ from exceptions.custom_exceptions.user_exceptions import TokenVerificationError
 
 
 class PasswordResetRepository:
-    def try_deactivate_all_user_tokens(
+    def deactivate_all_user_tokens(
         self, db: Session, user_id: uuid.UUID
     ) -> None:
-        # TODO: Silent/Not Silent Rules #5 - Return bool or ensure guaranteed effect (best-effort operation)
         db.execute(
             update(PasswordReset)
             .where(

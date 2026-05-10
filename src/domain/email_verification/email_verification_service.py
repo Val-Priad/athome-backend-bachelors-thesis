@@ -56,7 +56,7 @@ class EmailVerificationService:
         token_hash = self.token_hasher.hash_token(raw_token)
 
         if invalidate_previous:
-            self.email_verification_repository.try_deactivate_all_user_tokens(
+            self.email_verification_repository.deactivate_all_user_tokens(
                 db, user_id
             )
         self.email_verification_repository.add_token(
@@ -75,6 +75,6 @@ class EmailVerificationService:
         token.used_at = datetime.now(timezone.utc)
         token.user.is_email_verified = True
 
-        self.email_verification_repository.try_deactivate_all_user_tokens(
+        self.email_verification_repository.deactivate_all_user_tokens(
             db, token.user.id
         )

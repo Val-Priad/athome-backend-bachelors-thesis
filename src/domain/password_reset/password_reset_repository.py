@@ -45,5 +45,7 @@ class PasswordResetRepository:
             )
         )
         if token is None:
-            raise TokenVerificationError()
+            raise TokenVerificationError(
+                "The password reset token is invalid, expired, or already used"
+            )
         return token

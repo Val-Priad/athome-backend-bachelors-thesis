@@ -13,4 +13,6 @@ class PasswordCrypto:
     @staticmethod
     def verify_password(raw_password: str, hashed_password: bytes) -> None:
         if not bcrypt.checkpw(raw_password.encode(), hashed_password):
-            raise PasswordVerificationError()
+            raise PasswordVerificationError(
+                "The provided password does not match the stored password"
+            )

@@ -47,5 +47,7 @@ class EmailVerificationRepository:
             )
         )
         if token is None:
-            raise TokenVerificationError()
+            raise TokenVerificationError(
+                "The email verification token is invalid, expired, or already used"
+            )
         return token

@@ -12,6 +12,13 @@ _logger = logging.getLogger(__name__)
 class DomainError(Exception):
     """Base class for domain errors"""
 
+    def __init__(self, message: str | None = None):
+        self.message = message
+        if message is None:
+            super().__init__()
+        else:
+            super().__init__(message)
+
 
 @dataclass(frozen=True)
 class ErrorSpec:

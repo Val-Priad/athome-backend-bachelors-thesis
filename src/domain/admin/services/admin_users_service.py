@@ -16,6 +16,11 @@ class AdminUsersService:
 
     def delete_user(self, db, requester_id, user_id):
         self.ensure_has_rights(db, requester_id, UserRole.admin)
+
+        user = self.user_repository.get_user_by_id(db, user_id)
+        if user.role == UserRole.admin:
+            raise ForbiddenError()
+
         self.delete_user_by_id(db, user_id)
 
     def get_user_by_id(self, db, user_id):

@@ -6,6 +6,7 @@ class FlaskConfig:
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    DATABASE_URL = os.getenv("DATABASE_URL")
 
     RATELIMIT_HEADERS_ENABLED = True
     RATELIMIT_STORAGE_URI = os.getenv("RATE_LIMIT_STORAGE_URI")
@@ -21,6 +22,8 @@ class DevelopmentConfig(FlaskConfig):
 class TestingConfig(DevelopmentConfig):
     TESTING = True
     RATELIMIT_ENABLED = False
+    RATELIMIT_STORAGE_URI = os.getenv("RATE_LIMIT_TEST_STORAGE_URI")
+    DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 
 
 class ProductionConfig(FlaskConfig):

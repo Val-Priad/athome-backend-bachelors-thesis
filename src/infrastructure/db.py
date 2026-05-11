@@ -1,6 +1,6 @@
-import os
 from contextlib import contextmanager
 
+from flask import Flask
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -11,6 +11,21 @@ class Base(DeclarativeBase):
 
 _engine: Engine | None = None
 _SessionFactory: sessionmaker | None = None
+
+
+def init_db(app: Flask) -> None:
+    global _engine, _SessionFactory
+
+    database_url = app.config["DATABASE_URL"]
+
+    if not database_url:
+        raise RuntimeError("DATABASE_URL is not set")
+
+    if _engine is not None:
+        _engine.dispose()
+
+    _engine = create_db_engine(database_url)
+    _SessionFactory = create_session_factory(_engine)
 
 
 def create_db_engine(database_url: str):
@@ -24,23 +39,15 @@ def create_session_factory(engine: Engine):
 
 
 def get_engine() -> Engine:
-    global _engine
-
     if _engine is None:
-        database_url = os.getenv("DATABASE_URL")
-        if not database_url:
-            raise RuntimeError("DATABASE_URL is not set")
-
-        _engine = create_db_engine(database_url)
+        raise RuntimeError("Database engine is not initialized")
 
     return _engine
 
 
 def get_session() -> Session:
-    global _SessionFactory
-
-    if not _SessionFactory:
-        _SessionFactory = create_session_factory(get_engine())
+    if _SessionFactory is None:
+        raise RuntimeError("Database session factory is not initialized")
     return _SessionFactory()
 
 

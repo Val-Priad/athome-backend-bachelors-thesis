@@ -10,8 +10,6 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
     UsersListResponse,
 )
 
-# TODO: chose one naming approach session vs db
-
 
 class ListUsersUseCase:
     def __init__(self, admin_users_service: AdminUsersService):

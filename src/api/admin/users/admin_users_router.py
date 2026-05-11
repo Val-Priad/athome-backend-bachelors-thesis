@@ -62,16 +62,6 @@ def handle_exception(e: Exception):
     return construct_error(e)
 
 
-# TODO: Admin Panel: Users List
-# Add filters for users list
-# Add sorting for users list
-# + Pagination
-# email
-# name
-# phone_number
-# is_email_verified
-# created_at
-
 # TODO: Admin Panel: Agent List
 # Add filters for admin list
 # Add sorting for admin list

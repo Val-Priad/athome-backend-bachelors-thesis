@@ -16,6 +16,13 @@ class RequestValidation(BaseModel):
     def from_request(cls, parsed_json):
         return cls.model_validate(parsed_json)
 
+    @classmethod
+    @wrap_with_custom_error(
+        wrap_with=RequestValidationError, catch=ValidationError
+    )
+    def from_query(cls, query_args):
+        return cls.model_validate(query_args.to_dict())
+
 
 class ResponseValidation(BaseModel):
     @classmethod

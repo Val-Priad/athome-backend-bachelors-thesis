@@ -1,6 +1,7 @@
 from application.admin.change_user_role_use_case import ChangeUserRoleUseCase
 from application.admin.delete_admin_user_use_case import DeleteAdminUserUseCase
 from application.admin.get_admin_user_use_case import GetAdminUserUseCase
+from application.admin.list_users_use_case import ListUsersUseCase
 from application.agent.get_agent_description_use_case import (
     GetAgentDescriptionUseCase,
 )
@@ -87,6 +88,7 @@ update_personal_data_use_case = UpdatePersonalDataUseCase(me_service)
 get_admin_user_use_case = GetAdminUserUseCase(admin_users_service)
 change_user_role_use_case = ChangeUserRoleUseCase(admin_users_service)
 delete_admin_user_use_case = DeleteAdminUserUseCase(admin_users_service)
+list_users_use_case = ListUsersUseCase(admin_users_service)
 
 agent_service = AgentService(user_repository)
 get_agent_description_use_case = GetAgentDescriptionUseCase(agent_service)

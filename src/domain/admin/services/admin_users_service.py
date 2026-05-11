@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -49,3 +50,33 @@ class AdminUsersService:
         requester = self.get_user_by_id(session, requester_id)
         if requester.role not in roles:
             raise ForbiddenError()
+
+    def list_users(
+        self,
+        db: Session,
+        requester_id: UUID,
+        *,
+        role: UserRole | None = None,
+        email: str | None = None,
+        name: str | None = None,
+        phone_number: str | None = None,
+        is_email_verified: bool | None = None,
+        sort_by: str,
+        sort_order: Literal["asc", "desc"],
+        page: int,
+        page_size: int,
+    ):
+        self.ensure_has_rights(db, requester_id, UserRole.admin)
+
+        return self.user_repository.list_users(
+            db,
+            role=role,
+            email=email,
+            name=name,
+            phone_number=phone_number,
+            is_email_verified=is_email_verified,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            page=page,
+            page_size=page_size,
+        )

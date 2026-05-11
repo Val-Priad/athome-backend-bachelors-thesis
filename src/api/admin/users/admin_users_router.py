@@ -8,10 +8,12 @@ from composition_root import (
     change_user_role_use_case,
     delete_admin_user_use_case,
     get_admin_user_use_case,
+    list_users_use_case,
 )
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
 from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
     RoleRequest,
+    UsersListRequest,
 )
 
 bp = Blueprint("admin_users", __name__, url_prefix="/api/admin/users")
@@ -45,11 +47,36 @@ def delete_user(user_id: UUID):
     return construct_response()
 
 
+@bp.get("")
+@jwt_required()
+def list_users():
+    requester_id = get_jwt_user_uuid()
+    query = UsersListRequest.from_query(request.args)
+
+    response = list_users_use_case.execute(requester_id, query)
+    return construct_response(data=response)
+
+
 @bp.errorhandler(Exception)
 def handle_exception(e: Exception):
     return construct_error(e)
 
 
-# TODO: Read users list (GDPR safe fields only)
-# TODO: Add filters for users list
-# TODO: Add sorting for users list
+# TODO: Admin Panel: Users List
+# Add filters for users list
+# Add sorting for users list
+# + Pagination
+# email
+# name
+# phone_number
+# is_email_verified
+# created_at
+
+# TODO: Admin Panel: Agent List
+# Add filters for admin list
+# Add sorting for admin list
+# + Pagination
+# email
+# name
+# phone_number
+# qty of connected active estate (will be implemented after adding estate entity)

@@ -29,8 +29,8 @@ class PasswordResetService:
 
     TOKEN_TTL = timedelta(minutes=10)
 
-    def get_user_by_email(self, db: Session, email: str):
-        return self.user_repository.get_user_by_email(db, email)
+    def get_user_by_email(self, session: Session, email: str):
+        return self.user_repository.get_user_by_email(session, email)
 
     def send_reset_password_email(self, email_to: str, token: str):
         try:
@@ -40,27 +40,29 @@ class PasswordResetService:
 
     def get_token(
         self,
-        db: Session,
+        session: Session,
         user_id: uuid.UUID,
     ):
         expires_at = datetime.now(timezone.utc) + self.TOKEN_TTL
         raw_token = self.token_hasher.generate_token()
         token_hash = self.token_hasher.hash_token(raw_token)
 
-        self.password_reset_repository.deactivate_all_user_tokens(db, user_id)
+        self.password_reset_repository.deactivate_all_user_tokens(
+            session, user_id
+        )
         self.password_reset_repository.add_token(
-            db, user_id, token_hash, expires_at
+            session, user_id, token_hash, expires_at
         )
         return raw_token
 
-    def reset_password(self, db: Session, raw_token: str, password: str):
+    def reset_password(self, session: Session, raw_token: str, password: str):
         token = self.password_reset_repository.get_valid_token(
-            db, self.token_hasher.hash_token(raw_token)
+            session, self.token_hasher.hash_token(raw_token)
         )
 
         token.used_at = datetime.now(timezone.utc)
         token.user.password_hash = self.password_hasher.hash_password(password)
 
         self.password_reset_repository.deactivate_all_user_tokens(
-            db, token.user.id
+            session, token.user.id
         )

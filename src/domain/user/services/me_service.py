@@ -19,16 +19,16 @@ class MeService:
         self.user_repository = user_repository
         self.password_hasher = password_hasher
 
-    def get_user_by_id(self, db: Session, user_id: UUID) -> User:
-        return self.user_repository.get_user_by_id(db, user_id)
+    def get_user_by_id(self, session: Session, user_id: UUID) -> User:
+        return self.user_repository.get_user_by_id(session, user_id)
 
-    def delete_user_by_id(self, db: Session, user_id: UUID) -> None:
-        db.delete(self.user_repository.get_user_by_id(db, user_id))
+    def delete_user_by_id(self, session: Session, user_id: UUID) -> None:
+        session.delete(self.user_repository.get_user_by_id(session, user_id))
 
     def update_password(
-        self, db: Session, user_id: UUID, raw_password: str
+        self, session: Session, user_id: UUID, raw_password: str
     ) -> None:
-        user = self.user_repository.get_user_by_id(db, user_id)
+        user = self.user_repository.get_user_by_id(session, user_id)
         user.password_hash = self.password_hasher.hash_password(raw_password)
 
     @staticmethod
@@ -39,18 +39,18 @@ class MeService:
             raise NewPasswordMatchesOldError()
 
     def verify_password(
-        self, db: Session, user_id: UUID, raw_password: str
+        self, session: Session, user_id: UUID, raw_password: str
     ) -> None:
-        user = self.user_repository.get_user_by_id(db, user_id)
+        user = self.user_repository.get_user_by_id(session, user_id)
         self.password_hasher.verify_password(raw_password, user.password_hash)
 
     def update_personal_data(
         self,
-        db: Session,
+        session: Session,
         user_id: UUID,
         updates: dict[str, Any],
     ):
-        user = self.user_repository.get_user_by_id(db, user_id)
+        user = self.user_repository.get_user_by_id(session, user_id)
 
         if not updates:
             raise MissingUpdateDataError()

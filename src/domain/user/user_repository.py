@@ -9,26 +9,26 @@ from exceptions.custom_exceptions.user_exceptions import UserNotFoundError
 
 
 class UserRepository:
-    def exists_by_email(self, db: Session, email: str) -> bool:
-        return db.execute(
+    def exists_by_email(self, session: Session, email: str) -> bool:
+        return session.execute(
             select(exists().where(User.email == email))
         ).scalar_one()
 
-    def get_user_by_email(self, db: Session, email: str) -> User:
-        result = db.scalar(select(User).where(User.email == email))
+    def get_user_by_email(self, session: Session, email: str) -> User:
+        result = session.scalar(select(User).where(User.email == email))
         if result is None:
             raise UserNotFoundError()
         return result
 
-    def get_user_by_id(self, db: Session, user_id: UUID) -> User:
-        result = db.scalar(select(User).where(User.id == user_id))
+    def get_user_by_id(self, session: Session, user_id: UUID) -> User:
+        result = session.scalar(select(User).where(User.id == user_id))
         if result is None:
             raise UserNotFoundError()
         return result
 
     def list_users(
         self,
-        db: Session,
+        session: Session,
         *,
         role: UserRole | None = None,
         email: str | None = None,
@@ -57,7 +57,8 @@ class UserRepository:
             stmt = stmt.where(User.phone_number.ilike(f"%{phone_number}%"))
 
         total = (
-            db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
+            session.scalar(select(func.count()).select_from(stmt.subquery()))
+            or 0
         )
 
         sort_columns = {
@@ -77,6 +78,6 @@ class UserRepository:
 
         offset = (page - 1) * page_size
 
-        users = db.scalars(stmt.offset(offset).limit(page_size)).all()
+        users = session.scalars(stmt.offset(offset).limit(page_size)).all()
 
         return list(users), total

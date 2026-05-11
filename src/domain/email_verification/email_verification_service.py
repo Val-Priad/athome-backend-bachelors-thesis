@@ -31,8 +31,8 @@ class EmailVerificationService:
 
     TOKEN_TTL = timedelta(hours=24)
 
-    def get_user_by_email(self, db: Session, email: str):
-        return self.user_repository.get_user_by_email(db, email)
+    def get_user_by_email(self, session: Session, email: str):
+        return self.user_repository.get_user_by_email(session, email)
 
     def send_verification_email(self, email_to: str, token: str):
         try:
@@ -47,7 +47,7 @@ class EmailVerificationService:
 
     def create_token(
         self,
-        db: Session,
+        session: Session,
         user_id: uuid.UUID,
         invalidate_previous: bool = False,
     ):
@@ -57,24 +57,24 @@ class EmailVerificationService:
 
         if invalidate_previous:
             self.email_verification_repository.deactivate_all_user_tokens(
-                db, user_id
+                session, user_id
             )
         self.email_verification_repository.add_token(
-            db, user_id, token_hash, expires_at
+            session, user_id, token_hash, expires_at
         )
         return raw_token
 
-    def get_resend_token(self, db: Session, user_id: uuid.UUID):
-        return self.create_token(db, user_id, invalidate_previous=True)
+    def get_resend_token(self, session: Session, user_id: uuid.UUID):
+        return self.create_token(session, user_id, invalidate_previous=True)
 
-    def verify_token(self, db: Session, raw_token):
+    def verify_token(self, session: Session, raw_token):
         token = self.email_verification_repository.get_valid_token(
-            db, self.token_hasher.hash_token(raw_token)
+            session, self.token_hasher.hash_token(raw_token)
         )
 
         token.used_at = datetime.now(timezone.utc)
         token.user.is_email_verified = True
 
         self.email_verification_repository.deactivate_all_user_tokens(
-            db, token.user.id
+            session, token.user.id
         )

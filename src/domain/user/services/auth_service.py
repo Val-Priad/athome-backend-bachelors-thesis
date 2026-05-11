@@ -18,22 +18,22 @@ class AuthService:
         self.user_repository = user_repository
         self.password_hasher = password_hasher
 
-    def create_user(self, db: Session, email: str, password: str) -> User:
-        if self.user_repository.exists_by_email(db, email):
+    def create_user(self, session: Session, email: str, password: str) -> User:
+        if self.user_repository.exists_by_email(session, email):
             raise UserAlreadyExistsError()
 
         hashed_password = self.password_hasher.hash_password(password)
 
         user = User(email=email, password_hash=hashed_password)
-        db.add(user)
-        db.flush()
+        session.add(user)
+        session.flush()
         return user
 
-    def get_user_by_email(self, db: Session, email: str):
-        return self.user_repository.get_user_by_email(db, email)
+    def get_user_by_email(self, session: Session, email: str):
+        return self.user_repository.get_user_by_email(session, email)
 
-    def verify_password(self, db: Session, email, password):
-        user = self.get_user_by_email(db, email)
+    def verify_password(self, session: Session, email, password):
+        user = self.get_user_by_email(session, email)
 
         if not user.is_email_verified:
             raise UserIsNotVerifiedError()

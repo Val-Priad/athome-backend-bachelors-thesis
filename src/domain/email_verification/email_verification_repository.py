@@ -12,9 +12,9 @@ from exceptions.custom_exceptions.user_exceptions import TokenVerificationError
 
 class EmailVerificationRepository:
     def deactivate_all_user_tokens(
-        self, db: Session, user_id: uuid.UUID
+        self, session: Session, user_id: uuid.UUID
     ) -> None:
-        db.execute(
+        session.execute(
             update(EmailVerification)
             .where(
                 EmailVerification.user_id == user_id,
@@ -25,21 +25,21 @@ class EmailVerificationRepository:
 
     def add_token(
         self,
-        db: Session,
+        session: Session,
         user_id: uuid.UUID,
         hashed_token: bytes,
         expires_at: datetime,
     ) -> None:
-        db.add(
+        session.add(
             EmailVerification(
                 user_id=user_id, token_hash=hashed_token, expires_at=expires_at
             )
         )
 
     def get_valid_token(
-        self, db: Session, hashed_token: bytes
+        self, session: Session, hashed_token: bytes
     ) -> EmailVerification:
-        token = db.scalar(
+        token = session.scalar(
             select(EmailVerification).where(
                 EmailVerification.token_hash == hashed_token,
                 EmailVerification.used_at.is_(None),

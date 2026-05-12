@@ -7,3 +7,4 @@ class ListingStatus(Enum):
     expiring = "Expiring"
     archived = "Archived"
     suggested = "Suggested"
+    draft = "Draft"

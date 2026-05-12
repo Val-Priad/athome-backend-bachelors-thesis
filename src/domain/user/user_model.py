@@ -28,7 +28,9 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True
+    )
     password_hash: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="role_enum"),
@@ -47,7 +49,7 @@ class User(Base):
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
-        default=func.now(),
+        server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
     )

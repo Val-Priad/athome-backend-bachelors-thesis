@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class EstateCategory(Enum):
+class EstateType(Enum):
     apartment = "Apartment"
     house = "House"
 

@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class EstateType(Enum):
-    apartment = "Apartment"
-    house = "House"
+    apartment = "apartment"
+    house = "house"
 
 
 class OfferType(Enum):
-    sale = "Sale"
-    lease = "Lease"
+    sale = "sale"
+    lease = "lease"

@@ -2,23 +2,23 @@ from enum import Enum
 
 
 class PropertyCondition(Enum):
-    very_good = "Very good"
-    good = "Good"
-    poor = "Poor"
-    new = "New"
+    very_good = "very_good"
+    good = "good"
+    poor = "poor"
+    new = "new"
 
 
 class EnergyClass(Enum):
-    a = "A"
-    b = "B"
-    c = "C"
-    d = "D"
-    e = "E"
-    f = "F"
-    g = "G"
+    a = "a"
+    b = "b"
+    c = "c"
+    d = "d"
+    e = "e"
+    f = "f"
+    g = "g"
 
 
 class Furnishing(Enum):
-    furnished = "Furnished"
-    unfurnished = "Unfurnished"
-    partially = "Partially"
+    furnished = "furnished"
+    unfurnished = "unfurnished"
+    partially = "partially"

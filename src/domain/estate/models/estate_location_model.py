@@ -9,7 +9,7 @@ from infrastructure.db import Base
 
 
 class EstateLocation(Base):
-    __tablename__ = "estate_locations"
+    __tablename__ = "estate_location"
 
     estate_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

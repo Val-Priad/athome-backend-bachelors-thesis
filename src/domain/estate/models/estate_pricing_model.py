@@ -6,6 +6,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Numeric,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -15,7 +16,7 @@ from infrastructure.db import Base
 
 
 class EstatePricing(Base):
-    __tablename__ = "estate_pricings"
+    __tablename__ = "estate_pricing"
 
     estate_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -37,7 +38,7 @@ class EstatePricing(Base):
         Numeric(12, 2), nullable=True
     )
     commission_paid_by_owner: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="false"
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     refundable_deposit: Mapped[Decimal | None] = mapped_column(
         Numeric(12, 2), nullable=True

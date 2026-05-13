@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from domain.estate.enums.estate_enums import EstateType, ListingOfferType
+from domain.estate.enums.estate_enums import EstateType, OfferType
 from infrastructure.db import Base
 
 
@@ -28,8 +28,8 @@ class Estate(Base):
     estate_type: Mapped[EstateType] = mapped_column(
         Enum(EstateType, name="estate_type_enum"), nullable=False
     )
-    offer_type: Mapped[ListingOfferType] = mapped_column(
-        Enum(ListingOfferType, name="listing_offer_type_enum"), nullable=False
+    offer_type: Mapped[OfferType] = mapped_column(
+        Enum(OfferType, name="offer_type_enum"), nullable=False
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -41,5 +41,19 @@ class Estate(Base):
         nullable=False,
     )
 
-    seller = relationship("User", foreign_keys=[seller_id])
-    broker = relationship("User", foreign_keys=[broker_id])
+    seller = relationship(
+        "User",
+        foreign_keys=[seller_id],
+        back_populates="owned_estates",
+    )
+    broker = relationship(
+        "User",
+        foreign_keys=[broker_id],
+        back_populates="brokered_estates",
+    )
+    location = relationship(
+        "EstateLocation",
+        back_populates="estate",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

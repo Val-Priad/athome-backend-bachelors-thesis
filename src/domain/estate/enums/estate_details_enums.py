@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class PropertyCondition(Enum):
-    very_goody = "Very good"
-    goody = "Good"
+    very_good = "Very good"
+    good = "Good"
     poor = "Poor"
     new = "New"
 

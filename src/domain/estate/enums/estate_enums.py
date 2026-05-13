@@ -6,6 +6,6 @@ class EstateType(Enum):
     house = "House"
 
 
-class ListingOfferType(Enum):
+class OfferType(Enum):
     sale = "Sale"
     lease = "Lease"

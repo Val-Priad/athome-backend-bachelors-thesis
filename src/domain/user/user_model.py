@@ -60,3 +60,14 @@ class User(Base):
     password_reset_tokens: Mapped[list["PasswordReset"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    owned_estates = relationship(
+        "Estate",
+        foreign_keys="Estate.seller_id",
+        back_populates="seller",
+    )
+
+    brokered_estates = relationship(
+        "Estate",
+        foreign_keys="Estate.broker_id",
+        back_populates="broker",
+    )

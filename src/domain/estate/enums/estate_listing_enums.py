@@ -2,7 +2,9 @@ from enum import Enum
 
 
 class ListingStatus(Enum):
-    archived = "Archived"
+    draft = "Draft"
     suggested = "Suggested"
     rejected = "Rejected"
-    draft = "Draft"
+    active = "Active"
+    expired = "Expired"
+    archived = "Archived"

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class HouseAttachmentType(Enum):
+class HouseType(Enum):
     detached = "Detached"
     semi_detached = "Semi-detached"
     terraced = "Terraced"

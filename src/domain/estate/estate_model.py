@@ -57,3 +57,9 @@ class Estate(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    pricing = relationship(
+        "EstatePricing",
+        back_populates="estate",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

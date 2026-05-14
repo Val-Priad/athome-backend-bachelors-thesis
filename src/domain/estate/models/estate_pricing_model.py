@@ -2,13 +2,7 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import (
-    Boolean,
-    Enum,
-    ForeignKey,
-    Numeric,
-    text,
-)
+from sqlalchemy import Boolean, Enum, ForeignKey, Numeric
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -27,9 +21,11 @@ class EstatePricing(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    price_unit: Mapped[PriceUnit] = mapped_column(
-        Enum(PriceUnit, name="price_unit_enum"), nullable=False
+    price: Mapped[Decimal | None] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
+    price_unit: Mapped[PriceUnit | None] = mapped_column(
+        Enum(PriceUnit, name="price_unit_enum"), nullable=True
     )
     cost_of_living: Mapped[Decimal | None] = mapped_column(
         Numeric(12, 2), nullable=True
@@ -37,8 +33,8 @@ class EstatePricing(Base):
     commission: Mapped[Decimal | None] = mapped_column(
         Numeric(12, 2), nullable=True
     )
-    commission_paid_by_owner: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
+    commission_paid_by_owner: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
     )
     refundable_deposit: Mapped[Decimal | None] = mapped_column(
         Numeric(12, 2), nullable=True

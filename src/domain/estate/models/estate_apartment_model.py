@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Enum, Float, ForeignKey, Integer, text
+from sqlalchemy import Boolean, Enum, Float, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,17 +20,15 @@ class EstateApartment(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    apartment_layout: Mapped[ApartmentLayout] = mapped_column(
+    apartment_layout: Mapped[ApartmentLayout | None] = mapped_column(
         Enum(ApartmentLayout, name="apartment_layout_enum"),
-        nullable=False,
+        nullable=True,
     )
     floor_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    has_elevator: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
-    )
-    balcony_area: Mapped[float] = mapped_column(Float, nullable=False)
-    loggia_area: Mapped[float] = mapped_column(Float, nullable=False)
-    terrace_area: Mapped[float] = mapped_column(Float, nullable=False)
+    has_elevator: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    balcony_area: Mapped[float | None] = mapped_column(Float, nullable=True)
+    loggia_area: Mapped[float | None] = mapped_column(Float, nullable=True)
+    terrace_area: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     estate: Mapped["Estate"] = relationship(
         "Estate",

@@ -104,7 +104,6 @@ class Estate(Base):
         single_parent=True,
         cascade="all, delete-orphan",
     )
-
     house: Mapped["EstateHouse | None"] = relationship(
         "EstateHouse",
         back_populates="estate",

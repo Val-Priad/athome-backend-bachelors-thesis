@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Enum, Float, ForeignKey, text
+from sqlalchemy import Boolean, Enum, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,23 +24,22 @@ class EstateDetails(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    condition: Mapped[PropertyCondition] = mapped_column(
+    condition: Mapped[PropertyCondition | None] = mapped_column(
         Enum(PropertyCondition, name="property_condition_enum"),
-        nullable=False,
+        nullable=True,
     )
-    energy_class: Mapped[EnergyClass] = mapped_column(
+    energy_class: Mapped[EnergyClass | None] = mapped_column(
         Enum(EnergyClass, name="energy_class_enum"),
-        nullable=False,
+        nullable=True,
     )
-    usable_area: Mapped[float] = mapped_column(Float, nullable=False)
-    total_area: Mapped[float | None] = mapped_column(Float, nullable=True)
-
-    furnishing: Mapped[Furnishing] = mapped_column(
+    usable_area: Mapped[float | None] = mapped_column(Float, nullable=True)
+    total_property_area: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    furnishing: Mapped[Furnishing | None] = mapped_column(
         Enum(Furnishing, name="furnishing_enum"),
-        nullable=False,
+        nullable=True,
     )
-    easy_access: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
-    )
+    easy_access: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     estate: Mapped["Estate"] = relationship("Estate", back_populates="details")

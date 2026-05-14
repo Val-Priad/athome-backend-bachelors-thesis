@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Enum, ForeignKey, text
+from sqlalchemy import Boolean, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,29 +24,21 @@ class EstateUtilities(Base):
         primary_key=True,
     )
 
-    has_cold_water: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
+    has_cold_water: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    has_hot_water: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    has_gas: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    has_sewerage: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    heating_source: Mapped[HeatingSource | None] = mapped_column(
+        Enum(HeatingSource, name="heating_source_enum"), nullable=True
     )
-    has_hot_water: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
-    )
-    has_gas: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
-    )
-    has_sewerage: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
-    )
-    heating_source: Mapped[HeatingSource] = mapped_column(
-        Enum(HeatingSource, name="heating_source_enum"), nullable=False
-    )
-    primary_internet_connection_type: Mapped[PrimaryInternetConnectionType] = (
-        mapped_column(
-            Enum(
-                PrimaryInternetConnectionType,
-                name="primary_internet_connection_type_enum",
-            ),
-            nullable=False,
-        )
+    primary_internet_connection_type: Mapped[
+        PrimaryInternetConnectionType | None
+    ] = mapped_column(
+        Enum(
+            PrimaryInternetConnectionType,
+            name="primary_internet_connection_type_enum",
+        ),
+        nullable=True,
     )
 
     estate: Mapped["Estate"] = relationship(

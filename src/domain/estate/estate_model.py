@@ -7,16 +7,16 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.estate.enums.estate_enums import EstateType, OfferType
+from domain.estate.models.estate_apartment_model import EstateApartment
+from domain.estate.models.estate_details_model import EstateDetails
+from domain.estate.models.estate_house_model import EstateHouse
+from domain.estate.models.estate_listing_model import EstateListing
+from domain.estate.models.estate_location_model import EstateLocation
+from domain.estate.models.estate_pricing_model import EstatePricing
+from domain.estate.models.estate_utilities_model import EstateUtilities
 from infrastructure.db import Base
 
 if TYPE_CHECKING:
-    from domain.estate.models.estate_apartment_model import EstateApartment
-    from domain.estate.models.estate_details_model import EstateDetails
-    from domain.estate.models.estate_house_model import EstateHouse
-    from domain.estate.models.estate_listing_model import EstateListing
-    from domain.estate.models.estate_location_model import EstateLocation
-    from domain.estate.models.estate_pricing_model import EstatePricing
-    from domain.estate.models.estate_utilities_model import EstateUtilities
     from domain.user.user_model import User
 
 
@@ -47,6 +47,7 @@ class Estate(Base):
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
+        default=func.now(),
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,

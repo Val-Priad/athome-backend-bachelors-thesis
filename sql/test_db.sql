@@ -1,6 +1,6 @@
-CREATE DATABASE estate_v2_test
-WITH TEMPLATE estate_v2
-OWNER postgres;
+DROP DATABASE IF EXISTS estate_v2_test;
+
+CREATE DATABASE estate_v2_test WITH TEMPLATE estate_v2 OWNER postgres;
 
 BEGIN;
 TRUNCATE TABLE
@@ -15,5 +15,5 @@ TRUNCATE TABLE
     email_verification_tokens,
     password_reset_tokens,
     users
-RESTART IDENTITY CASCADE;
+    RESTART IDENTITY CASCADE;
 COMMIT;

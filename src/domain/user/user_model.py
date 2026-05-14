@@ -7,6 +7,7 @@ from sqlalchemy import Boolean, DateTime, Enum, LargeBinary, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from domain.estate.estate_model import Estate
 from infrastructure.db import Base
 
 if TYPE_CHECKING:
@@ -49,6 +50,7 @@ class User(Base):
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
+        default=func.now(),
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
@@ -62,12 +64,12 @@ class User(Base):
     )
     owned_estates = relationship(
         "Estate",
-        foreign_keys="Estate.seller_id",
+        foreign_keys=[Estate.seller_id],
         back_populates="seller",
     )
 
     brokered_estates = relationship(
         "Estate",
-        foreign_keys="Estate.broker_id",
+        foreign_keys=[Estate.broker_id],
         back_populates="broker",
     )

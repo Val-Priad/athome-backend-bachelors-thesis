@@ -1,16 +1,16 @@
 from enum import Enum
 
 
-class HouseType(Enum):
+class HouseType(str, Enum):
     detached = "detached"
-    semi_detached = "semi-detached"
+    semi_detached = "semi_detached"
     terraced = "terraced"
 
 
-class RoomCount(Enum):
-    one = "1"
-    two = "2"
-    three = "3"
-    four = "4"
-    five = "5+"
+class RoomCount(str, Enum):
+    one = "one"
+    two = "two"
+    three = "three"
+    four = "four"
+    five_plus = "five_plus"
     atypical = "atypical"

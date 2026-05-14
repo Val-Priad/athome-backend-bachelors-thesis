@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Region(Enum):
+class Region(str, Enum):
     vinnytsia_region = "vinnytsia_region"
     volyn_region = "volyn_region"
     luhansk_region = "luhansk_region"

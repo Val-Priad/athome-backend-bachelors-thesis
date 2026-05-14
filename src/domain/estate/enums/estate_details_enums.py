@@ -1,14 +1,14 @@
 from enum import Enum
 
 
-class PropertyCondition(Enum):
+class PropertyCondition(str, Enum):
     very_good = "very_good"
     good = "good"
     poor = "poor"
     new = "new"
 
 
-class EnergyClass(Enum):
+class EnergyClass(str, Enum):
     a = "a"
     b = "b"
     c = "c"
@@ -18,7 +18,7 @@ class EnergyClass(Enum):
     g = "g"
 
 
-class Furnishing(Enum):
+class Furnishing(str, Enum):
     furnished = "furnished"
     unfurnished = "unfurnished"
     partially = "partially"

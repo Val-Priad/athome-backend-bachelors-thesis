@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -7,6 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from infrastructure.db import Base
+
+if TYPE_CHECKING:
+    from domain.estate.models.estate_details_model import EstateDetails
+    from domain.estate.models.estate_listing_model import EstateListing
+    from domain.estate.models.estate_location_model import EstateLocation
+    from domain.estate.models.estate_pricing_model import EstatePricing
+    from domain.estate.models.estate_utilities_model import EstateUtilities
+    from domain.user.user_model import User
 
 
 class Estate(Base):
@@ -41,32 +50,46 @@ class Estate(Base):
         nullable=False,
     )
 
-    seller = relationship(
+    seller: Mapped["User | None"] = relationship(
         "User",
         foreign_keys=[seller_id],
         back_populates="owned_estates",
     )
-    broker = relationship(
+    broker: Mapped["User | None"] = relationship(
         "User",
         foreign_keys=[broker_id],
         back_populates="brokered_estates",
     )
-    location = relationship(
+    location: Mapped["EstateLocation | None"] = relationship(
         "EstateLocation",
         back_populates="estate",
         uselist=False,
         single_parent=True,
         cascade="all, delete-orphan",
     )
-    pricing = relationship(
+    pricing: Mapped["EstatePricing | None"] = relationship(
         "EstatePricing",
         back_populates="estate",
         uselist=False,
         single_parent=True,
         cascade="all, delete-orphan",
     )
-    listing = relationship(
+    listing: Mapped["EstateListing | None"] = relationship(
         "EstateListing",
+        back_populates="estate",
+        uselist=False,
+        single_parent=True,
+        cascade="all, delete-orphan",
+    )
+    utilities: Mapped["EstateUtilities | None"] = relationship(
+        "EstateUtilities",
+        back_populates="estate",
+        uselist=False,
+        single_parent=True,
+        cascade="all, delete-orphan",
+    )
+    details: Mapped["EstateDetails | None"] = relationship(
+        "EstateDetails",
         back_populates="estate",
         uselist=False,
         single_parent=True,

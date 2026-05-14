@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ApartmentLayout(Enum):
+class ApartmentLayout(str, Enum):
     studio_1 = "studio_1"
     one_plus_one = "one_plus_one"
     studio_2 = "studio_2"

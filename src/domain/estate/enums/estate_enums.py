@@ -1,11 +1,11 @@
 from enum import Enum
 
 
-class EstateType(Enum):
+class EstateType(str, Enum):
     apartment = "apartment"
     house = "house"
 
 
-class OfferType(Enum):
+class OfferType(str, Enum):
     sale = "sale"
     lease = "lease"

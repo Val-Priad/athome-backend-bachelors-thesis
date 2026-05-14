@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from domain.password_reset.password_reset_model import PasswordReset
 
 
-class UserRole(enum.Enum):
+class UserRole(str, enum.Enum):
     user = "user"
     agent = "agent"
     admin = "admin"

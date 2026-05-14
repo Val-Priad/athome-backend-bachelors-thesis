@@ -1,5 +1,6 @@
 import uuid
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -14,6 +15,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from domain.estate.enums.estate_pricing_enums import PriceUnit
 from infrastructure.db import Base
 
+if TYPE_CHECKING:
+    from domain.estate.estate_model import Estate
+
 
 class EstatePricing(Base):
     __tablename__ = "estate_pricing"
@@ -24,11 +28,9 @@ class EstatePricing(Base):
         primary_key=True,
     )
 
-    price: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2), nullable=True
-    )
-    price_unit: Mapped[PriceUnit | None] = mapped_column(
-        Enum(PriceUnit, name="price_unit_enum"), nullable=True
+    price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    price_unit: Mapped[PriceUnit] = mapped_column(
+        Enum(PriceUnit, name="price_unit_enum"), nullable=False
     )
 
     cost_of_living: Mapped[Decimal | None] = mapped_column(
@@ -44,4 +46,4 @@ class EstatePricing(Base):
         Numeric(12, 2), nullable=True
     )
 
-    estate = relationship("Estate", back_populates="pricing")
+    estate: Mapped["Estate"] = relationship("Estate", back_populates="pricing")

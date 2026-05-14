@@ -18,8 +18,6 @@ wheels/
 # log files
 *.log
 
-# alembic
-migrations
 
 # thoughts files
 _sandbox

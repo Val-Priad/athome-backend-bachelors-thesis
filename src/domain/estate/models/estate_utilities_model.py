@@ -36,21 +36,17 @@ class EstateUtilities(Base):
     has_sewerage: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")
     )
-    has_internet: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default=text("false")
+    heating_source: Mapped[HeatingSource] = mapped_column(
+        Enum(HeatingSource, name="heating_source_enum"), nullable=False
     )
-    # TODO: primary_internet_connection can not be set without has_internet true
-    heating_source: Mapped[HeatingSource | None] = mapped_column(
-        Enum(HeatingSource, name="heating_source_enum"), nullable=True
-    )
-    primary_internet_connection_type: Mapped[
-        PrimaryInternetConnectionType | None
-    ] = mapped_column(
-        Enum(
-            PrimaryInternetConnectionType,
-            name="primary_internet_connection_type_enum",
-        ),
-        nullable=True,
+    primary_internet_connection_type: Mapped[PrimaryInternetConnectionType] = (
+        mapped_column(
+            Enum(
+                PrimaryInternetConnectionType,
+                name="primary_internet_connection_type_enum",
+            ),
+            nullable=False,
+        )
     )
 
     estate: Mapped["Estate"] = relationship(

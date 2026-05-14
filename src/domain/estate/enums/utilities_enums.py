@@ -18,3 +18,4 @@ class PrimaryInternetConnectionType(str, Enum):
     satellite = "satellite"
     fixed_wireless = "fixed_wireless"
     other = "other"
+    no_internet = "no_internet"

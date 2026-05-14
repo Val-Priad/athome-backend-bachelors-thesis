@@ -24,25 +24,21 @@ class EstateDetails(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-
-    condition: Mapped[PropertyCondition | None] = mapped_column(
+    condition: Mapped[PropertyCondition] = mapped_column(
         Enum(PropertyCondition, name="property_condition_enum"),
-        nullable=True,
+        nullable=False,
     )
-
-    energy_class: Mapped[EnergyClass | None] = mapped_column(
+    energy_class: Mapped[EnergyClass] = mapped_column(
         Enum(EnergyClass, name="energy_class_enum"),
-        nullable=True,
+        nullable=False,
     )
-
     usable_area: Mapped[float] = mapped_column(Float, nullable=False)
     total_area: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    furnishing: Mapped[Furnishing | None] = mapped_column(
+    furnishing: Mapped[Furnishing] = mapped_column(
         Enum(Furnishing, name="furnishing_enum"),
-        nullable=True,
+        nullable=False,
     )
-
     easy_access: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")
     )

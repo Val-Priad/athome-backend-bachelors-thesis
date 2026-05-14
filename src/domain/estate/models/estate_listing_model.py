@@ -21,19 +21,16 @@ class EstateListing(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-
     status: Mapped[ListingStatus] = mapped_column(
         Enum(ListingStatus, name="listing_status_enum"),
         nullable=False,
     )
-    # TODO: When listing is published for the first time,
-    # set published_at and expires_at in service layer.
-    published_at: Mapped[datetime | None] = mapped_column(
+    published_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    expires_at: Mapped[datetime | None] = mapped_column(
+    expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    available_from: Mapped[date | None] = mapped_column(Date, nullable=True)
+    available_from: Mapped[date] = mapped_column(Date, nullable=True)
 
     estate: Mapped["Estate"] = relationship("Estate", back_populates="listing")

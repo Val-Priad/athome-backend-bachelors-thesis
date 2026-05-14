@@ -27,12 +27,10 @@ class EstatePricing(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-
     price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     price_unit: Mapped[PriceUnit] = mapped_column(
         Enum(PriceUnit, name="price_unit_enum"), nullable=False
     )
-
     cost_of_living: Mapped[Decimal | None] = mapped_column(
         Numeric(12, 2), nullable=True
     )

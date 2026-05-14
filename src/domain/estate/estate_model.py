@@ -10,7 +10,9 @@ from domain.estate.enums.estate_enums import EstateType, OfferType
 from infrastructure.db import Base
 
 if TYPE_CHECKING:
+    from domain.estate.models.estate_apartment_model import EstateApartment
     from domain.estate.models.estate_details_model import EstateDetails
+    from domain.estate.models.estate_house_model import EstateHouse
     from domain.estate.models.estate_listing_model import EstateListing
     from domain.estate.models.estate_location_model import EstateLocation
     from domain.estate.models.estate_pricing_model import EstatePricing
@@ -90,6 +92,21 @@ class Estate(Base):
     )
     details: Mapped["EstateDetails | None"] = relationship(
         "EstateDetails",
+        back_populates="estate",
+        uselist=False,
+        single_parent=True,
+        cascade="all, delete-orphan",
+    )
+    apartment: Mapped["EstateApartment | None"] = relationship(
+        "EstateApartment",
+        back_populates="estate",
+        uselist=False,
+        single_parent=True,
+        cascade="all, delete-orphan",
+    )
+
+    house: Mapped["EstateHouse | None"] = relationship(
+        "EstateHouse",
         back_populates="estate",
         uselist=False,
         single_parent=True,

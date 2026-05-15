@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable
+from typing import Callable, cast
 
 from .error_catalog import DomainError
 
@@ -15,6 +15,12 @@ def wrap_with_custom_error(
             try:
                 return fn(*args, **kwargs)
             except catch as e:
+                from_exception = getattr(wrap_with, "from_exception", None)
+                if callable(from_exception):
+                    typed_from_exception = cast(
+                        Callable[[Exception], DomainError], from_exception
+                    )
+                    raise typed_from_exception(e) from e
                 raise wrap_with from e
 
         return wrapper

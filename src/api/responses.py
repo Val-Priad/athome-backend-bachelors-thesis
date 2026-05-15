@@ -3,6 +3,9 @@ from typing import Any
 from flask import Response, jsonify, make_response
 from pydantic import BaseModel
 
+from exceptions.custom_exceptions.validation_exceptions import (
+    ValidationError as DomainValidationError,
+)
 from exceptions.error_catalog import (
     _is_external_exception,
     get_description,
@@ -33,14 +36,14 @@ def construct_error(
     else:
         raise ValueError("Exception or code must be provided")
 
-    return make_response(
-        jsonify(
-            {
-                "error": {
-                    "code": description.code,
-                    "message": description.message,
-                }
-            }
-        ),
-        description.status,
-    )
+    payload: dict[str, Any] = {
+        "error": {
+            "code": description.code,
+            "message": description.message,
+        }
+    }
+
+    if isinstance(e, DomainValidationError) and e.errors:
+        payload["error"]["errors"] = e.errors
+
+    return make_response(jsonify(payload), description.status)

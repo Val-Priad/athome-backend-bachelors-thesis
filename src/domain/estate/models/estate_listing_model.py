@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, text
+from sqlalchemy import Date, DateTime, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,8 +24,6 @@ class EstateListing(Base):
     status: Mapped[ListingStatus] = mapped_column(
         Enum(ListingStatus, name="listing_status_enum"),
         nullable=False,
-        default=ListingStatus.draft,
-        server_default=text("'draft'"),
     )
     published_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

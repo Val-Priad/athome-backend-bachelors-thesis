@@ -11,7 +11,6 @@ from infrastructure.db import Base
 
 
 def _clean_input(value: Any) -> Any:
-    """Recursively trim strings and convert all-whitespace strings to None."""
     if isinstance(value, str):
         s = value.strip()
         return None if s == "" else s

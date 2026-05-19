@@ -12,6 +12,23 @@ class EstatePublicationRequest(EstateBaseRequest):
     def validate_for_publication(self):
         errors: list[InitErrorDetails] = []
 
+        self._validate_estate_type_sections(errors)
+        self._validate_listing(errors)
+        self._validate_common_required_sections(errors)
+        self._validate_type_specific_required_sections(errors)
+
+        if errors:
+            raise ValidationError.from_exception_data(
+                title=type(self).__name__,
+                line_errors=errors,
+            )
+
+        return self
+
+    def _validate_estate_type_sections(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
         if self.estate_type == EstateType.apartment and self.house is not None:
             errors.append(
                 make_value_error(
@@ -30,6 +47,10 @@ class EstatePublicationRequest(EstateBaseRequest):
                 )
             )
 
+    def _validate_listing(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
         if self.listing is None:
             errors.append(
                 make_value_error(
@@ -37,7 +58,9 @@ class EstatePublicationRequest(EstateBaseRequest):
                     message="Listing is required for publication",
                 )
             )
-        elif self.listing.status != ListingStatus.active:
+            return
+
+        if self.listing.status != ListingStatus.active:
             errors.append(
                 make_value_error(
                     loc=("listing", "status"),
@@ -46,67 +69,155 @@ class EstatePublicationRequest(EstateBaseRequest):
                 )
             )
 
-        missing_sections: list[str] = []
-        missing_fields: list[str] = []
+    def _validate_common_required_sections(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        self._validate_location(errors)
+        self._validate_pricing(errors)
+        self._validate_details(errors)
 
+    def _validate_location(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
         if self.location is None:
-            missing_sections.append("location")
-        else:
-            if self.location.region is None:
-                missing_fields.append("location.region")
-            if self.location.city is None:
-                missing_fields.append("location.city")
-
-        if self.pricing is None:
-            missing_sections.append("pricing")
-        else:
-            if self.pricing.price is None:
-                missing_fields.append("pricing.price")
-            if self.pricing.price_unit is None:
-                missing_fields.append("pricing.price_unit")
-
-        if self.details is None:
-            missing_sections.append("details")
-        else:
-            if self.details.usable_area is None:
-                missing_fields.append("details.usable_area")
-
-        if self.estate_type == EstateType.apartment:
-            if self.apartment is None:
-                missing_sections.append("apartment")
-            elif self.apartment.apartment_layout is None:
-                missing_fields.append("apartment.apartment_layout")
-
-        if self.estate_type == EstateType.house:
-            if self.house is None:
-                missing_sections.append("house")
-            else:
-                if self.house.room_count is None:
-                    missing_fields.append("house.room_count")
-                if self.house.house_type is None:
-                    missing_fields.append("house.house_type")
-
-        for section in missing_sections:
             errors.append(
                 make_value_error(
-                    loc=(section,),
-                    message=f"{section} is required for publication",
+                    loc=("location",),
+                    message="location is required for publication",
                 )
             )
+            return
 
-        for field in missing_fields:
-            loc = tuple(field.split("."))
+        self._require_field(
+            errors,
+            value=self.location.region,
+            loc=("location", "region"),
+            message="location.region is required for publication",
+        )
+        self._require_field(
+            errors,
+            value=self.location.city,
+            loc=("location", "city"),
+            message="location.city is required for publication",
+        )
+
+    def _validate_pricing(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        if self.pricing is None:
+            errors.append(
+                make_value_error(
+                    loc=("pricing",),
+                    message="pricing is required for publication",
+                )
+            )
+            return
+
+        self._require_field(
+            errors,
+            value=self.pricing.price,
+            loc=("pricing", "price"),
+            message="pricing.price is required for publication",
+        )
+        self._require_field(
+            errors,
+            value=self.pricing.price_unit,
+            loc=("pricing", "price_unit"),
+            message="pricing.price_unit is required for publication",
+        )
+
+    def _validate_details(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        if self.details is None:
+            errors.append(
+                make_value_error(
+                    loc=("details",),
+                    message="details is required for publication",
+                )
+            )
+            return
+
+        self._require_field(
+            errors,
+            value=self.details.usable_area,
+            loc=("details", "usable_area"),
+            message="details.usable_area is required for publication",
+        )
+
+    def _validate_type_specific_required_sections(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        if self.estate_type == EstateType.apartment:
+            self._validate_apartment(errors)
+            return
+
+        if self.estate_type == EstateType.house:
+            self._validate_house(errors)
+
+    def _validate_apartment(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        if self.apartment is None:
+            errors.append(
+                make_value_error(
+                    loc=("apartment",),
+                    message="apartment is required for publication",
+                )
+            )
+            return
+
+        self._require_field(
+            errors,
+            value=self.apartment.apartment_layout,
+            loc=("apartment", "apartment_layout"),
+            message="apartment.apartment_layout is required for publication",
+        )
+
+    def _validate_house(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        if self.house is None:
+            errors.append(
+                make_value_error(
+                    loc=("house",),
+                    message="house is required for publication",
+                )
+            )
+            return
+
+        self._require_field(
+            errors,
+            value=self.house.room_count,
+            loc=("house", "room_count"),
+            message="house.room_count is required for publication",
+        )
+        self._require_field(
+            errors,
+            value=self.house.house_type,
+            loc=("house", "house_type"),
+            message="house.house_type is required for publication",
+        )
+
+    @staticmethod
+    def _require_field(
+        errors: list[InitErrorDetails],
+        *,
+        value: object,
+        loc: tuple[str, ...],
+        message: str,
+    ) -> None:
+        if value is None:
             errors.append(
                 make_value_error(
                     loc=loc,
-                    message=f"{field} is required for publication",
+                    message=message,
                 )
             )
-
-        if errors:
-            raise ValidationError.from_exception_data(
-                title=type(self).__name__,
-                line_errors=errors,
-            )
-
-        return self

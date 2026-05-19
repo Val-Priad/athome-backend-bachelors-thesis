@@ -1,35 +1,5 @@
-from domain.estate.enums.estate_enums import EstateType, OfferType
-from schemas.estate_schemas.sections.apartment_section import (
-    EstateApartmentSection,
-)
-from schemas.estate_schemas.sections.details_section import (
-    EstateDetailsSection,
-)
-from schemas.estate_schemas.sections.house_section import EstateHouseSection
-from schemas.estate_schemas.sections.listing_section import (
-    EstateListingSection,
-)
-from schemas.estate_schemas.sections.location_section import (
-    EstateLocationSection,
-)
-from schemas.estate_schemas.sections.pricing_section import (
-    EstatePricingSection,
-)
-from schemas.estate_schemas.sections.utilities_section import (
-    EstateUtilitiesSection,
-)
-from schemas.parent_types import RequestValidation
+from schemas.estate_schemas.base_request import EstateBaseRequest
 
 
-class EstateDraftRequest(RequestValidation):
-    estate_type: EstateType
-    offer_type: OfferType
-
-    location: EstateLocationSection | None = None
-    pricing: EstatePricingSection | None = None
-    details: EstateDetailsSection | None = None
-    utilities: EstateUtilitiesSection | None = None
-    listing: EstateListingSection | None = None
-
-    apartment: EstateApartmentSection | None = None
-    house: EstateHouseSection | None = None
+class EstateDraftRequest(EstateBaseRequest):
+    pass

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import Field
 
 from domain.estate.enums.estate_details_enums import (

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from domain.estate.enums.utilities_enums import (
     HeatingSource,
     PrimaryInternetConnectionType,

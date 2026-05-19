@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pydantic import ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
@@ -112,8 +110,3 @@ class EstatePublicationRequest(EstateBaseRequest):
             )
 
         return self
-
-
-# TODO: vicinity table
-# TODO: translations table
-# TODO: media table

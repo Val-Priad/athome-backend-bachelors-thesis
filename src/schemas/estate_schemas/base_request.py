@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from schemas.estate_schemas.sections.apartment_section import (
     EstateApartmentSection,

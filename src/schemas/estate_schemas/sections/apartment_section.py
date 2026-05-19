@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pydantic import Field
 
 from domain.estate.enums.apartment_enums import ApartmentLayout

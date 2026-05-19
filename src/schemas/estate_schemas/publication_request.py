@@ -16,6 +16,8 @@ class EstatePublicationRequest(EstateBaseRequest):
         self._validate_listing(errors)
         self._validate_common_required_sections(errors)
         self._validate_type_specific_required_sections(errors)
+        self._validate_translations(errors)
+        self._validate_media(errors)
 
         if errors:
             raise ValidationError.from_exception_data(
@@ -205,6 +207,26 @@ class EstatePublicationRequest(EstateBaseRequest):
             loc=("house", "house_type"),
             message="house.house_type is required for publication",
         )
+
+    def _validate_translations(self, errors: list[InitErrorDetails]) -> None:
+        if not self.translations:
+            errors.append(
+                make_value_error(
+                    loc=("translations",),
+                    message="At least one translation is required for publication",
+                    input_value=self.translations,
+                )
+            )
+
+    def _validate_media(self, errors: list[InitErrorDetails]):
+        if not self.media:
+            errors.append(
+                make_value_error(
+                    loc=("media",),
+                    message="At least one media is required for publication",
+                    input_value=self.media,
+                )
+            )
 
     @staticmethod
     def _require_field(

@@ -27,6 +27,8 @@ if TYPE_CHECKING:
 class Estate(Base):
     __tablename__ = "estates"
 
+    _CASCADE_ALL_DELETE_ORPHAN = "all, delete-orphan"
+
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
@@ -71,67 +73,67 @@ class Estate(Base):
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     pricing: Mapped["EstatePricing | None"] = relationship(
         "EstatePricing",
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     listing: Mapped["EstateListing | None"] = relationship(
         "EstateListing",
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     utilities: Mapped["EstateUtilities | None"] = relationship(
         "EstateUtilities",
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     details: Mapped["EstateDetails | None"] = relationship(
         "EstateDetails",
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     apartment: Mapped["EstateApartment | None"] = relationship(
         "EstateApartment",
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     house: Mapped["EstateHouse | None"] = relationship(
         "EstateHouse",
         back_populates="estate",
         uselist=False,
         single_parent=True,
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     translations: Mapped[list["EstateTranslation"]] = relationship(
         "EstateTranslation",
         back_populates="estate",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     media: Mapped[list["EstateMedia"]] = relationship(
         "EstateMedia",
         back_populates="estate",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     vicinities: Mapped[list["EstateVicinity"]] = relationship(
         "EstateVicinity",
         back_populates="estate",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     saved_by_users: Mapped[list["SavedEstate"]] = relationship(
         "SavedEstate",
         back_populates="estate",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )

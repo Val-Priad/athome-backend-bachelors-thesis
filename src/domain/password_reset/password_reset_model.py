@@ -23,12 +23,14 @@ class PasswordReset(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    token_hash: Mapped[bytes] = mapped_column(LargeBinary, nullable=False, unique=True)
+    token_hash: Mapped[bytes] = mapped_column(
+        LargeBinary, nullable=False, unique=True
+    )
     expires_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     used_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), nullable=True

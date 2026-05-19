@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.estate.estate_model import Estate
+from domain.estate.models.saved_estate_model import SavedEstate
 from infrastructure.db import Base
 
 if TYPE_CHECKING:
@@ -46,11 +47,10 @@ class User(Base):
     avatar_key: Mapped[str | None] = mapped_column(Text)
     description: Mapped[str | None] = mapped_column(String(510))
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now(), nullable=False
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
-        default=func.now(),
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
@@ -67,9 +67,13 @@ class User(Base):
         foreign_keys=[Estate.seller_id],
         back_populates="seller",
     )
-
     brokered_estates = relationship(
         "Estate",
         foreign_keys=[Estate.broker_id],
         back_populates="broker",
+    )
+    saved_estates = relationship(
+        "SavedEstate",
+        foreign_keys=[SavedEstate.user_id],
+        back_populates="user",
     )

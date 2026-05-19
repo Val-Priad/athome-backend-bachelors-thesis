@@ -5,7 +5,7 @@ from flask import Blueprint
 from api.responses import construct_error, construct_response
 from composition_root import get_agent_description_use_case
 
-bp = Blueprint("agent", __name__, url_prefix="/api/agent")
+bp = Blueprint("agent", __name__, url_prefix="/api/agents")
 
 
 @bp.get("/<uuid:agent_id>")

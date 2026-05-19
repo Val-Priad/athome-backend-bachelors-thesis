@@ -39,14 +39,11 @@ from domain.user.user_repository import UserRepository
 from infrastructure.email.Mailer import Mailer
 from security import PasswordCrypto, TokenCrypto
 
-# EXTERNAL
 mailer = Mailer()
 
-# INTERNAL
 password_hasher = PasswordCrypto()
 token_hasher = TokenCrypto()
 
-# DOMAIN RELATED
 user_repository = UserRepository()
 
 email_verification_repository = EmailVerificationRepository()

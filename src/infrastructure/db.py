@@ -10,11 +10,11 @@ class Base(DeclarativeBase):
 
 
 _engine: Engine | None = None
-_SessionFactory: sessionmaker | None = None
+_session_factory: sessionmaker | None = None
 
 
 def init_db(app: Flask) -> None:
-    global _engine, _SessionFactory
+    global _engine, _session_factory
 
     database_url = app.config["DATABASE_URL"]
 
@@ -25,7 +25,7 @@ def init_db(app: Flask) -> None:
         _engine.dispose()
 
     _engine = create_db_engine(database_url)
-    _SessionFactory = create_session_factory(_engine)
+    _session_factory = create_session_factory(_engine)
 
 
 def create_db_engine(database_url: str):
@@ -46,9 +46,9 @@ def get_engine() -> Engine:
 
 
 def get_session() -> Session:
-    if _SessionFactory is None:
+    if _session_factory is None:
         raise RuntimeError("Database session factory is not initialized")
-    return _SessionFactory()
+    return _session_factory()
 
 
 @contextmanager

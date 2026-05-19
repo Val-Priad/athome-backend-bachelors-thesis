@@ -48,12 +48,12 @@ def db_session(app: Flask, monkeypatch):
         connection = engine.connect()
         transaction = connection.begin()
 
-        TestingSessionFactory = sessionmaker(bind=connection)
-        session = TestingSessionFactory()
+        testing_session_factory = sessionmaker(bind=connection)
+        session = testing_session_factory()
         session.begin_nested()
 
         monkeypatch.setattr(
-            db_module, "_SessionFactory", TestingSessionFactory
+            db_module, "_session_factory", testing_session_factory
         )
 
         @event.listens_for(session, "after_transaction_end")
@@ -75,7 +75,7 @@ def logged_in_user(
     user_role = getattr(request, "param", UserRole.user)
 
     email = "logged_in_user@example.com"
-    password = "12345678"
+    password = "12345678"  # NOSONAR test-only password for integration tests
     payload = {"email": email, "password": password}
 
     register_response = client.post("/api/auth/register", json=payload)

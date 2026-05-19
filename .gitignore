@@ -8,6 +8,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.coverage
 
 # Virtual environments
 .venv
@@ -21,5 +22,3 @@ wheels/
 
 # thoughts files
 _sandbox
-
-.coverage

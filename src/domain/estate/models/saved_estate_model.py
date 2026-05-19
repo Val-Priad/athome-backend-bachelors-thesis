@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from domain.estate.estate_model import Estate
     from domain.user.user_model import User
 
+# TODO: Implement saving liked estate by user
+
 
 class SavedEstate(Base):
     __tablename__ = "saved_estates"

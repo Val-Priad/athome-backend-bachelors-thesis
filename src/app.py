@@ -3,6 +3,7 @@ from flask import Flask
 from api.admin.users.admin_users_router import bp as admin_users_bp
 from api.agents.agents_router import bp as agent_bp
 from api.auth.auth_router import bp as auth_bp
+from api.estate.estate_router import bp as estate_bp
 from api.users.me.me_router import bp as me_bp
 from config import FlaskConfig
 from exceptions.error_catalog import register_errors
@@ -31,5 +32,6 @@ def create_app(config: type[FlaskConfig]) -> Flask:
     app.register_blueprint(me_bp)
     app.register_blueprint(admin_users_bp)
     app.register_blueprint(agent_bp)
+    app.register_blueprint(estate_bp)
 
     return app

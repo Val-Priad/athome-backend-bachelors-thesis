@@ -56,12 +56,13 @@ from domain.password_reset.password_reset_repository import (
     PasswordResetRepository,
 )
 from domain.password_reset.password_reset_service import PasswordResetService
+from domain.token.token_lifecycle_service import TokenLifecycleService
 from domain.user.services.agent_service import AgentService
 from domain.user.services.auth_service import AuthService
 from domain.user.services.me_service import MeService
 from domain.user.user_repository import UserRepository
 from infrastructure.email.Mailer import Mailer
-from security import PasswordCrypto, TokenCrypto
+from security import AuthorizationService, PasswordCrypto, TokenCrypto
 
 # ============================================================================
 # INFRASTRUCTURE LAYER INITIALIZATION
@@ -83,21 +84,26 @@ password_reset_repository = PasswordResetRepository()
 estate_repository = EstateRepository()
 
 # Services
+token_lifecycle_service = TokenLifecycleService()
+authorization_service = AuthorizationService(user_repository)
 email_verification_service = EmailVerificationService(
-    email_verification_repository, user_repository, mailer, token_hasher
+    email_verification_repository,
+    mailer,
+    token_hasher,
+    token_lifecycle_service,
 )
 
 password_reset_service = PasswordResetService(
     password_reset_repository,
-    user_repository,
     mailer,
     token_hasher,
     password_hasher,
+    token_lifecycle_service,
 )
 
 auth_service = AuthService(user_repository, password_hasher)
 me_service = MeService(user_repository, password_hasher)
-admin_users_service = AdminUsersService(user_repository)
+admin_users_service = AdminUsersService(user_repository, authorization_service)
 agent_service = AgentService(user_repository)
 estate_service = EstateService(estate_repository)
 
@@ -113,19 +119,23 @@ register_user_use_case = RegisterUserUseCase(
 login_user_use_case = LoginUserUseCase(auth_service)
 verify_email_use_case = VerifyEmailUseCase(email_verification_service)
 resend_verification_use_case = ResendVerificationUseCase(
-    email_verification_service
+    email_verification_service, user_repository
 )
-reset_password_use_case = ResetPasswordUseCase(password_reset_service)
+reset_password_use_case = ResetPasswordUseCase(
+    password_reset_service, user_repository
+)
 verify_new_password_use_case = VerifyNewPasswordUseCase(password_reset_service)
 
 # Users Use Cases
-get_me_use_case = GetMeUseCase(me_service)
-delete_me_use_case = DeleteMeUseCase(me_service)
+get_me_use_case = GetMeUseCase(user_repository)
+delete_me_use_case = DeleteMeUseCase(user_repository)
 update_password_use_case = UpdatePasswordUseCase(me_service)
 update_personal_data_use_case = UpdatePersonalDataUseCase(me_service)
 
 # Admin Use Cases
-get_admin_user_use_case = GetAdminUserUseCase(admin_users_service)
+get_admin_user_use_case = GetAdminUserUseCase(
+    admin_users_service, authorization_service, user_repository
+)
 change_user_role_use_case = ChangeUserRoleUseCase(admin_users_service)
 delete_admin_user_use_case = DeleteAdminUserUseCase(admin_users_service)
 list_users_use_case = ListUsersUseCase(admin_users_service)

@@ -3,7 +3,6 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from domain.user.user_model import User
 from domain.user.user_repository import UserRepository
 from exceptions.custom_exceptions.user_exceptions import (
     MissingUpdateDataError,
@@ -18,12 +17,6 @@ class MeService:
     ):
         self.user_repository = user_repository
         self.password_hasher = password_hasher
-
-    def get_user_by_id(self, session: Session, user_id: UUID) -> User:
-        return self.user_repository.get_user_by_id(session, user_id)
-
-    def delete_user_by_id(self, session: Session, user_id: UUID) -> None:
-        session.delete(self.user_repository.get_user_by_id(session, user_id))
 
     def update_password(
         self, session: Session, user_id: UUID, raw_password: str

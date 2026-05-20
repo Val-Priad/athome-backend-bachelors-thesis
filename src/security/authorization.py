@@ -1,0 +1,19 @@
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from domain.user.user_model import UserRole
+from domain.user.user_repository import UserRepository
+from exceptions.custom_exceptions.user_exceptions import ForbiddenError
+
+
+class AuthorizationService:
+    def __init__(self, user_repository: UserRepository):
+        self.user_repository = user_repository
+
+    def ensure_has_rights(
+        self, session: Session, requester_id: UUID, *roles: UserRole
+    ) -> None:
+        requester = self.user_repository.get_user_by_id(session, requester_id)
+        if requester.role not in roles:
+            raise ForbiddenError()

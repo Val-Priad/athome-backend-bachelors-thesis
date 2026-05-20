@@ -32,7 +32,10 @@ def test_register_valid(client, db_session):
 
 
 def test_register_user_already_exists(client):
-    payload = {"email": "user@example.com", "password": "some_password"}
+    payload = {
+        "email": "user@example.com",
+        "password": "some_password",
+    }
     client.post(f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register", json=payload)
     response = client.post("/api/auth/register", json=payload)
     assert response.status_code == 202
@@ -46,7 +49,7 @@ def test_register_user_already_exists(client):
             id="invalid email format",
         ),
         pytest.param(
-            {"email": "user@example.com", "password": "       "},
+            {"email": "user@example.com", "password": "       "},  # NOSONAR
             id="invalid password (after strip)",
         ),
         pytest.param({"email": "user@example.com"}, id="missing password"),
@@ -64,10 +67,10 @@ def test_register_user_validation_error(client, payload):
 
 def test_register_internal_error_rolls_back(client, db_session, monkeypatch):
     def boom(db, email, password):  # Do not touch arguments!
-        user = User(email=email, password_hash=b"hash")
+        user = User(email=email, password_hash=b"hash")  # NOSONAR
         db.add(user)
         db.flush()
-        raise Exception("boom")
+        raise Exception("boom")  # NOSONAR
 
     monkeypatch.setattr(auth_service, "create_user", boom)
 

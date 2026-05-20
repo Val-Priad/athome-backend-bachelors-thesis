@@ -29,11 +29,8 @@ class AuthService:
         session.flush()
         return user
 
-    def get_user_by_email(self, session: Session, email: str):
-        return self.user_repository.get_user_by_email(session, email)
-
     def verify_password(self, session: Session, email, password):
-        user = self.get_user_by_email(session, email)
+        user = self.user_repository.get_user_by_email(session, email)
 
         if not user.is_email_verified:
             raise UserIsNotVerifiedError()

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from domain.password_reset.password_reset_repository import (
     PasswordResetRepository,
 )
-from domain.user.user_repository import UserRepository
+from domain.token.token_lifecycle_service import TokenLifecycleService
 from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
 from infrastructure.email.Mailer import Mailer
 from security import PasswordCrypto, TokenCrypto
@@ -16,21 +16,18 @@ class PasswordResetService:
     def __init__(
         self,
         password_reset_repository: PasswordResetRepository,
-        user_repository: UserRepository,
         mailer: Mailer,
         token_hasher: TokenCrypto,
         password_hasher: PasswordCrypto,
+        token_lifecycle_service: TokenLifecycleService,
     ):
         self.password_reset_repository = password_reset_repository
-        self.user_repository = user_repository
         self.mailer = mailer
         self.token_hasher = token_hasher
         self.password_hasher = password_hasher
+        self.token_lifecycle_service = token_lifecycle_service
 
     TOKEN_TTL = timedelta(minutes=10)
-
-    def get_user_by_email(self, session: Session, email: str):
-        return self.user_repository.get_user_by_email(session, email)
 
     def send_reset_password_email(self, email_to: str, token: str):
         try:
@@ -43,17 +40,13 @@ class PasswordResetService:
         session: Session,
         user_id: uuid.UUID,
     ):
-        expires_at = datetime.now(timezone.utc) + self.TOKEN_TTL
-        raw_token = self.token_hasher.generate_token()
-        token_hash = self.token_hasher.hash_token(raw_token)
-
-        self.password_reset_repository.deactivate_all_user_tokens(
-            session, user_id
+        return self.token_lifecycle_service.create_token(
+            session,
+            user_id,
+            token_crypto=self.token_hasher,
+            repository=self.password_reset_repository,
+            ttl=self.TOKEN_TTL,
         )
-        self.password_reset_repository.add_token(
-            session, user_id, token_hash, expires_at
-        )
-        return raw_token
 
     def reset_password(self, session: Session, raw_token: str, password: str):
         token = self.password_reset_repository.get_valid_token(

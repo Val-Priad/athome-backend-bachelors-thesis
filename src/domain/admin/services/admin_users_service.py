@@ -9,23 +9,13 @@ from exceptions.custom_exceptions.user_exceptions import (
     ForbiddenError,
     UserStateConflictError,
 )
-from security.authorization import AuthorizationService
 
 
 class AdminUsersService:
-    def __init__(
-        self,
-        user_repository: UserRepository,
-        authorization_service: AuthorizationService,
-    ):
+    def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
-        self.authorization_service = authorization_service
 
-    def delete_user(self, session: Session, requester_id: UUID, user_id: UUID):
-        self.authorization_service.ensure_has_rights(
-            session, requester_id, UserRole.admin
-        )
-
+    def delete_user(self, session: Session, user_id: UUID):
         user = self.user_repository.get_user_by_id(session, user_id)
         if user.role == UserRole.admin:
             raise ForbiddenError()
@@ -35,14 +25,9 @@ class AdminUsersService:
     def change_user_role(
         self,
         session: Session,
-        requester_id: UUID,
         user_id: UUID,
         role: UserRole,
     ):
-        self.authorization_service.ensure_has_rights(
-            session, requester_id, UserRole.admin
-        )
-
         user = self.user_repository.get_user_by_id(session, user_id)
 
         if user.role == UserRole.admin:
@@ -55,7 +40,6 @@ class AdminUsersService:
     def list_users(
         self,
         session: Session,
-        requester_id: UUID,
         *,
         role: UserRole | None = None,
         email: str | None = None,
@@ -67,10 +51,6 @@ class AdminUsersService:
         page: int,
         page_size: int,
     ):
-        self.authorization_service.ensure_has_rights(
-            session, requester_id, UserRole.admin
-        )
-
         return self.user_repository.list_users(
             session,
             role=role,

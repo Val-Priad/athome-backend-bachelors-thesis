@@ -62,7 +62,7 @@ def handle_exception(e: Exception):
     return construct_error(e)
 
 
-# TODO: Admin Panel: Agent List
+# TODO: Admin Panel: Agent List  # NOSONAR
 # Add filters for admin list
 # Add sorting for admin list
 # + Pagination

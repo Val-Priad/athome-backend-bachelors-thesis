@@ -25,9 +25,12 @@ from schemas.estate_schemas.sections.utilities_section import (
     EstateUtilitiesSection,
 )
 from schemas.parent_types import RequestValidation
+from schemas.types import ID
 
 
 class EstateBaseRequest(RequestValidation):
+    seller_id: ID | None = None
+    broker_id: ID | None = None
     estate_type: EstateType
     offer_type: OfferType
 

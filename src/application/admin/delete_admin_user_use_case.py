@@ -1,13 +1,23 @@
 from uuid import UUID
 
 from domain.admin.services.admin_users_service import AdminUsersService
+from domain.user.user_model import UserRole
 from infrastructure.db import db_session
+from security.authorization import AuthorizationService
 
 
 class DeleteAdminUserUseCase:
-    def __init__(self, admin_users_service: AdminUsersService):
+    def __init__(
+        self,
+        admin_users_service: AdminUsersService,
+        authorization_service: AuthorizationService,
+    ):
         self.admin_users_service = admin_users_service
+        self.authorization_service = authorization_service
 
     def execute(self, requester_id: UUID, user_id: UUID) -> None:
         with db_session() as session:
-            self.admin_users_service.delete_user(session, requester_id, user_id)
+            self.authorization_service.ensure_has_rights(
+                session, requester_id, UserRole.admin
+            )
+            self.admin_users_service.delete_user(session, user_id)

@@ -21,7 +21,7 @@ def post_draft_estate():
     requester_id = get_jwt_user_uuid()
     data = EstateDraftRequest.from_request(request.json)
     post_draft_estate_use_case.execute(data, requester_id)
-    return construct_response()
+    return construct_response(status=201)
 
 
 @bp.errorhandler(Exception)

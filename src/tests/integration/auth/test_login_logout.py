@@ -8,7 +8,7 @@ from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 @pytest.fixture()
 def verified_user(db_session, client):
     email = "user@example.com"
-    password = "12345678"
+    password = "12345678"  # NOSONAR
     response = client.post(
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
         json={"email": email, "password": password},
@@ -24,7 +24,7 @@ def verified_user(db_session, client):
 @pytest.fixture
 def unverified_user(client):
     email = "user@example.com"
-    password = "12345678"
+    password = "12345678"  # NOSONAR
     response = client.post(
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
         json={"email": email, "password": password},
@@ -67,7 +67,7 @@ def test_login_not_registered_user(client):
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/login",
         json={
             "email": "not_registered@example.com",
-            "password": "not_registered",
+            "password": "not_registered",  # NOSONAR
         },
     )
     assert login_response.status_code == 401

@@ -13,7 +13,7 @@ from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
 
 @pytest.fixture
 def unverified_user(db_session):
-    user = User(email="user@example.com", password_hash=b"hash")
+    user = User(email="user@example.com", password_hash=b"hash")  # NOSONAR
     db_session.add(user)
     db_session.flush()
     return user
@@ -22,7 +22,9 @@ def unverified_user(db_session):
 @pytest.fixture
 def verified_user(db_session):
     user = User(
-        email="user@example.com", password_hash=b"hash", is_email_verified=True
+        email="user@example.com",
+        password_hash=b"hash",  # NOSONAR
+        is_email_verified=True,
     )
     db_session.add(user)
     db_session.flush()
@@ -114,7 +116,7 @@ def test_resend_verification_on_server_error_returns_500(
     client, unverified_user, monkeypatch
 ):
     def boom(*args, **kwargs):  # Do not touch arguments!
-        raise Exception("boom")
+        raise Exception("boom")  # NOSONAR
 
     monkeypatch.setattr(email_verification_service, "get_resend_token", boom)
 

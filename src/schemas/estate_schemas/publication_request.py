@@ -78,6 +78,7 @@ class EstatePublicationRequest(EstateBaseRequest):
         self._validate_location(errors)
         self._validate_pricing(errors)
         self._validate_details(errors)
+        self._validate_broker(errors)
 
     def _validate_location(
         self,
@@ -225,6 +226,16 @@ class EstatePublicationRequest(EstateBaseRequest):
                     loc=("media",),
                     message="At least one media is required for publication",
                     input_value=self.media,
+                )
+            )
+
+    def _validate_broker(self, errors: list[InitErrorDetails]) -> None:
+        if self.broker_id is None:
+            errors.append(
+                make_value_error(
+                    loc=("broker_id",),
+                    message="broker_id is required for publication",
+                    input_value=self.broker_id,
                 )
             )
 

@@ -103,7 +103,7 @@ password_reset_service = PasswordResetService(
 
 auth_service = AuthService(user_repository, password_hasher)
 me_service = MeService(user_repository, password_hasher)
-admin_users_service = AdminUsersService(user_repository, authorization_service)
+admin_users_service = AdminUsersService(user_repository)
 agent_service = AgentService(user_repository)
 estate_service = EstateService(estate_repository)
 
@@ -136,12 +136,12 @@ update_personal_data_use_case = UpdatePersonalDataUseCase(me_service)
 get_admin_user_use_case = GetAdminUserUseCase(
     admin_users_service, authorization_service, user_repository
 )
-change_user_role_use_case = ChangeUserRoleUseCase(admin_users_service)
-delete_admin_user_use_case = DeleteAdminUserUseCase(admin_users_service)
-list_users_use_case = ListUsersUseCase(admin_users_service)
+change_user_role_use_case = ChangeUserRoleUseCase(admin_users_service, authorization_service)
+delete_admin_user_use_case = DeleteAdminUserUseCase(admin_users_service, authorization_service)
+list_users_use_case = ListUsersUseCase(admin_users_service, authorization_service)
 
 # Agent Use Cases
 get_agent_description_use_case = GetAgentDescriptionUseCase(agent_service)
 
 # Estate Use Cases
-post_draft_estate_use_case = PostDraftEstateUseCase(estate_service)
+post_draft_estate_use_case = PostDraftEstateUseCase(estate_service, authorization_service)

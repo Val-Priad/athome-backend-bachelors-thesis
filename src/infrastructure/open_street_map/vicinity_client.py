@@ -126,6 +126,12 @@ class OpenStreetMapVicinityClient:
         if lat is None or lon is None:
             raise ValueError("Latitude and longitude are required.")
 
+        if not -90 <= lat <= 90:
+            raise ValueError("Latitude must be between -90 and 90.")
+
+        if not -180 <= lon <= 180:
+            raise ValueError("Longitude must be between -180 and 180.")
+
         if radius is None or radius <= 0:
             raise ValueError("Radius must be greater than zero.")
 
@@ -226,29 +232,20 @@ out body;
     def _sort_groups(
         groups: dict[VicinityType, list[Place]],
     ) -> dict[VicinityType, list[Place]]:
-        sorted_groups: dict[VicinityType, list[Place]] = {}
-        for vicinity_type, places in groups.items():
-            sorted_groups[vicinity_type] = sorted(
-                places,
-                key=lambda place: place.distance_m,
-            )
-
-        return sorted_groups
+        return {
+            vicinity_type: sorted(places, key=lambda place: place.distance_m)
+            for vicinity_type, places in groups.items()
+        }
 
     @staticmethod
     def _get_closest_places_from_each_group(
         groups: dict[VicinityType, list[Place]],
     ) -> list[Place]:
-        closest_places: list[Place] = []
-        for vicinity_type, places in groups.items():
-            if vicinity_type == VicinityType.closest or not places:
-                continue
-
-            closest_places.append(
-                min(places, key=lambda place: place.distance_m)
-            )
-
-        return closest_places
+        return [
+            places[0]
+            for vicinity_type, places in groups.items()
+            if vicinity_type != VicinityType.closest and places
+        ]
 
     @staticmethod
     def _haversine_distance(

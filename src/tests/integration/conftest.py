@@ -63,7 +63,16 @@ def noop_fetch_vicinity(monkeypatch):
                         distance_m=157,
                     )
                 ],
-                VicinityType.closest: [],
+                VicinityType.closest: [
+                    Place(
+                        type=VicinityType.bus_stop,
+                        name="Test bus stop",
+                        latitude=lat + 0.001,
+                        longitude=lon + 0.001,
+                        id=1,
+                        distance_m=157,
+                    )
+                ],
             },
         )
 

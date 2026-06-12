@@ -1,5 +1,3 @@
-from typing import Protocol
-
 from sqlalchemy.orm import Session
 
 from domain.estate.enums.estate_listing_enums import ListingStatus
@@ -15,23 +13,17 @@ from domain.estate.models.estate_pricing_model import EstatePricing
 from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
+from infrastructure.open_street_map.vicinity_client import (
+    OpenStreetMapVicinityClient,
+)
 from schemas.estate_schemas.draft_request import EstateDraftRequest
-
-
-class VicinityClient(Protocol):
-    def fetch_vicinity(
-        self,
-        lat: float,
-        lon: float,
-        radius: int = 10000,
-    ) -> object: ...
 
 
 class EstateService:
     def __init__(
         self,
         estate_repository: EstateRepository,
-        vicinity_client: VicinityClient,
+        vicinity_client: OpenStreetMapVicinityClient,
     ):
         self.estate_repository = estate_repository
         self.vicinity_client = vicinity_client
@@ -108,20 +100,17 @@ class EstateService:
             return []
 
         result = self.vicinity_client.fetch_vicinity(latitude, longitude)
-        if not getattr(result, "ok", False):
+        if not result.ok:
             return []
 
-        grouped_places = getattr(result, "data", None) or {}
+        grouped_places = result.data or {}
         vicinities: list[EstateVicinity] = []
 
         for vicinity_type, places in grouped_places.items():
-            if getattr(vicinity_type, "value", None) == "closest":
-                continue
-
             for place in places:
                 vicinities.append(
                     EstateVicinity(
-                        type=place.type,
+                        type=vicinity_type,
                         name=place.name,
                         latitude=place.latitude,
                         longitude=place.longitude,

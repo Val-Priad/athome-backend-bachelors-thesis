@@ -107,10 +107,13 @@ def test_create_estate_draft_persists_partial_payload(
     assert estate.utilities is not None
     assert estate.apartment is not None
     assert estate.house is not None
-    assert len(estate.vicinities) == 1
+    assert len(estate.vicinities) == 2
     assert estate.vicinities[0].type == VicinityType.bus_stop
     assert estate.vicinities[0].name == "Test bus stop"
     assert estate.vicinities[0].distance_m == 157
+    assert estate.vicinities[1].type == VicinityType.closest
+    assert estate.vicinities[1].name == "Test bus stop"
+    assert estate.vicinities[1].distance_m == 157
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)

@@ -62,7 +62,7 @@ from domain.user.services.auth_service import AuthService
 from domain.user.services.me_service import MeService
 from domain.user.user_repository import UserRepository
 from infrastructure.email.Mailer import Mailer
-from infrastructure.open_street_map.vicinity_client import (
+from infrastructure.vicinity.vicinity_client import (
     OpenStreetMapVicinityClient,
 )
 from security import AuthorizationService, PasswordCrypto, TokenCrypto

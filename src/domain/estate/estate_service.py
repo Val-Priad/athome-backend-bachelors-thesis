@@ -13,9 +13,7 @@ from domain.estate.models.estate_pricing_model import EstatePricing
 from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
-from infrastructure.open_street_map.vicinity_client import (
-    OpenStreetMapVicinityClient,
-)
+from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
 from schemas.estate_schemas.draft_request import EstateDraftRequest
 
 
@@ -23,7 +21,7 @@ class EstateService:
     def __init__(
         self,
         estate_repository: EstateRepository,
-        vicinity_client: OpenStreetMapVicinityClient,
+        vicinity_client: VicinityClientProtocol,
     ):
         self.estate_repository = estate_repository
         self.vicinity_client = vicinity_client

@@ -12,7 +12,7 @@ from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
 from exceptions.custom_exceptions.user_exceptions import (
     UserAlreadyVerifiedError,
 )
-from infrastructure.email.Mailer import Mailer
+from infrastructure.email.mailer_protocol import MailerProtocol
 from security import TokenCrypto
 
 
@@ -20,7 +20,7 @@ class EmailVerificationService:
     def __init__(
         self,
         email_verification_repository: EmailVerificationRepository,
-        mailer: Mailer,
+        mailer: MailerProtocol,
         token_hasher: TokenCrypto,
         token_lifecycle_service: TokenLifecycleService,
     ):

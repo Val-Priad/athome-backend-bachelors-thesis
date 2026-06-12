@@ -8,7 +8,7 @@ from domain.password_reset.password_reset_repository import (
 )
 from domain.token.token_lifecycle_service import TokenLifecycleService
 from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
-from infrastructure.email.Mailer import Mailer
+from infrastructure.email.mailer_protocol import MailerProtocol
 from security import PasswordCrypto, TokenCrypto
 
 
@@ -16,7 +16,7 @@ class PasswordResetService:
     def __init__(
         self,
         password_reset_repository: PasswordResetRepository,
-        mailer: Mailer,
+        mailer: MailerProtocol,
         token_hasher: TokenCrypto,
         password_hasher: PasswordCrypto,
         token_lifecycle_service: TokenLifecycleService,

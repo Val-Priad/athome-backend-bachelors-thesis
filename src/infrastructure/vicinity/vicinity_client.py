@@ -7,25 +7,12 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from domain.estate.enums.estate_vicinity_enums import VicinityType
+from infrastructure.vicinity.vicinity_protocol import (
+    Place,
+    VicinityFetchResult,
+)
 
 _logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class Place:
-    type: VicinityType
-    name: str
-    latitude: float
-    longitude: float
-    id: int
-    distance_m: int
-
-
-@dataclass(frozen=True)
-class VicinityFetchResult:
-    ok: bool
-    data: dict[VicinityType, list[Place]] | None = None
-    message: str | None = None
 
 
 @dataclass(frozen=True)

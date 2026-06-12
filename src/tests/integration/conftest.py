@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.user_model import User, UserRole
 from infrastructure import db as db_module
-from infrastructure.open_street_map.vicinity_client import (
+from infrastructure.vicinity.vicinity_client import (
     Place,
     VicinityFetchResult,
 )

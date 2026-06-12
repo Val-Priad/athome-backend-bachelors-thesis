@@ -1,15 +1,55 @@
-from pydantic import ValidationError, model_validator
+from pydantic import Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
-from domain.estate.enums.estate_enums import EstateType
-from domain.estate.enums.estate_listing_enums import ListingStatus
-from schemas.estate_schemas.base_request import EstateBaseRequest
+from domain.estate.enums.estate_enums import EstateType, OfferType
+from schemas.estate_schemas.sections.apartment_section import (
+    EstateApartmentSection,
+)
+from schemas.estate_schemas.sections.details_section import (
+    EstateDetailsSection,
+)
+from schemas.estate_schemas.sections.house_section import EstateHouseSection
+from schemas.estate_schemas.sections.listing_section import (
+    EstateListingSection,
+)
+from schemas.estate_schemas.sections.location_section import (
+    EstateLocationSection,
+)
+from schemas.estate_schemas.sections.media_section import EstateMediaSection
+from schemas.estate_schemas.sections.pricing_section import (
+    EstatePricingSection,
+)
+from schemas.estate_schemas.sections.translation_section import (
+    EstateTranslationSection,
+)
+from schemas.estate_schemas.sections.utilities_section import (
+    EstateUtilitiesSection,
+)
 from schemas.estate_schemas.validators_utils import make_value_error
+from schemas.parent_types import RequestValidation
+from schemas.types import ID
 
 
-class EstatePublicationRequest(EstateBaseRequest):
+class EstateCreateRequest(RequestValidation):
+    seller_id: ID | None = None
+    broker_id: ID
+    estate_type: EstateType
+    offer_type: OfferType
+
+    location: EstateLocationSection | None = None
+    pricing: EstatePricingSection | None = None
+    details: EstateDetailsSection | None = None
+    utilities: EstateUtilitiesSection | None = None
+    listing: EstateListingSection | None = None
+
+    apartment: EstateApartmentSection | None = None
+    house: EstateHouseSection | None = None
+
+    translations: list[EstateTranslationSection] = Field(default_factory=list)
+    media: list[EstateMediaSection] = Field(default_factory=list)
+
     @model_validator(mode="after")
-    def validate_for_publication(self):
+    def validate_for_creation(self):
         errors: list[InitErrorDetails] = []
 
         self._validate_estate_type_sections(errors)
@@ -57,17 +97,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("listing",),
-                    message="Listing is required for publication",
-                )
-            )
-            return
-
-        if self.listing.status != ListingStatus.active:
-            errors.append(
-                make_value_error(
-                    loc=("listing", "status"),
-                    message="Listing status must be active for publication",
-                    input_value=self.listing.status,
+                    message="Listing is required for estate creation",
                 )
             )
 
@@ -88,7 +118,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("location",),
-                    message="location is required for publication",
+                    message="location is required for estate creation",
                 )
             )
             return
@@ -97,13 +127,13 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors,
             value=self.location.region,
             loc=("location", "region"),
-            message="location.region is required for publication",
+            message="location.region is required for estate creation",
         )
         self._require_field(
             errors,
             value=self.location.city,
             loc=("location", "city"),
-            message="location.city is required for publication",
+            message="location.city is required for estate creation",
         )
 
     def _validate_pricing(
@@ -114,7 +144,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("pricing",),
-                    message="pricing is required for publication",
+                    message="pricing is required for estate creation",
                 )
             )
             return
@@ -123,13 +153,13 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors,
             value=self.pricing.price,
             loc=("pricing", "price"),
-            message="pricing.price is required for publication",
+            message="pricing.price is required for estate creation",
         )
         self._require_field(
             errors,
             value=self.pricing.price_unit,
             loc=("pricing", "price_unit"),
-            message="pricing.price_unit is required for publication",
+            message="pricing.price_unit is required for estate creation",
         )
 
     def _validate_details(
@@ -140,7 +170,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("details",),
-                    message="details is required for publication",
+                    message="details is required for estate creation",
                 )
             )
             return
@@ -149,7 +179,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors,
             value=self.details.usable_area,
             loc=("details", "usable_area"),
-            message="details.usable_area is required for publication",
+            message="details.usable_area is required for estate creation",
         )
 
     def _validate_type_specific_required_sections(
@@ -171,7 +201,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("apartment",),
-                    message="apartment is required for publication",
+                    message="apartment is required for estate creation",
                 )
             )
             return
@@ -180,7 +210,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors,
             value=self.apartment.apartment_layout,
             loc=("apartment", "apartment_layout"),
-            message="apartment.apartment_layout is required for publication",
+            message="apartment.apartment_layout is required for estate creation",
         )
 
     def _validate_house(
@@ -191,7 +221,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("house",),
-                    message="house is required for publication",
+                    message="house is required for estate creation",
                 )
             )
             return
@@ -200,13 +230,13 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors,
             value=self.house.room_count,
             loc=("house", "room_count"),
-            message="house.room_count is required for publication",
+            message="house.room_count is required for estate creation",
         )
         self._require_field(
             errors,
             value=self.house.house_type,
             loc=("house", "house_type"),
-            message="house.house_type is required for publication",
+            message="house.house_type is required for estate creation",
         )
 
     def _validate_translations(self, errors: list[InitErrorDetails]) -> None:
@@ -214,7 +244,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("translations",),
-                    message="At least one translation is required for publication",
+                    message="At least one translation is required for estate creation",
                     input_value=self.translations,
                 )
             )
@@ -224,7 +254,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("media",),
-                    message="At least one media is required for publication",
+                    message="At least one media is required for estate creation",
                     input_value=self.media,
                 )
             )
@@ -234,7 +264,7 @@ class EstatePublicationRequest(EstateBaseRequest):
             errors.append(
                 make_value_error(
                     loc=("broker_id",),
-                    message="broker_id is required for publication",
+                    message="broker_id is required for estate creation",
                     input_value=self.broker_id,
                 )
             )
@@ -254,3 +284,7 @@ class EstatePublicationRequest(EstateBaseRequest):
                     message=message,
                 )
             )
+
+
+# TODO: achieve successful creation of estate
+# TODO: dramatically decrease complexity of the code

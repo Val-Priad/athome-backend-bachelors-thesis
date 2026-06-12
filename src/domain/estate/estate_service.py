@@ -1,5 +1,8 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 
+from domain.estate.enums.estate_enums import EstateType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_model import Estate
 from domain.estate.estate_repository import EstateRepository
@@ -13,8 +16,9 @@ from domain.estate.models.estate_pricing_model import EstatePricing
 from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
+from domain.user.user_model import UserRole
 from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
-from schemas.estate_schemas.draft_request import EstateDraftRequest
+from schemas.estate_schemas.create_request import EstateCreateRequest
 
 
 class EstateService:
@@ -28,26 +32,43 @@ class EstateService:
 
     @staticmethod
     def _create_related_model(model_class, data):
-        if data is None:
-            return model_class()
-
         return model_class(**data.model_dump(exclude_none=True))
 
-    def create_draft(
+    @staticmethod
+    def _create_listing(
+        status: ListingStatus,
+        available_from,
+    ) -> EstateListing:
+        return EstateListing(
+            status=status,
+            published_at=(
+                datetime.now(timezone.utc)
+                if status == ListingStatus.active
+                else None
+            ),
+            available_from=available_from,
+        )
+
+    def create_estate(
         self,
         session: Session,
-        data: EstateDraftRequest,
+        data: EstateCreateRequest,
+        requester_role: UserRole = UserRole.admin,
     ) -> None:
+        listing_status = (
+            ListingStatus.active
+            if requester_role == UserRole.admin
+            else ListingStatus.suggested
+        )
+
         estate = Estate(
             seller_id=data.seller_id,
             broker_id=data.broker_id,
             estate_type=data.estate_type,
             offer_type=data.offer_type,
-            listing=EstateListing(
-                status=ListingStatus.draft,
-                available_from=(
-                    data.listing.available_from if data.listing else None
-                ),
+            listing=self._create_listing(
+                status=listing_status,
+                available_from=data.listing.available_from,
             ),
         )
 
@@ -63,15 +84,18 @@ class EstateService:
             EstateDetails, data.details
         )
 
-        estate.utilities = self._create_related_model(
-            EstateUtilities, data.utilities
-        )
+        if data.utilities is not None:
+            estate.utilities = self._create_related_model(
+                EstateUtilities, data.utilities
+            )
 
-        estate.apartment = self._create_related_model(
-            EstateApartment, data.apartment
-        )
+        if data.estate_type == EstateType.apartment:
+            estate.apartment = self._create_related_model(
+                EstateApartment, data.apartment
+            )
 
-        estate.house = self._create_related_model(EstateHouse, data.house)
+        if data.estate_type == EstateType.house:
+            estate.house = self._create_related_model(EstateHouse, data.house)
 
         estate.translations = [
             EstateTranslation(**translation.model_dump())
@@ -87,7 +111,7 @@ class EstateService:
         return self.estate_repository.add(session, estate)
 
     def _create_vicinities(
-        self, data: EstateDraftRequest
+        self, data: EstateCreateRequest
     ) -> list[EstateVicinity]:
         if data.location is None:
             return []

@@ -2,9 +2,9 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
 from api.responses import construct_error, construct_response
-from composition_root import post_draft_estate_use_case
+from composition_root import create_estate_use_case
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
-from schemas.estate_schemas.draft_request import EstateDraftRequest
+from schemas.estate_schemas.create_request import EstateCreateRequest
 
 bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 
@@ -17,10 +17,10 @@ bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 
 @bp.post("")
 @jwt_required()
-def post_draft_estate():
+def create_estate():
     requester_id = get_jwt_user_uuid()
-    data = EstateDraftRequest.from_request(request.json)
-    post_draft_estate_use_case.execute(data, requester_id)
+    data = EstateCreateRequest.from_request(request.json)
+    create_estate_use_case.execute(data, requester_id)
     return construct_response(status=201)
 
 

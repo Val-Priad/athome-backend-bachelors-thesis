@@ -9,7 +9,7 @@ from tests.integration.conftest import (
 def test_login_invalid_type_of_content(client):
     response = client.post(
         f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/login",
-        data="email=user@example.com&password=45245",
+        data="email=user@example.com&password=45245",  # NOSONAR
         content_type="text/plain",
     )
     assert response.status_code == 415

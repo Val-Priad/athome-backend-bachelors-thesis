@@ -16,6 +16,7 @@ AUTH_ENDPOINT_PATH = "/auth"
 ME_ENDPOINT_PATH = "/users/me"
 ADMIN_USERS_PATH = "/admin/users"
 AGENT_PATH = "/agents"
+ESTATE_PATH = "/estate"
 
 
 @fixture

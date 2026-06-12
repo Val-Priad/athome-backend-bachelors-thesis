@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.enums.estate_listing_enums import ListingStatus
+from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.estate.estate_model import Estate
 from domain.user.user_model import UserRole
 from tests.integration.conftest import API_PREFIX, ESTATE_PATH
@@ -45,6 +46,7 @@ def test_create_estate_draft_admin_success(client, logged_in_user, db_session):
     assert estate.utilities is not None
     assert estate.apartment is not None
     assert estate.house is not None
+    assert estate.vicinities == []
     assert estate.translations == []
     assert estate.media == []
 
@@ -105,6 +107,10 @@ def test_create_estate_draft_persists_partial_payload(
     assert estate.utilities is not None
     assert estate.apartment is not None
     assert estate.house is not None
+    assert len(estate.vicinities) == 1
+    assert estate.vicinities[0].type == VicinityType.bus_stop
+    assert estate.vicinities[0].name == "Test bus stop"
+    assert estate.vicinities[0].distance_m == 157
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)

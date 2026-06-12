@@ -62,6 +62,9 @@ from domain.user.services.auth_service import AuthService
 from domain.user.services.me_service import MeService
 from domain.user.user_repository import UserRepository
 from infrastructure.email.Mailer import Mailer
+from infrastructure.open_street_map.vicinity_client import (
+    OpenStreetMapVicinityClient,
+)
 from security import AuthorizationService, PasswordCrypto, TokenCrypto
 
 # ============================================================================
@@ -82,6 +85,7 @@ user_repository = UserRepository()
 email_verification_repository = EmailVerificationRepository()
 password_reset_repository = PasswordResetRepository()
 estate_repository = EstateRepository()
+vicinity_client = OpenStreetMapVicinityClient()
 
 # Services
 token_lifecycle_service = TokenLifecycleService()
@@ -105,7 +109,7 @@ auth_service = AuthService(user_repository, password_hasher)
 me_service = MeService(user_repository, password_hasher)
 admin_users_service = AdminUsersService(user_repository)
 agent_service = AgentService(user_repository)
-estate_service = EstateService(estate_repository)
+estate_service = EstateService(estate_repository, vicinity_client)
 
 
 # ============================================================================
@@ -136,12 +140,20 @@ update_personal_data_use_case = UpdatePersonalDataUseCase(me_service)
 get_admin_user_use_case = GetAdminUserUseCase(
     admin_users_service, authorization_service, user_repository
 )
-change_user_role_use_case = ChangeUserRoleUseCase(admin_users_service, authorization_service)
-delete_admin_user_use_case = DeleteAdminUserUseCase(admin_users_service, authorization_service)
-list_users_use_case = ListUsersUseCase(admin_users_service, authorization_service)
+change_user_role_use_case = ChangeUserRoleUseCase(
+    admin_users_service, authorization_service
+)
+delete_admin_user_use_case = DeleteAdminUserUseCase(
+    admin_users_service, authorization_service
+)
+list_users_use_case = ListUsersUseCase(
+    admin_users_service, authorization_service
+)
 
 # Agent Use Cases
 get_agent_description_use_case = GetAgentDescriptionUseCase(agent_service)
 
 # Estate Use Cases
-post_draft_estate_use_case = PostDraftEstateUseCase(estate_service, authorization_service)
+post_draft_estate_use_case = PostDraftEstateUseCase(
+    estate_service, authorization_service
+)

@@ -1,3 +1,5 @@
+from typing import Protocol
+
 from sqlalchemy.orm import Session
 
 from domain.estate.enums.estate_listing_enums import ListingStatus
@@ -12,12 +14,27 @@ from domain.estate.models.estate_media_model import EstateMedia
 from domain.estate.models.estate_pricing_model import EstatePricing
 from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
+from domain.estate.models.estate_vicinity_model import EstateVicinity
 from schemas.estate_schemas.draft_request import EstateDraftRequest
 
 
+class VicinityClient(Protocol):
+    def fetch_vicinity(
+        self,
+        lat: float,
+        lon: float,
+        radius: int = 10000,
+    ) -> object: ...
+
+
 class EstateService:
-    def __init__(self, estate_repository: EstateRepository):
+    def __init__(
+        self,
+        estate_repository: EstateRepository,
+        vicinity_client: VicinityClient,
+    ):
         self.estate_repository = estate_repository
+        self.vicinity_client = vicinity_client
 
     @staticmethod
     def _create_related_model(model_class, data):
@@ -75,4 +92,41 @@ class EstateService:
             EstateMedia(**media.model_dump()) for media in data.media
         ]
 
+        estate.vicinities = self._create_vicinities(data)
+
         return self.estate_repository.add(session, estate)
+
+    def _create_vicinities(
+        self, data: EstateDraftRequest
+    ) -> list[EstateVicinity]:
+        if data.location is None:
+            return []
+
+        latitude = data.location.latitude
+        longitude = data.location.longitude
+        if latitude is None or longitude is None:
+            return []
+
+        result = self.vicinity_client.fetch_vicinity(latitude, longitude)
+        if not getattr(result, "ok", False):
+            return []
+
+        grouped_places = getattr(result, "data", None) or {}
+        vicinities: list[EstateVicinity] = []
+
+        for vicinity_type, places in grouped_places.items():
+            if getattr(vicinity_type, "value", None) == "closest":
+                continue
+
+            for place in places:
+                vicinities.append(
+                    EstateVicinity(
+                        type=place.type,
+                        name=place.name,
+                        latitude=place.latitude,
+                        longitude=place.longitude,
+                        distance_m=place.distance_m,
+                    )
+                )
+
+        return vicinities

@@ -7,8 +7,13 @@ from pytest import FixtureRequest, fixture
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
 
+from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.user_model import User, UserRole
 from infrastructure import db as db_module
+from infrastructure.open_street_map.vicinity_client import (
+    Place,
+    VicinityFetchResult,
+)
 from security.password_crypto import PasswordCrypto
 
 API_PREFIX = "/api"
@@ -39,6 +44,32 @@ def noop_send_verification_email(monkeypatch):
     monkeypatch.setattr(
         "infrastructure.email.Mailer.Mailer.send_verification_email",
         lambda *args, **kwargs: None,
+    )
+
+
+@fixture(autouse=True)
+def noop_fetch_vicinity(monkeypatch):
+    def fetch_vicinity(lat, lon, radius=10000):
+        return VicinityFetchResult(
+            ok=True,
+            data={
+                VicinityType.bus_stop: [
+                    Place(
+                        type=VicinityType.bus_stop,
+                        name="Test bus stop",
+                        latitude=lat + 0.001,
+                        longitude=lon + 0.001,
+                        id=1,
+                        distance_m=157,
+                    )
+                ],
+                VicinityType.closest: [],
+            },
+        )
+
+    monkeypatch.setattr(
+        "composition_root.estate_service.vicinity_client.fetch_vicinity",
+        fetch_vicinity,
     )
 
 

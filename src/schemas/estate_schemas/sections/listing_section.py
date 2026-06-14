@@ -16,10 +16,7 @@ class EstateListingSection(RequestValidation):
     def _validate_available_from(self):
         errors: list[InitErrorDetails] = []
 
-        if (
-            self.available_from is not None
-            and self.available_from < date.today()
-        ):
+        if self.available_from < date.today():
             errors.append(
                 make_value_error(
                     loc=("available_from",),

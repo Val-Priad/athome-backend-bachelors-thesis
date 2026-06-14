@@ -9,11 +9,11 @@ from schemas.parent_types import RequestValidation
 
 
 class EstateHouseSection(RequestValidation):
-    room_count: RoomCount | None = None
-    house_type: HouseType | None = None
+    room_count: RoomCount
+    house_type: HouseType
 
     acceptance_year: int | None = Field(default=None, ge=0)
-    floors: int | None = Field(default=None, ge=0)
+    floors: int = Field(ge=1)
     underground_floors: int | None = Field(default=None, ge=0)
     parking_lots_count: int | None = Field(default=None, ge=0)
 

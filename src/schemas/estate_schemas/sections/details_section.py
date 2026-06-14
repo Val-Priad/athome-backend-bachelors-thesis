@@ -12,7 +12,7 @@ class EstateDetailsSection(RequestValidation):
     condition: PropertyCondition | None = None
     energy_class: EnergyClass | None = None
 
-    usable_area: float | None = Field(default=None, ge=0)
+    usable_area: float = Field(gt=0)
     total_property_area: float | None = Field(default=None, ge=0)
 
     furnishing: Furnishing | None = None

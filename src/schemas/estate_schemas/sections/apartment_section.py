@@ -5,7 +5,7 @@ from schemas.parent_types import RequestValidation
 
 
 class EstateApartmentSection(RequestValidation):
-    apartment_layout: ApartmentLayout | None = None
+    apartment_layout: ApartmentLayout
 
     floor_number: int | None = Field(default=None, ge=0)
     has_elevator: bool | None = None

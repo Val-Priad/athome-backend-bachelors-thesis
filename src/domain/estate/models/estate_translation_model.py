@@ -21,8 +21,8 @@ class EstateTranslation(Base):
     )
     lang_code: Mapped[str] = mapped_column(String(10), primary_key=True)
 
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
+    title: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(Text)
 
     estate: Mapped["Estate"] = relationship(
         "Estate",

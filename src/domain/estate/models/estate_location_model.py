@@ -20,14 +20,12 @@ class EstateLocation(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    region: Mapped[Region | None] = mapped_column(
-        Enum(Region, name="region_enum"), nullable=True
-    )
-    city: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    street: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    house_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
-    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    region: Mapped[Region] = mapped_column(Enum(Region, name="region_enum"))
+    city: Mapped[str] = mapped_column(String(255))
+    street: Mapped[str] = mapped_column(String(255))
+    house_number: Mapped[str | None] = mapped_column(String(50))
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
 
     estate: Mapped["Estate"] = relationship(
         "Estate", back_populates="location"

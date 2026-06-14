@@ -20,24 +20,17 @@ class EstateMedia(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     estate_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("estates.id", ondelete="CASCADE"),
-        nullable=False,
+        UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE")
     )
 
-    url: Mapped[str] = mapped_column(Text, nullable=False)
+    url: Mapped[str] = mapped_column(Text)
     media_type: Mapped[MediaType] = mapped_column(
-        Enum(MediaType, name="media_type_enum"),
-        nullable=False,
+        Enum(MediaType, name="media_type_enum")
     )
-    alt: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    is_main: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    alt: Mapped[str | None] = mapped_column(String(255))
+    is_main: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
+        DateTime(timezone=True), server_default=func.now()
     )
     estate: Mapped["Estate"] = relationship(
         "Estate",

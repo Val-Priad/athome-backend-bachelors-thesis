@@ -22,15 +22,14 @@ class EstateListing(Base):
         primary_key=True,
     )
     status: Mapped[ListingStatus] = mapped_column(
-        Enum(ListingStatus, name="listing_status_enum"),
-        nullable=False,
+        Enum(ListingStatus, name="listing_status_enum")
     )
     published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
+        DateTime(timezone=True)
     )
     expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
+        DateTime(timezone=True)
     )
-    available_from: Mapped[date | None] = mapped_column(Date, nullable=True)
+    available_from: Mapped[date] = mapped_column(Date)
 
     estate: Mapped["Estate"] = relationship("Estate", back_populates="listing")

@@ -19,21 +19,17 @@ class PasswordReset(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")
     )
-    token_hash: Mapped[bytes] = mapped_column(
-        LargeBinary, nullable=False, unique=True
-    )
+    token_hash: Mapped[bytes] = mapped_column(LargeBinary, unique=True)
     expires_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
+        DateTime(timezone=True)
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
-    used_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), nullable=True
+    used_at: Mapped[datetime.datetime | None] = mapped_column(
+        DateTime(timezone=True)
     )
 
     user: Mapped["User"] = relationship(back_populates="password_reset_tokens")

@@ -20,15 +20,14 @@ class EstateApartment(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    apartment_layout: Mapped[ApartmentLayout | None] = mapped_column(
+    apartment_layout: Mapped[ApartmentLayout] = mapped_column(
         Enum(ApartmentLayout, name="apartment_layout_enum"),
-        nullable=True,
     )
-    floor_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    has_elevator: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
-    balcony_area: Mapped[float | None] = mapped_column(Float, nullable=True)
-    loggia_area: Mapped[float | None] = mapped_column(Float, nullable=True)
-    terrace_area: Mapped[float | None] = mapped_column(Float, nullable=True)
+    floor_number: Mapped[int | None] = mapped_column(Integer)
+    has_elevator: Mapped[bool | None] = mapped_column(Boolean)
+    balcony_area: Mapped[float | None] = mapped_column(Float)
+    loggia_area: Mapped[float | None] = mapped_column(Float)
+    terrace_area: Mapped[float | None] = mapped_column(Float)
 
     estate: Mapped["Estate"] = relationship(
         "Estate",

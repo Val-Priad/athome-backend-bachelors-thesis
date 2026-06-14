@@ -21,23 +21,13 @@ class EstatePricing(Base):
         ForeignKey("estates.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    price: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2), nullable=True
+    price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    price_unit: Mapped[PriceUnit] = mapped_column(
+        Enum(PriceUnit, name="price_unit_enum")
     )
-    price_unit: Mapped[PriceUnit | None] = mapped_column(
-        Enum(PriceUnit, name="price_unit_enum"), nullable=True
-    )
-    cost_of_living: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2), nullable=True
-    )
-    commission: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2), nullable=True
-    )
-    commission_paid_by_owner: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True
-    )
-    refundable_deposit: Mapped[Decimal | None] = mapped_column(
-        Numeric(12, 2), nullable=True
-    )
+    cost_of_living: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    commission: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    commission_paid_by_owner: Mapped[bool | None] = mapped_column(Boolean)
+    refundable_deposit: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
 
     estate: Mapped["Estate"] = relationship("Estate", back_populates="pricing")

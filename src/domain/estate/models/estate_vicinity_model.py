@@ -18,20 +18,17 @@ class EstateVicinity(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     estate_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("estates.id", ondelete="CASCADE"),
-        nullable=False,
+        UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE")
     )
 
     type: Mapped[VicinityType] = mapped_column(
-        Enum(VicinityType, name="vicinity_type_enum"),
-        nullable=False,
+        Enum(VicinityType, name="vicinity_type_enum")
     )
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(255))
 
-    latitude: Mapped[float] = mapped_column(Float, nullable=False)
-    longitude: Mapped[float] = mapped_column(Float, nullable=False)
-    distance_m: Mapped[int] = mapped_column(Integer, nullable=False)
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
+    distance_m: Mapped[int] = mapped_column(Integer)
 
     estate: Mapped["Estate"] = relationship(
         "Estate",

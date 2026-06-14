@@ -35,27 +35,24 @@ class Estate(Base):
     seller_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True,
     )
     broker_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True,
     )
     estate_type: Mapped[EstateType] = mapped_column(
-        Enum(EstateType, name="estate_type_enum"), nullable=False
+        Enum(EstateType, name="estate_type_enum")
     )
     offer_type: Mapped[OfferType] = mapped_column(
-        Enum(OfferType, name="offer_type_enum"), nullable=False
+        Enum(OfferType, name="offer_type_enum")
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
-        nullable=False,
     )
 
     seller: Mapped["User | None"] = relationship(

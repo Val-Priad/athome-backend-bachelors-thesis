@@ -26,20 +26,15 @@ class EstateDetails(Base):
     )
     condition: Mapped[PropertyCondition | None] = mapped_column(
         Enum(PropertyCondition, name="property_condition_enum"),
-        nullable=True,
     )
     energy_class: Mapped[EnergyClass | None] = mapped_column(
         Enum(EnergyClass, name="energy_class_enum"),
-        nullable=True,
     )
-    usable_area: Mapped[float | None] = mapped_column(Float, nullable=True)
-    total_property_area: Mapped[float | None] = mapped_column(
-        Float, nullable=True
-    )
+    usable_area: Mapped[float] = mapped_column(Float)
+    total_property_area: Mapped[float | None] = mapped_column(Float)
     furnishing: Mapped[Furnishing | None] = mapped_column(
         Enum(Furnishing, name="furnishing_enum"),
-        nullable=True,
     )
-    easy_access: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    easy_access: Mapped[bool | None] = mapped_column(Boolean)
 
     estate: Mapped["Estate"] = relationship("Estate", back_populates="details")

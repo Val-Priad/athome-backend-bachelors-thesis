@@ -35,21 +35,6 @@ class EstateService:
     def _create_related_model(model_class, data):
         return model_class(**data.model_dump(exclude_none=True))
 
-    @staticmethod
-    def _create_listing(
-        status: ListingStatus,
-        available_from,
-    ) -> EstateListing:
-        return EstateListing(
-            status=status,
-            published_at=(
-                datetime.now(timezone.utc)
-                if status == ListingStatus.active
-                else None
-            ),
-            available_from=available_from,
-        )
-
     def create_estate(
         self,
         session: Session,
@@ -61,9 +46,15 @@ class EstateService:
             agent_id=data.agent_id,
             estate_type=data.estate_type,
             offer_type=data.offer_type,
-            listing=self._create_listing(
+            listing=EstateListing(
                 status=data.listing_status,
+                published_at=(
+                    datetime.now(timezone.utc)
+                    if data.listing_status == ListingStatus.active
+                    else None
+                ),
                 available_from=data.listing.available_from,
+                expires_at=data.expires_at,
             ),
             location=self._create_related_model(
                 EstateLocation,

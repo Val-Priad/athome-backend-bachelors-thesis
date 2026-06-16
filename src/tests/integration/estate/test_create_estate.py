@@ -19,11 +19,13 @@ def base_payload(
     agent_id=None,
 ):
     future_date = date.today() + timedelta(days=1)
+    expires_at = date.today() + timedelta(days=67)
 
     payload = {
         "estate_type": EstateType.apartment.value,
         "offer_type": OfferType.sale.value,
         "listing_status": listing_status.value,
+        "expires_at": expires_at.isoformat(),
         "listing": {
             "available_from": future_date.isoformat(),
         },
@@ -120,6 +122,10 @@ def test_admin_create_estate_success(
 
     assert estate.listing is not None
     assert estate.listing.status == listing_status
+    assert estate.listing.expires_at is not None
+    assert estate.listing.expires_at.date() == date.today() + timedelta(
+        days=67
+    )
     assert estate.listing.available_from == date.fromisoformat(
         payload["listing"]["available_from"]
     )
@@ -248,6 +254,68 @@ def test_admin_create_estate_rejects_past_available_from(
     assert any(
         error["field"].endswith("available_from")
         and "cannot be in the past" in error["message"]
+        for error in body["error"].get("errors", [])
+    )
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
+@pytest.mark.parametrize(
+    "expires_at",
+    [
+        date.today().isoformat(),
+        (date.today() + timedelta(days=368)).isoformat(),
+    ],
+)
+def test_admin_create_estate_rejects_invalid_expires_at(
+    client, logged_in_user, any_user, expires_at
+):
+    payload = base_payload(
+        listing_status=ListingStatus.draft,
+        agent_id=any_user.id,
+    )
+
+    payload["expires_at"] = expires_at
+
+    response = client.post(
+        f"{API_PREFIX}{ESTATE_PATH}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+
+    body = response.get_json()
+    assert body["error"]["code"] == "request_validation_error"
+    assert any(
+        error["field"].endswith("expires_at")
+        for error in body["error"].get("errors", [])
+    )
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
+def test_admin_create_estate_rejects_active_estate_without_expires_field(
+    client, logged_in_user, any_user
+):
+    payload = base_payload(
+        listing_status=ListingStatus.active,
+        agent_id=any_user.id,
+    )
+    payload["expires_at"] = None
+
+    response = client.post(
+        f"{API_PREFIX}{ESTATE_PATH}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+
+    body = response.get_json()
+    assert body["error"]["code"] == "request_validation_error"
+    assert any(
+        error["field"].endswith("expires_at")
         for error in body["error"].get("errors", [])
     )
 

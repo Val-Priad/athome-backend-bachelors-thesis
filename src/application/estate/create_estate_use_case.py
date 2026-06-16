@@ -27,15 +27,19 @@ class CreateEstateUseCase:
     ) -> EstateCreateResponse:
 
         with db_session() as session:
-            self.authorization_service.ensure_has_rights(
-                session, requester_id, UserRole.admin
-            )
-            self.participants_service.check_participants(session, data)
+            self._ensure_rights_and_data_validity(session, requester_id, data)
 
         vicinities = self.estate_service.get_vicinities_or_empty(data.location)
 
         with db_session() as session:
+            self._ensure_rights_and_data_validity(session, requester_id, data)
             estate = self.estate_service.create_estate(
                 session, data, vicinities
             )
             return EstateCreateResponse(id=estate.id)
+
+    def _ensure_rights_and_data_validity(self, session, requester_id, data):
+        self.authorization_service.ensure_has_rights(
+            session, requester_id, UserRole.admin
+        )
+        self.participants_service.check_participants(session, data)

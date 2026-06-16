@@ -58,7 +58,7 @@ class EstateService:
     ) -> Estate:
         estate = Estate(
             seller_id=data.seller_id,
-            broker_id=data.broker_id,
+            agent_id=data.agent_id,
             estate_type=data.estate_type,
             offer_type=data.offer_type,
             listing=self._create_listing(

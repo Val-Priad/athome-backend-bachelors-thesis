@@ -13,21 +13,21 @@ class EstateCreateRequest(EstateSuggestRequest):
     model_config = ConfigDict(extra="forbid")
 
     seller_id: ID | None = None
-    broker_id: ID | None = None
+    agent_id: ID | None = None
     listing_status: Literal[ListingStatus.draft, ListingStatus.active]
 
     @model_validator(mode="after")
-    def validate_broker_and_status_compatibility(self):
+    def validate_agent_and_status_compatibility(self):
         errors: list[InitErrorDetails] = []
         if (
-            self.broker_id is None
+            self.agent_id is None
             and self.listing_status == ListingStatus.active
         ):
             errors.append(
                 make_value_error(
-                    loc=("broker_id",),
-                    message="broker_id is required when listing_status is active",
-                    input_value=self.broker_id,
+                    loc=("agent_id",),
+                    message="agent_id is required when listing_status is active",
+                    input_value=self.agent_id,
                 )
             )
 

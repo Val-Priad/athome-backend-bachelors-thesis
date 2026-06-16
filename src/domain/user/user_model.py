@@ -58,10 +58,10 @@ class User(Base):
         foreign_keys=[Estate.seller_id],
         back_populates="seller",
     )
-    brokered_estates = relationship(
+    agent_estates = relationship(
         "Estate",
-        foreign_keys=[Estate.broker_id],
-        back_populates="broker",
+        foreign_keys=[Estate.agent_id],
+        back_populates="agent",
     )
     saved_estates = relationship(
         "SavedEstate",

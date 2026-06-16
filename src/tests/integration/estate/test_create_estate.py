@@ -16,7 +16,7 @@ from tests.integration.conftest import API_PREFIX, ESTATE_PATH
 def _base_payload(
     *,
     listing_status: ListingStatus = ListingStatus.draft,
-    broker_id=None,
+    agent_id=None,
 ):
     future_date = date.today() + timedelta(days=1)
 
@@ -61,8 +61,8 @@ def _base_payload(
         ],
     }
 
-    if broker_id is not None:
-        payload["broker_id"] = str(broker_id)
+    if agent_id is not None:
+        payload["agent_id"] = str(agent_id)
 
     return payload
 
@@ -100,7 +100,7 @@ def test_admin_create_estate_success(
 ):
     payload = _base_payload(
         listing_status=listing_status,
-        broker_id=any_user.id,
+        agent_id=any_user.id,
     )
 
     response = client.post(
@@ -115,7 +115,7 @@ def test_admin_create_estate_success(
 
     assert estate.estate_type == EstateType.apartment
     assert estate.offer_type == OfferType.sale
-    assert estate.broker_id == any_user.id
+    assert estate.agent_id == any_user.id
     assert estate.seller_id is None
 
     assert estate.listing is not None
@@ -166,14 +166,14 @@ def test_admin_create_estate_success(
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_admin_create_draft_estate_without_broker_success(
+def test_admin_create_draft_estate_without_agent_success(
     client,
     logged_in_user,
     db_session,
 ):
     payload = _base_payload(
         listing_status=ListingStatus.draft,
-        broker_id=None,
+        agent_id=None,
     )
 
     response = client.post(
@@ -186,20 +186,20 @@ def test_admin_create_draft_estate_without_broker_success(
 
     estate = _get_created_estate(db_session, response)
 
-    assert estate.broker_id is None
+    assert estate.agent_id is None
     assert estate.listing is not None
     assert estate.listing.status == ListingStatus.draft
     assert estate.listing.published_at is None
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_admin_create_active_estate_requires_broker(
+def test_admin_create_active_estate_requires_agent(
     client,
     logged_in_user,
 ):
     payload = _base_payload(
         listing_status=ListingStatus.active,
-        broker_id=None,
+        agent_id=None,
     )
 
     response = client.post(
@@ -213,8 +213,8 @@ def test_admin_create_active_estate_requires_broker(
     body = response.get_json()
     assert body["error"]["code"] == "request_validation_error"
     assert any(
-        error["field"] == "broker_id"
-        and "broker_id is required when listing_status is active"
+        error["field"] == "agent_id"
+        and "agent_id is required when listing_status is active"
         in error["message"]
         for error in body["error"].get("errors", [])
     )
@@ -229,7 +229,7 @@ def test_admin_create_estate_rejects_past_available_from(
 ):
     payload = _base_payload(
         listing_status=ListingStatus.draft,
-        broker_id=any_user.id,
+        agent_id=any_user.id,
     )
     payload["listing"] = {
         "available_from": (date.today() - timedelta(days=1)).isoformat(),
@@ -268,7 +268,7 @@ def test_create_estate_forbidden_for_non_admin(
 ):
     payload = _base_payload(
         listing_status=ListingStatus.draft,
-        broker_id=any_user.id,
+        agent_id=any_user.id,
     )
 
     response = client.post(
@@ -287,7 +287,7 @@ def test_create_estate_forbidden_for_non_admin(
 def test_create_estate_unauthorized_without_token(client, any_user):
     payload = _base_payload(
         listing_status=ListingStatus.draft,
-        broker_id=any_user.id,
+        agent_id=any_user.id,
     )
 
     response = client.post(

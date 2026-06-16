@@ -36,7 +36,7 @@ class Estate(Base):
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
     )
-    broker_id: Mapped[uuid.UUID | None] = mapped_column(
+    agent_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
     )
@@ -60,10 +60,10 @@ class Estate(Base):
         foreign_keys=[seller_id],
         back_populates="owned_estates",
     )
-    broker: Mapped["User | None"] = relationship(
+    agent: Mapped["User | None"] = relationship(
         "User",
-        foreign_keys=[broker_id],
-        back_populates="brokered_estates",
+        foreign_keys=[agent_id],
+        back_populates="agent_estates",
     )
     location: Mapped["EstateLocation | None"] = relationship(
         "EstateLocation",

@@ -127,6 +127,3 @@ class EstateSuggestRequest(RequestValidation):
                     input_value=self.media,
                 )
             )
-
-
-# TODO: achieve successful creation of estate

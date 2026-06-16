@@ -16,7 +16,7 @@ from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
 from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
-from schemas.estate_schemas.estate_create_request import EstateCreateRequest
+from schemas.estate_schemas.estate_create_type import EstateCreateType
 from schemas.estate_schemas.sections.location_section import (
     EstateLocationSection,
 )
@@ -53,7 +53,7 @@ class EstateService:
     def create_estate(
         self,
         session: Session,
-        data: EstateCreateRequest,
+        data: EstateCreateType,
         vicinities: list[EstateVicinity],
     ) -> Estate:
         estate = Estate(

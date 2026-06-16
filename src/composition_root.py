@@ -29,6 +29,7 @@ from application.auth.verify_new_password_use_case import (
 
 # Application Layer - Estate Use Cases
 from application.estate.create_estate_use_case import CreateEstateUseCase
+from application.estate.suggest_estate_use_case import SuggestEstateUseCase
 from application.users.delete_me_use_case import DeleteMeUseCase
 
 # Application Layer - Users Use Cases
@@ -161,3 +162,4 @@ get_agent_description_use_case = GetAgentDescriptionUseCase(agent_service)
 create_estate_use_case = CreateEstateUseCase(
     estate_service, authorization_service, estate_participants_service
 )
+suggest_estate_use_case = SuggestEstateUseCase(estate_service)

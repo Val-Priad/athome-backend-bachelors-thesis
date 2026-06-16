@@ -4,7 +4,7 @@ from schemas.parent_types import ResponseValidation
 from schemas.types import ID
 
 
-class EstateCreateResponse(ResponseValidation):
+class EstateIDResponse(ResponseValidation):
     id: ID
 
     model_config = ConfigDict(from_attributes=True)

@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import ConfigDict, ValidationError, model_validator
+from pydantic import ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
 from schemas.estate_schemas.validators_utils import make_value_error
@@ -8,8 +8,6 @@ from schemas.parent_types import RequestValidation
 
 
 class EstateListingSection(RequestValidation):
-    model_config = ConfigDict(extra="forbid")
-
     available_from: date
 
     @model_validator(mode="after")

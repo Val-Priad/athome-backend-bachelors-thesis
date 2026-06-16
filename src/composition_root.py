@@ -48,6 +48,7 @@ from domain.email_verification.email_verification_service import (
 )
 
 # Domain Layer - Repositories
+from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_repository import EstateRepository
 from domain.estate.estate_service import EstateService
 from domain.password_reset.password_reset_repository import (
@@ -60,6 +61,9 @@ from domain.user.services.auth_service import AuthService
 from domain.user.services.me_service import MeService
 from domain.user.user_repository import UserRepository
 from infrastructure.email.Mailer import Mailer
+from infrastructure.vicinity.retry_vicinity_client import (
+    RetryingVicinityClient,
+)
 from infrastructure.vicinity.vicinity_client import (
     OpenStreetMapVicinityClient,
 )
@@ -83,7 +87,8 @@ user_repository = UserRepository()
 email_verification_repository = EmailVerificationRepository()
 password_reset_repository = PasswordResetRepository()
 estate_repository = EstateRepository()
-vicinity_client = OpenStreetMapVicinityClient()
+osm_vicinity_client = OpenStreetMapVicinityClient()
+vicinity_client = RetryingVicinityClient(osm_vicinity_client)
 
 # Services
 token_lifecycle_service = TokenLifecycleService()
@@ -108,6 +113,7 @@ me_service = MeService(user_repository, password_hasher)
 admin_users_service = AdminUsersService(user_repository)
 agent_service = AgentService(user_repository)
 estate_service = EstateService(estate_repository, vicinity_client)
+estate_participants_service = EstateParticipantsService(user_repository)
 
 
 # ============================================================================
@@ -153,5 +159,5 @@ get_agent_description_use_case = GetAgentDescriptionUseCase(agent_service)
 
 # Estate Use Cases
 create_estate_use_case = CreateEstateUseCase(
-    estate_service, authorization_service
+    estate_service, authorization_service, estate_participants_service
 )

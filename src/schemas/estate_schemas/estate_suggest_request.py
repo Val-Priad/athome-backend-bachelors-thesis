@@ -1,4 +1,4 @@
-from pydantic import Field, ValidationError, model_validator
+from pydantic import ConfigDict, Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
 from domain.estate.enums.estate_enums import EstateType, OfferType
@@ -27,12 +27,11 @@ from schemas.estate_schemas.sections.utilities_section import (
 )
 from schemas.estate_schemas.validators_utils import make_value_error
 from schemas.parent_types import RequestValidation
-from schemas.types import ID
 
 
-class EstateCreateRequest(RequestValidation):
-    seller_id: ID | None = None
-    broker_id: ID
+class EstateSuggestRequest(RequestValidation):
+    model_config = ConfigDict(extra="forbid")
+
     estate_type: EstateType
     offer_type: OfferType
 

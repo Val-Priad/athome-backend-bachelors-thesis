@@ -4,5 +4,7 @@ from domain.estate.estate_model import Estate
 
 
 class EstateRepository:
-    def add(self, session: Session, estate: Estate) -> None:
+    def add(self, session: Session, estate: Estate) -> Estate:
         session.add(estate)
+        session.flush()
+        return estate

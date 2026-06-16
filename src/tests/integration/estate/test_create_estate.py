@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 from decimal import Decimal
+from uuid import UUID
 
 import pytest
 from sqlalchemy import select
@@ -12,12 +13,20 @@ from domain.user.user_model import UserRole
 from tests.integration.conftest import API_PREFIX, ESTATE_PATH
 
 
-def _base_payload(broker_id):
-    return {
+def _base_payload(
+    *,
+    listing_status: ListingStatus = ListingStatus.draft,
+    broker_id=None,
+):
+    future_date = date.today() + timedelta(days=1)
+
+    payload = {
         "estate_type": EstateType.apartment.value,
         "offer_type": OfferType.sale.value,
-        "broker_id": str(broker_id),
-        "listing": {},
+        "listing_status": listing_status.value,
+        "listing": {
+            "available_from": future_date.isoformat(),
+        },
         "location": {
             "region": "kyiv_city",
             "city": "Kyiv",
@@ -52,21 +61,47 @@ def _base_payload(broker_id):
         ],
     }
 
+    if broker_id is not None:
+        payload["broker_id"] = str(broker_id)
+
+    return payload
+
+
+def _get_created_estate(db_session, response) -> Estate:
+    body = response.get_json()
+
+    assert body["message"] == "OK"
+    assert "data" in body
+    assert "id" in body["data"]
+
+    estate_id = UUID(body["data"]["id"])
+
+    estate = db_session.scalar(select(Estate).where(Estate.id == estate_id))
+
+    assert estate is not None
+    return estate
+
 
 @pytest.mark.parametrize(
-    "logged_in_user, expected_status",
+    "listing_status",
     [
-        (UserRole.admin, ListingStatus.active),
-        (UserRole.user, ListingStatus.suggested),
-        (UserRole.agent, ListingStatus.suggested),
+        ListingStatus.draft,
+        ListingStatus.active,
     ],
-    indirect=["logged_in_user"],
 )
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 @pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
-def test_create_estate_success(
-    client, logged_in_user, any_user, db_session, expected_status
+def test_admin_create_estate_success(
+    client,
+    logged_in_user,
+    any_user,
+    db_session,
+    listing_status,
 ):
-    payload = _base_payload(any_user.id)
+    payload = _base_payload(
+        listing_status=listing_status,
+        broker_id=any_user.id,
+    )
 
     response = client.post(
         f"{API_PREFIX}{ESTATE_PATH}",
@@ -75,21 +110,21 @@ def test_create_estate_success(
     )
 
     assert response.status_code == 201
-    assert response.get_json() == {"message": "OK"}
 
-    estate = db_session.scalar(
-        select(Estate).where(
-            Estate.estate_type == EstateType.apartment,
-            Estate.offer_type == OfferType.sale,
-            Estate.broker_id == any_user.id,
-        )
-    )
-    assert estate is not None
+    estate = _get_created_estate(db_session, response)
+
+    assert estate.estate_type == EstateType.apartment
+    assert estate.offer_type == OfferType.sale
+    assert estate.broker_id == any_user.id
+    assert estate.seller_id is None
 
     assert estate.listing is not None
-    assert estate.listing.status == expected_status
-    assert estate.listing.available_from is None
-    if expected_status == ListingStatus.active:
+    assert estate.listing.status == listing_status
+    assert estate.listing.available_from == date.fromisoformat(
+        payload["listing"]["available_from"]
+    )
+
+    if listing_status == ListingStatus.active:
         assert estate.listing.published_at is not None
     else:
         assert estate.listing.published_at is None
@@ -105,9 +140,22 @@ def test_create_estate_success(
     assert estate.pricing.price == Decimal("123456.78")
 
     assert estate.details is not None
-    assert estate.utilities is None
+    assert estate.details.usable_area == pytest.approx(48.5)
+
+    assert estate.utilities is not None
+
     assert estate.apartment is not None
+    assert estate.apartment.apartment_layout.value == "two_plus_one"
     assert estate.house is None
+
+    assert len(estate.translations) == 1
+    assert estate.translations[0].lang_code == "en"
+    assert estate.translations[0].title == "Test apartment"
+
+    assert len(estate.media) == 1
+    assert estate.media[0].url == "https://example.com/image.jpg"
+    assert estate.media[0].is_main is True
+
     assert len(estate.vicinities) == 2
     assert estate.vicinities[0].type == VicinityType.bus_stop
     assert estate.vicinities[0].name == "Test bus stop"
@@ -118,13 +166,15 @@ def test_create_estate_success(
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
-def test_create_estate_persists_available_from(
-    client, logged_in_user, any_user, db_session
+def test_admin_create_draft_estate_without_broker_success(
+    client,
+    logged_in_user,
+    db_session,
 ):
-    future_date = date.today() + timedelta(days=1)
-    payload = _base_payload(any_user.id)
-    payload["listing"] = {"available_from": future_date.isoformat()}
+    payload = _base_payload(
+        listing_status=ListingStatus.draft,
+        broker_id=None,
+    )
 
     response = client.post(
         f"{API_PREFIX}{ESTATE_PATH}",
@@ -134,24 +184,53 @@ def test_create_estate_persists_available_from(
 
     assert response.status_code == 201
 
-    estate = db_session.scalar(
-        select(Estate).where(
-            Estate.estate_type == EstateType.apartment,
-            Estate.offer_type == OfferType.sale,
-            Estate.broker_id == any_user.id,
-        )
-    )
-    assert estate is not None
+    estate = _get_created_estate(db_session, response)
+
+    assert estate.broker_id is None
     assert estate.listing is not None
-    assert estate.listing.available_from == future_date
+    assert estate.listing.status == ListingStatus.draft
+    assert estate.listing.published_at is None
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_admin_create_active_estate_requires_broker(
+    client,
+    logged_in_user,
+):
+    payload = _base_payload(
+        listing_status=ListingStatus.active,
+        broker_id=None,
+    )
+
+    response = client.post(
+        f"{API_PREFIX}{ESTATE_PATH}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+
+    body = response.get_json()
+    assert body["error"]["code"] == "request_validation_error"
+    assert any(
+        error["field"] == "broker_id"
+        and "broker_id is required when listing_status is active"
+        in error["message"]
+        for error in body["error"].get("errors", [])
+    )
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 @pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
-def test_create_estate_rejects_past_available_from(
-    client, logged_in_user, any_user
+def test_admin_create_estate_rejects_past_available_from(
+    client,
+    logged_in_user,
+    any_user,
 ):
-    payload = _base_payload(any_user.id)
+    payload = _base_payload(
+        listing_status=ListingStatus.draft,
+        broker_id=any_user.id,
+    )
     payload["listing"] = {
         "available_from": (date.today() - timedelta(days=1)).isoformat(),
     }
@@ -163,6 +242,7 @@ def test_create_estate_rejects_past_available_from(
     )
 
     assert response.status_code == 400
+
     body = response.get_json()
     assert body["error"]["code"] == "request_validation_error"
     assert any(
@@ -172,11 +252,47 @@ def test_create_estate_rejects_past_available_from(
     )
 
 
+@pytest.mark.parametrize(
+    "logged_in_user",
+    [
+        UserRole.user,
+        UserRole.agent,
+    ],
+    indirect=True,
+)
 @pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
-def test_create_estate_unauthorized_without_token(client, any_user):
+def test_create_estate_forbidden_for_non_admin(
+    client,
+    logged_in_user,
+    any_user,
+):
+    payload = _base_payload(
+        listing_status=ListingStatus.draft,
+        broker_id=any_user.id,
+    )
+
     response = client.post(
         f"{API_PREFIX}{ESTATE_PATH}",
-        json=_base_payload(any_user.id),
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 403
+
+    body = response.get_json()
+    assert body["error"]["code"] == "forbidden"
+
+
+@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
+def test_create_estate_unauthorized_without_token(client, any_user):
+    payload = _base_payload(
+        listing_status=ListingStatus.draft,
+        broker_id=any_user.id,
+    )
+
+    response = client.post(
+        f"{API_PREFIX}{ESTATE_PATH}",
+        json=payload,
     )
 
     assert response.status_code == 401

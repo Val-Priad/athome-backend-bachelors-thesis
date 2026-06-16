@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from domain.estate.enums.estate_enums import EstateType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_model import Estate
 from domain.estate.estate_repository import EstateRepository
@@ -16,9 +15,11 @@ from domain.estate.models.estate_pricing_model import EstatePricing
 from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
-from domain.user.user_model import UserRole
 from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
-from schemas.estate_schemas.create_request import EstateCreateRequest
+from schemas.estate_schemas.estate_create_request import EstateCreateRequest
+from schemas.estate_schemas.sections.location_section import (
+    EstateLocationSection,
+)
 
 
 class EstateService:
@@ -53,75 +54,66 @@ class EstateService:
         self,
         session: Session,
         data: EstateCreateRequest,
-        requester_role: UserRole = UserRole.admin,
-    ) -> None:
-        listing_status = (
-            ListingStatus.active
-            if requester_role == UserRole.admin
-            else ListingStatus.suggested
-        )
-
+        vicinities: list[EstateVicinity],
+    ) -> Estate:
         estate = Estate(
             seller_id=data.seller_id,
             broker_id=data.broker_id,
             estate_type=data.estate_type,
             offer_type=data.offer_type,
             listing=self._create_listing(
-                status=listing_status,
+                status=data.listing_status,
                 available_from=data.listing.available_from,
             ),
+            location=self._create_related_model(
+                EstateLocation,
+                data.location,
+            ),
+            pricing=self._create_related_model(
+                EstatePricing,
+                data.pricing,
+            ),
+            details=self._create_related_model(
+                EstateDetails,
+                data.details,
+            ),
+            utilities=(
+                self._create_related_model(EstateUtilities, data.utilities)
+                if data.utilities is not None
+                else EstateUtilities()
+            ),
+            translations=[
+                EstateTranslation(**translation.model_dump())
+                for translation in data.translations
+            ],
+            media=[EstateMedia(**media.model_dump()) for media in data.media],
         )
 
-        estate.location = self._create_related_model(
-            EstateLocation, data.location
-        )
-
-        estate.pricing = self._create_related_model(
-            EstatePricing, data.pricing
-        )
-
-        estate.details = self._create_related_model(
-            EstateDetails, data.details
-        )
-
-        if data.utilities is not None:
-            estate.utilities = self._create_related_model(
-                EstateUtilities, data.utilities
-            )
-
-        if data.estate_type == EstateType.apartment:
+        if data.apartment is not None:
             estate.apartment = self._create_related_model(
-                EstateApartment, data.apartment
+                EstateApartment,
+                data.apartment,
             )
 
-        if data.estate_type == EstateType.house:
-            estate.house = self._create_related_model(EstateHouse, data.house)
+        if data.house is not None:
+            estate.house = self._create_related_model(
+                EstateHouse,
+                data.house,
+            )
 
-        estate.translations = [
-            EstateTranslation(**translation.model_dump())
-            for translation in data.translations
-        ]
-
-        estate.media = [
-            EstateMedia(**media.model_dump()) for media in data.media
-        ]
-
-        estate.vicinities = self._create_vicinities(data)
+        estate.vicinities = vicinities
 
         return self.estate_repository.add(session, estate)
 
-    def _create_vicinities(
-        self, data: EstateCreateRequest
+    def get_vicinities_or_empty(
+        self,
+        location: EstateLocationSection,
     ) -> list[EstateVicinity]:
-        if data.location is None:
-            return []
+        result = self.vicinity_client.fetch_vicinity(
+            location.latitude,
+            location.longitude,
+        )
 
-        latitude = data.location.latitude
-        longitude = data.location.longitude
-        if latitude is None or longitude is None:
-            return []
-
-        result = self.vicinity_client.fetch_vicinity(latitude, longitude)
         if not result.ok:
             return []
 

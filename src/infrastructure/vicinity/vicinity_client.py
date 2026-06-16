@@ -71,7 +71,7 @@ class OpenStreetMapVicinityClient:
         self,
         *,
         api_url: str = "https://overpass-api.de/api/interpreter",
-        timeout: float = 30.0,
+        timeout: float = 5.0,
     ):
         self.api_url = api_url
         self.timeout = timeout
@@ -104,7 +104,7 @@ class OpenStreetMapVicinityClient:
                 "Failed to fetch vicinity data from Overpass: %s", error
             )
             return VicinityFetchResult(ok=False, message=str(error))
-        except Exception as error:  # pragma: no cover - defensive fallback
+        except Exception as error:
             _logger.exception("Unexpected error while fetching vicinity data")
             return VicinityFetchResult(ok=False, message=str(error))
 

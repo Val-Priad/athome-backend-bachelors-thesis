@@ -6,6 +6,10 @@ from typing import Type
 from flask_jwt_extended.exceptions import JWTExtendedException
 from werkzeug.exceptions import HTTPException
 
+from exceptions.custom_exceptions.estate_exceptions import (
+    register_estate_errors,
+)
+
 _logger = logging.getLogger(__name__)
 
 
@@ -41,7 +45,9 @@ def map_code(code: str, status: int, message: str):
 
 def map_exception(exception_type: Type[Exception], code: str):
     if exception_type in EXCEPTION_TO_CODE:
-        raise ValueError(f"Exception already mapped: {exception_type.__name__}")
+        raise ValueError(
+            f"Exception already mapped: {exception_type.__name__}"
+        )
     EXCEPTION_TO_CODE[exception_type] = code
 
 
@@ -122,6 +128,7 @@ def _register_custom_errors():
 
     register_user_errors()
     register_validation_errors()
+    register_estate_errors()
 
 
 def register_errors():

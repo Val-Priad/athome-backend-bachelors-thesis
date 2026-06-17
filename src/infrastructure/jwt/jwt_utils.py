@@ -8,3 +8,10 @@ def get_jwt_user_uuid():
     if identity is None:
         raise RuntimeError("Missing jwt identity")
     return UUID(identity)
+
+
+def get_optional_jwt_user_uuid() -> UUID | None:
+    identity = get_jwt_identity()
+    if identity is None:
+        return None
+    return UUID(identity)

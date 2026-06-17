@@ -1,9 +1,18 @@
+from uuid import UUID
+
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
 from api.responses import construct_error, construct_response
-from composition_root import create_estate_use_case, suggest_estate_use_case
-from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
+from composition_root import (
+    create_estate_use_case,
+    get_estate_use_case,
+    suggest_estate_use_case,
+)
+from infrastructure.jwt.jwt_utils import (
+    get_jwt_user_uuid,
+    get_optional_jwt_user_uuid,
+)
 from schemas.estate_schemas.estate_create_request import EstateCreateRequest
 from schemas.estate_schemas.estate_suggest_request import EstateSuggestRequest
 
@@ -14,6 +23,17 @@ bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 # def get_estate_description(estate_id: UUID):
 #     estate_description = .execute(estate_id)
 #     return construct_response(data=estate_description)
+
+# TODO: list estate
+# todo: save estate to liked
+
+
+@bp.get("/<uuid:estate_id>")
+@jwt_required(optional=True)
+def get_estate(estate_id: UUID):
+    requester_id = get_optional_jwt_user_uuid()
+    response = get_estate_use_case.execute(requester_id, estate_id)
+    return construct_response(data=response)
 
 
 @bp.post("")

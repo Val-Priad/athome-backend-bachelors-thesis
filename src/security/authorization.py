@@ -17,3 +17,11 @@ class AuthorizationService:
         requester = self.user_repository.get_user_by_id(session, requester_id)
         if requester.role not in roles:
             raise ForbiddenError()
+
+    def users_role_is(
+        self, session: Session, requester_id: UUID, *roles: UserRole
+    ) -> bool:
+        requester = self.user_repository.get_user_by_id(session, requester_id)
+        if requester.role in roles:
+            return True
+        return False

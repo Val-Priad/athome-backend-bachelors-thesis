@@ -141,6 +141,7 @@ def logged_in_user(
 
     return SimpleNamespace(
         id=user.id,
+        role=user.role,
         email=email,
         password=password,
         headers={"X-CSRF-TOKEN": cookie.value},

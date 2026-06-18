@@ -6,10 +6,6 @@ from typing import Type
 from flask_jwt_extended.exceptions import JWTExtendedException
 from werkzeug.exceptions import HTTPException
 
-from exceptions.custom_exceptions.estate_exceptions import (
-    register_estate_errors,
-)
-
 _logger = logging.getLogger(__name__)
 
 
@@ -121,6 +117,10 @@ def _register_default_errors():
 
 
 def _register_custom_errors():
+    from exceptions.custom_exceptions.estate_exceptions import (
+        register_estate_errors,
+    )
+
     from .custom_exceptions.user_exceptions import register_user_errors
     from .custom_exceptions.validation_exceptions import (
         register_validation_errors,

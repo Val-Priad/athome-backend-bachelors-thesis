@@ -177,3 +177,4 @@ class EstateGeneralGetResponse(EstateBaseResponse):
 
 class EstateGetResponseWithSeller(EstateGeneralGetResponse):
     seller: EstateUserResponse | None
+    seller_id: ID | None

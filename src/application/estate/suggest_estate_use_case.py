@@ -3,9 +3,13 @@ from uuid import UUID
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_service import EstateService
 from infrastructure.db import db_session
-from schemas.estate_schemas.estate_create_response import EstateIDResponse
-from schemas.estate_schemas.estate_create_type import EstateCreateType
-from schemas.estate_schemas.estate_suggest_request import EstateSuggestRequest
+from schemas.estate_schemas.requests.estate_create_type import EstateCreateType
+from schemas.estate_schemas.requests.estate_suggest_request import (
+    EstateSuggestRequest,
+)
+from schemas.estate_schemas.responses.estate_create_response import (
+    EstateIDResponse,
+)
 
 
 class SuggestEstateUseCase:

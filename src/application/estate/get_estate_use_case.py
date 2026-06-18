@@ -5,7 +5,7 @@ from domain.estate.estate_repository import EstateRepository
 from domain.user.user_model import UserRole
 from exceptions.custom_exceptions.estate_exceptions import EstateNotFoundError
 from infrastructure.db import db_session
-from schemas.estate_schemas.estate_get_response import (
+from schemas.estate_schemas.responses.estate_get_response import (
     EstateGeneralGetResponse,
     EstateGetResponseWithSeller,
 )

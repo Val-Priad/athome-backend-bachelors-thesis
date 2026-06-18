@@ -62,6 +62,8 @@ def handle_exception(e: Exception):
     return construct_error(e)
 
 
+# TODO: use leaflet as an interactive map on frontend # NOSONAR
+
 # TODO: Admin Panel: Agent List  # NOSONAR
 # Add filters for admin list
 # Add sorting for admin list

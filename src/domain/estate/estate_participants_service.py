@@ -8,7 +8,9 @@ from exceptions.custom_exceptions.user_exceptions import (
     AgentNotFoundError,
     UserNotFoundError,
 )
-from schemas.estate_schemas.estate_create_request import EstateCreateRequest
+from schemas.estate_schemas.requests.estate_create_request import (
+    EstateCreateRequest,
+)
 
 
 class EstateParticipantsService:

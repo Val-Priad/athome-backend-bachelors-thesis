@@ -13,8 +13,12 @@ from infrastructure.jwt.jwt_utils import (
     get_jwt_user_uuid,
     get_optional_jwt_user_uuid,
 )
-from schemas.estate_schemas.estate_create_request import EstateCreateRequest
-from schemas.estate_schemas.estate_suggest_request import EstateSuggestRequest
+from schemas.estate_schemas.requests.estate_create_request import (
+    EstateCreateRequest,
+)
+from schemas.estate_schemas.requests.estate_suggest_request import (
+    EstateSuggestRequest,
+)
 
 bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 
@@ -24,8 +28,8 @@ bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 #     estate_description = .execute(estate_id)
 #     return construct_response(data=estate_description)
 
-# TODO: list estate
-# todo: save estate to liked
+# TODO: list estate # NOSONAR
+# TODO: save estate to liked # NOSONAR
 
 
 @bp.get("/<uuid:estate_id>")
@@ -39,6 +43,7 @@ def get_estate(estate_id: UUID):
 @bp.post("")
 @jwt_required()
 def create_estate():
+    # TODO: think about combining suggest route and create route # NOSONAR
     requester_id = get_jwt_user_uuid()
     data = EstateCreateRequest.from_request(request.json)
     response = create_estate_use_case.execute(data, requester_id)

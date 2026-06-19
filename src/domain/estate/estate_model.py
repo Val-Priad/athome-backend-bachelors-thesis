@@ -65,35 +65,35 @@ class Estate(Base):
         foreign_keys=[agent_id],
         back_populates="agent_estates",
     )
-    location: Mapped["EstateLocation | None"] = relationship(
+    location: Mapped["EstateLocation"] = relationship(
         "EstateLocation",
         back_populates="estate",
         uselist=False,
         single_parent=True,
         cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
-    pricing: Mapped["EstatePricing | None"] = relationship(
+    pricing: Mapped["EstatePricing"] = relationship(
         "EstatePricing",
         back_populates="estate",
         uselist=False,
         single_parent=True,
         cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
-    listing: Mapped["EstateListing | None"] = relationship(
+    listing: Mapped["EstateListing"] = relationship(
         "EstateListing",
         back_populates="estate",
         uselist=False,
         single_parent=True,
         cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
-    utilities: Mapped["EstateUtilities | None"] = relationship(
+    utilities: Mapped["EstateUtilities"] = relationship(
         "EstateUtilities",
         back_populates="estate",
         uselist=False,
         single_parent=True,
         cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
-    details: Mapped["EstateDetails | None"] = relationship(
+    details: Mapped["EstateDetails"] = relationship(
         "EstateDetails",
         back_populates="estate",
         uselist=False,

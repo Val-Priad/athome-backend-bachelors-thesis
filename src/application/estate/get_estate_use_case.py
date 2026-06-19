@@ -36,7 +36,6 @@ class GetEstateUseCase:
 
             if (
                 not requester_is_staff
-                and estate.listing
                 and estate.listing.status != ListingStatus.active
             ):
                 raise EstateNotFoundError()

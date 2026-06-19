@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field
 
 from domain.user.user_model import UserRole
 from schemas.parent_types import ResponseValidation
@@ -41,6 +41,6 @@ class UsersListItem(ResponseValidation):
 
 class UsersListResponse(ResponseValidation):
     items: list[UsersListItem]
-    total: int
-    page: int
-    page_size: int
+    total: int = Field(ge=0)
+    page: int = Field(ge=1)
+    page_size: int = Field(ge=1, le=100)

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Annotated, Union
 from uuid import UUID
 
@@ -33,3 +34,41 @@ Password = Annotated[
 ]
 
 Token = Annotated[str, Field(min_length=40, max_length=50)]
+
+NonNegativeMoneyAmount = Annotated[
+    Decimal,
+    Field(
+        ge=0,
+        max_digits=12,
+        decimal_places=2,
+    ),
+]
+
+PositiveMoneyAmount = Annotated[
+    Decimal,
+    Field(
+        gt=0,
+        max_digits=12,
+        decimal_places=2,
+    ),
+]
+
+PositiveArea = Annotated[
+    float,
+    Field(gt=0, le=100_000),
+]
+
+NonNegativeArea = Annotated[
+    float,
+    Field(ge=0, le=100_000),
+]
+
+Latitude = Annotated[
+    float,
+    Field(ge=-90, le=90),
+]
+
+Longitude = Annotated[
+    float,
+    Field(ge=-180, le=180),
+]

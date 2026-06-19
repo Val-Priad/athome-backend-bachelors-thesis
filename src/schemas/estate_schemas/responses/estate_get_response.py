@@ -26,6 +26,8 @@ from schemas.types import (
     ID,
     E164PhoneNumberType,
     ImageKey,
+    Latitude,
+    Longitude,
     UserDescription,
     UserName,
 )
@@ -52,8 +54,8 @@ class EstateLocationResponse(EstateBaseResponse):
     street: str
     house_number: str | None
 
-    latitude: float
-    longitude: float
+    latitude: Latitude
+    longitude: Longitude
 
 
 class EstatePricingResponse(EstateBaseResponse):
@@ -143,8 +145,8 @@ class EstateVicinityResponse(EstateBaseResponse):
     type: VicinityType
     name: str
 
-    latitude: float
-    longitude: float
+    latitude: Latitude
+    longitude: Longitude
     distance_m: int
 
 

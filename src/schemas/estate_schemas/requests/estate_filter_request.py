@@ -1,11 +1,8 @@
 import datetime
 import uuid
-from decimal import Decimal
 from enum import Enum
-from typing import Annotated, ClassVar
 
 from pydantic import (
-    BaseModel,
     ConfigDict,
     Field,
     ValidationError,
@@ -30,6 +27,8 @@ from domain.estate.enums.utilities_enums import (
     PrimaryInternetConnectionType,
 )
 from schemas.estate_schemas.validators_utils import make_value_error
+from schemas.parent_types import RequestValidation
+from schemas.types import NonNegativeArea, NonNegativeMoneyAmount
 
 
 class EstateSortBy(str, Enum):
@@ -49,14 +48,14 @@ class SortOrder(str, Enum):
     desc = "desc"
 
 
-class EstatePublicFilterRequest(BaseModel):
-    current_year: ClassVar[int] = datetime.date.today().year
+class EstatePublicFilterRequest(RequestValidation):
+    # current_year: ClassVar[int] = datetime.date.today().year
 
     model_config = ConfigDict(extra="forbid")
 
     # pagination
-    page: Annotated[int, Field(ge=1)] = 1
-    page_size: Annotated[int, Field(ge=1, le=100)] = 20
+    page: int = Field(default=1, ge=1, le=999_999)
+    page_size: int = Field(default=20, ge=1, le=100)
 
     # sorting
     sort_by: EstateSortBy = EstateSortBy.published_at
@@ -65,8 +64,14 @@ class EstatePublicFilterRequest(BaseModel):
     # Estate
     agent_id: uuid.UUID | None = None
 
-    estate_type: Annotated[list[EstateType] | None, Field(min_length=1)] = None
-    offer_type: Annotated[list[OfferType] | None, Field(min_length=1)] = None
+    estate_type: list[EstateType] | None = Field(
+        default=None,
+        min_length=1,
+    )
+    offer_type: list[OfferType] | None = Field(
+        default=None,
+        min_length=1,
+    )
 
     created_at_from: datetime.datetime | None = None
     created_at_to: datetime.datetime | None = None
@@ -75,16 +80,22 @@ class EstatePublicFilterRequest(BaseModel):
     saved_by_current_user: bool | None = None
 
     # EstateLocation
-    region: Annotated[list[Region] | None, Field(min_length=1)] = None
+    region: list[Region] | None = Field(
+        default=None,
+        min_length=1,
+    )
 
     # EstatePricing
-    price_from: Annotated[Decimal | None, Field(ge=0)] = None
-    price_to: Annotated[Decimal | None, Field(ge=0)] = None
+    price_from: NonNegativeMoneyAmount | None = None
+    price_to: NonNegativeMoneyAmount | None = None
 
-    price_unit: Annotated[list[PriceUnit] | None, Field(min_length=1)] = None
+    price_unit: list[PriceUnit] | None = Field(
+        default=None,
+        min_length=1,
+    )
 
-    cost_of_living_from: Annotated[Decimal | None, Field(ge=0)] = None
-    cost_of_living_to: Annotated[Decimal | None, Field(ge=0)] = None
+    cost_of_living_from: NonNegativeMoneyAmount | None = None
+    cost_of_living_to: NonNegativeMoneyAmount | None = None
 
     commission_paid_by_owner: bool | None = None
 
@@ -104,93 +115,114 @@ class EstatePublicFilterRequest(BaseModel):
     has_gas: bool | None = None
     has_sewerage: bool | None = None
 
-    heating_source: Annotated[
-        list[HeatingSource] | None, Field(min_length=1)
-    ] = None
-    primary_internet_connection_type: Annotated[
-        list[PrimaryInternetConnectionType] | None, Field(min_length=1)
-    ] = None
+    heating_source: list[HeatingSource] | None = Field(
+        default=None,
+        min_length=1,
+    )
+    primary_internet_connection_type: (
+        list[PrimaryInternetConnectionType] | None
+    ) = Field(
+        default=None,
+        min_length=1,
+    )
 
     # EstateDetails
-    condition: Annotated[
-        list[PropertyCondition] | None, Field(min_length=1)
-    ] = None
-    energy_class: Annotated[list[EnergyClass] | None, Field(min_length=1)] = (
-        None
+    condition: list[PropertyCondition] | None = Field(
+        default=None,
+        min_length=1,
     )
-    furnishing: Annotated[list[Furnishing] | None, Field(min_length=1)] = None
+    energy_class: list[EnergyClass] | None = Field(
+        default=None,
+        min_length=1,
+    )
+    furnishing: list[Furnishing] | None = Field(
+        default=None,
+        min_length=1,
+    )
     easy_access: bool | None = None
 
-    usable_area_from: Annotated[float | None, Field(gt=0)] = None
-    usable_area_to: Annotated[float | None, Field(gt=0)] = None
+    usable_area_from: NonNegativeArea | None = None
+    usable_area_to: NonNegativeArea | None = None
 
-    total_property_area_from: Annotated[float | None, Field(gt=0)] = None
-    total_property_area_to: Annotated[float | None, Field(gt=0)] = None
+    total_property_area_from: NonNegativeArea | None = None
+    total_property_area_to: NonNegativeArea | None = None
 
     # EstateApartment
-    apartment_layout: Annotated[
-        list[ApartmentLayout] | None, Field(min_length=1)
-    ] = None
+    apartment_layout: list[ApartmentLayout] | None = Field(
+        default=None,
+        min_length=1,
+    )
 
-    floor_number_from: Annotated[int | None, Field(ge=-5, le=200)] = None
-    floor_number_to: Annotated[int | None, Field(ge=-5, le=200)] = None
+    floor_number_from: int | None = Field(default=None, ge=0, le=200)
+    floor_number_to: int | None = Field(default=None, ge=0, le=200)
 
     has_elevator: bool | None = None
 
     has_balcony: bool | None = None
-    balcony_area_from: Annotated[float | None, Field(gt=0)] = None
-    balcony_area_to: Annotated[float | None, Field(gt=0)] = None
+    balcony_area_from: NonNegativeArea | None = None
+    balcony_area_to: NonNegativeArea | None = None
 
     has_loggia: bool | None = None
-    loggia_area_from: Annotated[float | None, Field(gt=0)] = None
-    loggia_area_to: Annotated[float | None, Field(gt=0)] = None
+    loggia_area_from: NonNegativeArea | None = None
+    loggia_area_to: NonNegativeArea | None = None
 
     has_terrace: bool | None = None
-    terrace_area_from: Annotated[float | None, Field(gt=0)] = None
-    terrace_area_to: Annotated[float | None, Field(gt=0)] = None
+    terrace_area_from: NonNegativeArea | None = None
+    terrace_area_to: NonNegativeArea | None = None
 
     # EstateHouse
-    room_count: Annotated[list[RoomCount] | None, Field(min_length=1)] = None
-    house_type: Annotated[list[HouseType] | None, Field(min_length=1)] = None
+    room_count: list[RoomCount] | None = Field(
+        default=None,
+        min_length=1,
+    )
+    house_type: list[HouseType] | None = Field(
+        default=None,
+        min_length=1,
+    )
 
-    acceptance_year_from: Annotated[
-        int | None, Field(ge=1800, le=current_year + 10)
-    ] = None
-    acceptance_year_to: Annotated[
-        int | None, Field(ge=1800, le=current_year + 10)
-    ] = None
+    acceptance_year_from: int | None = Field(
+        default=None,
+        ge=1800,
+    )
+    acceptance_year_to: int | None = Field(
+        default=None,
+        ge=1800,
+    )
 
-    floors_from: Annotated[int | None, Field(ge=1)] = None
-    floors_to: Annotated[int | None, Field(ge=1)] = None
+    floors_from: int | None = Field(default=None, ge=1)
+    floors_to: int | None = Field(default=None, ge=1)
 
     has_garden: bool | None = None
-    garden_area_from: Annotated[float | None, Field(gt=0)] = None
-    garden_area_to: Annotated[float | None, Field(gt=0)] = None
+    garden_area_from: NonNegativeArea | None = None
+    garden_area_to: NonNegativeArea | None = None
 
-    building_area_from: Annotated[float | None, Field(gt=0)] = None
-    building_area_to: Annotated[float | None, Field(gt=0)] = None
+    building_area_from: NonNegativeArea | None = None
+    building_area_to: NonNegativeArea | None = None
 
     has_pool: bool | None = None
-    pool_area_from: Annotated[float | None, Field(gt=0)] = None
-    pool_area_to: Annotated[float | None, Field(gt=0)] = None
+    pool_area_from: NonNegativeArea | None = None
+    pool_area_to: NonNegativeArea | None = None
 
     has_cellar: bool | None = None
-    cellar_area_from: Annotated[float | None, Field(gt=0)] = None
-    cellar_area_to: Annotated[float | None, Field(gt=0)] = None
+    cellar_area_from: NonNegativeArea | None = None
+    cellar_area_to: NonNegativeArea | None = None
 
     has_garage: bool | None = None
-    garage_area_from: Annotated[float | None, Field(gt=0)] = None
-    garage_area_to: Annotated[float | None, Field(gt=0)] = None
+    garage_area_from: NonNegativeArea | None = None
+    garage_area_to: NonNegativeArea | None = None
 
     # EstateVicinity
-    vicinity_type: Annotated[
-        list[VicinityType] | None, Field(min_length=1)
-    ] = None
-    vicinity_distance_m_to: Annotated[int | None, Field(gt=0)] = None
+    vicinity_type: list[VicinityType] | None = Field(
+        default=None,
+        min_length=1,
+    )
+    vicinity_distance_m_to: int | None = Field(default=None, ge=0, le=100_000)
 
     @model_validator(mode="after")
     def validate_filter_ranges(self):
         errors: list[InitErrorDetails] = []
+
+        self._validate_acceptance_year(errors)
 
         self._validate_range(errors, "created_at_from", "created_at_to")
         self._validate_range(errors, "price_from", "price_to")
@@ -335,10 +367,34 @@ class EstatePublicFilterRequest(BaseModel):
             )
         )
 
+    def _validate_acceptance_year(self, errors: list[InitErrorDetails]):
+        current_year = datetime.date.today().year
+        if self.acceptance_year_from is not None:
+            if not (1800 <= self.acceptance_year_from <= current_year + 10):
+                errors.append(
+                    make_value_error(
+                        loc=("acceptance_year_from",),
+                        message="acceptance_year_from must be between 1800 and current year + 10",
+                        input_value=self.acceptance_year_from,
+                    )
+                )
+        if self.acceptance_year_to is not None:
+            if not (1800 <= self.acceptance_year_to <= current_year + 10):
+                errors.append(
+                    make_value_error(
+                        loc=("acceptance_year_to",),
+                        message="acceptance_year_to must be between 1800 and current year + 10",
+                        input_value=self.acceptance_year_to,
+                    )
+                )
+
 
 class EstateAdminFilterRequest(EstatePublicFilterRequest):
     # Estate
     seller_id: uuid.UUID | None = None
 
     # EstateListing
-    status: Annotated[list[ListingStatus] | None, Field(min_length=1)] = None
+    status: list[ListingStatus] | None = Field(
+        default=None,
+        min_length=1,
+    )

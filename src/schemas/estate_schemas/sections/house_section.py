@@ -6,22 +6,23 @@ from pydantic_core import InitErrorDetails
 from domain.estate.enums.house_enums import HouseType, RoomCount
 from schemas.estate_schemas.validators_utils import make_value_error
 from schemas.parent_types import RequestValidation
+from schemas.types import NonNegativeArea
 
 
 class EstateHouseSection(RequestValidation):
     room_count: RoomCount
     house_type: HouseType
 
-    acceptance_year: int | None = Field(default=None, ge=0)
-    floors: int = Field(ge=1)
-    underground_floors: int | None = Field(default=None, ge=0)
-    parking_lots_count: int | None = Field(default=None, ge=0)
+    acceptance_year: int | None = Field(default=None)
+    floors: int = Field(ge=1, le=200)
+    underground_floors: int | None = Field(default=None, ge=0, le=20)
+    parking_lots_count: int | None = Field(default=None, ge=0, le=250)
 
-    garden_area: float | None = Field(default=None, ge=0)
-    building_area: float | None = Field(default=None, ge=0)
-    pool_area: float | None = Field(default=None, ge=0)
-    cellar_area: float | None = Field(default=None, ge=0)
-    garage_area: float | None = Field(default=None, ge=0)
+    garden_area: NonNegativeArea | None = None
+    building_area: NonNegativeArea | None = None
+    pool_area: NonNegativeArea | None = None
+    cellar_area: NonNegativeArea | None = None
+    garage_area: NonNegativeArea | None = None
 
     @model_validator(mode="after")
     def _validate_acceptance_year(self):
@@ -29,11 +30,11 @@ class EstateHouseSection(RequestValidation):
 
         if self.acceptance_year is not None:
             current_year = date.today().year
-            if not (1800 <= self.acceptance_year <= current_year):
+            if not (1800 <= self.acceptance_year <= current_year + 10):
                 errors.append(
                     make_value_error(
                         loc=("acceptance_year",),
-                        message="acceptance_year must be between 1800 and current year",
+                        message="acceptance_year must be between 1800 and current year + 10",
                         input_value=self.acceptance_year,
                     )
                 )

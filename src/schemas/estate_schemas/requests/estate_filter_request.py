@@ -1,6 +1,7 @@
 import datetime
 import uuid
 from enum import Enum
+from typing import ClassVar
 
 from pydantic import (
     ConfigDict,
@@ -49,9 +50,49 @@ class SortOrder(str, Enum):
 
 
 class EstatePublicFilterRequest(RequestValidation):
-    # current_year: ClassVar[int] = datetime.date.today().year
-
     model_config = ConfigDict(extra="forbid")
+
+    RANGE_FILTERS: ClassVar[tuple[tuple[str, str], ...]] = (
+        ("created_at_from", "created_at_to"),
+        ("price_from", "price_to"),
+        ("cost_of_living_from", "cost_of_living_to"),
+        ("published_at_from", "published_at_to"),
+        ("expires_at_from", "expires_at_to"),
+        ("available_from_from", "available_from_to"),
+        ("usable_area_from", "usable_area_to"),
+        ("total_property_area_from", "total_property_area_to"),
+        ("floor_number_from", "floor_number_to"),
+        ("balcony_area_from", "balcony_area_to"),
+        ("loggia_area_from", "loggia_area_to"),
+        ("terrace_area_from", "terrace_area_to"),
+        ("acceptance_year_from", "acceptance_year_to"),
+        ("floors_from", "floors_to"),
+        ("garden_area_from", "garden_area_to"),
+        ("building_area_from", "building_area_to"),
+        ("pool_area_from", "pool_area_to"),
+        ("cellar_area_from", "cellar_area_to"),
+        ("garage_area_from", "garage_area_to"),
+    )
+
+    EXISTS_AREA_FILTERS: ClassVar[tuple[tuple[str, str, str, str], ...]] = (
+        (
+            "has_balcony",
+            "balcony_area_from",
+            "balcony_area_to",
+            "balcony_area",
+        ),
+        ("has_loggia", "loggia_area_from", "loggia_area_to", "loggia_area"),
+        (
+            "has_terrace",
+            "terrace_area_from",
+            "terrace_area_to",
+            "terrace_area",
+        ),
+        ("has_garden", "garden_area_from", "garden_area_to", "garden_area"),
+        ("has_pool", "pool_area_from", "pool_area_to", "pool_area"),
+        ("has_cellar", "cellar_area_from", "cellar_area_to", "cellar_area"),
+        ("has_garage", "garage_area_from", "garage_area_to", "garage_area"),
+    )
 
     # pagination
     page: int = Field(default=1, ge=1, le=999_999)
@@ -224,88 +265,22 @@ class EstatePublicFilterRequest(RequestValidation):
 
         self._validate_acceptance_year(errors)
 
-        self._validate_range(errors, "created_at_from", "created_at_to")
-        self._validate_range(errors, "price_from", "price_to")
-        self._validate_range(
-            errors, "cost_of_living_from", "cost_of_living_to"
-        )
-        self._validate_range(errors, "published_at_from", "published_at_to")
-        self._validate_range(errors, "expires_at_from", "expires_at_to")
-        self._validate_range(
-            errors, "available_from_from", "available_from_to"
-        )
+        for from_field, to_field in self.RANGE_FILTERS:
+            self._validate_range(errors, from_field, to_field)
 
-        self._validate_range(errors, "usable_area_from", "usable_area_to")
-        self._validate_range(
-            errors,
-            "total_property_area_from",
-            "total_property_area_to",
-        )
-
-        self._validate_range(errors, "floor_number_from", "floor_number_to")
-        self._validate_range(errors, "balcony_area_from", "balcony_area_to")
-        self._validate_range(errors, "loggia_area_from", "loggia_area_to")
-        self._validate_range(errors, "terrace_area_from", "terrace_area_to")
-
-        self._validate_range(
-            errors, "acceptance_year_from", "acceptance_year_to"
-        )
-        self._validate_range(errors, "floors_from", "floors_to")
-        self._validate_range(errors, "garden_area_from", "garden_area_to")
-        self._validate_range(errors, "building_area_from", "building_area_to")
-        self._validate_range(errors, "pool_area_from", "pool_area_to")
-        self._validate_range(errors, "cellar_area_from", "cellar_area_to")
-        self._validate_range(errors, "garage_area_from", "garage_area_to")
-
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_balcony",
-            from_field="balcony_area_from",
-            to_field="balcony_area_to",
-            area_name="balcony_area",
-        )
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_loggia",
-            from_field="loggia_area_from",
-            to_field="loggia_area_to",
-            area_name="loggia_area",
-        )
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_terrace",
-            from_field="terrace_area_from",
-            to_field="terrace_area_to",
-            area_name="terrace_area",
-        )
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_garden",
-            from_field="garden_area_from",
-            to_field="garden_area_to",
-            area_name="garden_area",
-        )
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_pool",
-            from_field="pool_area_from",
-            to_field="pool_area_to",
-            area_name="pool_area",
-        )
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_cellar",
-            from_field="cellar_area_from",
-            to_field="cellar_area_to",
-            area_name="cellar_area",
-        )
-        self._validate_exists_filter(
-            errors=errors,
-            exists_field="has_garage",
-            from_field="garage_area_from",
-            to_field="garage_area_to",
-            area_name="garage_area",
-        )
+        for (
+            exists_field,
+            from_field,
+            to_field,
+            area_name,
+        ) in self.EXISTS_AREA_FILTERS:
+            self._validate_exists_filter(
+                errors=errors,
+                exists_field=exists_field,
+                from_field=from_field,
+                to_field=to_field,
+                area_name=area_name,
+            )
 
         if errors:
             raise ValidationError.from_exception_data(
@@ -367,26 +342,31 @@ class EstatePublicFilterRequest(RequestValidation):
             )
         )
 
-    def _validate_acceptance_year(self, errors: list[InitErrorDetails]):
-        current_year = datetime.date.today().year
-        if self.acceptance_year_from is not None:
-            if not (1800 <= self.acceptance_year_from <= current_year + 10):
-                errors.append(
-                    make_value_error(
-                        loc=("acceptance_year_from",),
-                        message="acceptance_year_from must be between 1800 and current year + 10",
-                        input_value=self.acceptance_year_from,
-                    )
+    def _validate_acceptance_year(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        max_year = datetime.date.today().year + 10
+
+        for field_name in ("acceptance_year_from", "acceptance_year_to"):
+            value = getattr(self, field_name)
+
+            if value is None:
+                continue
+
+            if value <= max_year:
+                continue
+
+            errors.append(
+                make_value_error(
+                    loc=(field_name,),
+                    message=(
+                        f"{field_name} cannot be greater than "
+                        "current year + 10"
+                    ),
+                    input_value=value,
                 )
-        if self.acceptance_year_to is not None:
-            if not (1800 <= self.acceptance_year_to <= current_year + 10):
-                errors.append(
-                    make_value_error(
-                        loc=("acceptance_year_to",),
-                        message="acceptance_year_to must be between 1800 and current year + 10",
-                        input_value=self.acceptance_year_to,
-                    )
-                )
+            )
 
 
 class EstateAdminFilterRequest(EstatePublicFilterRequest):

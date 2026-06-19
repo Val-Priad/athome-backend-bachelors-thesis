@@ -49,7 +49,7 @@ class EstateRepository:
         self,
         session: Session,
         filters: EstatePublicFilterRequest,
-        current_user_id: UUID | None = None,
+        requester_id: UUID | None = None,
     ) -> tuple[list[Estate], int]:
         stmt = select(Estate)
 
@@ -60,7 +60,7 @@ class EstateRepository:
         stmt = self._apply_filters(
             stmt=stmt,
             filters=filters,
-            current_user_id=current_user_id,
+            requester_id=requester_id,
             is_admin=False,
         )
 
@@ -81,14 +81,14 @@ class EstateRepository:
         self,
         session: Session,
         filters: EstateAdminFilterRequest,
-        current_user_id: UUID | None = None,
+        requester_id: UUID | None = None,
     ) -> tuple[list[Estate], int]:
         stmt = select(Estate)
 
         stmt = self._apply_filters(
             stmt=stmt,
             filters=filters,
-            current_user_id=current_user_id,
+            requester_id=requester_id,
             is_admin=True,
         )
 
@@ -109,12 +109,12 @@ class EstateRepository:
         self,
         stmt: Select,
         filters: EstatePublicFilterRequest | EstateAdminFilterRequest,
-        current_user_id: UUID | None,
+        requester_id: UUID | None,
         is_admin: bool,
     ) -> Select:
         stmt = self._apply_direct_filters(stmt, filters)
         stmt = self._apply_admin_filters(stmt, filters, is_admin)
-        stmt = self._apply_saved_filter(stmt, filters, current_user_id)
+        stmt = self._apply_saved_filter(stmt, filters, requester_id)
         stmt = self._apply_relation_filters(stmt, filters)
         stmt = self._apply_vicinity_filters(stmt, filters)
 
@@ -168,12 +168,12 @@ class EstateRepository:
         self,
         stmt: Select,
         filters: EstatePublicFilterRequest | EstateAdminFilterRequest,
-        current_user_id: UUID | None,
+        requester_id: UUID | None,
     ) -> Select:
         if filters.saved_by_current_user is None:
             return stmt
 
-        if current_user_id is None:
+        if requester_id is None:
             if filters.saved_by_current_user is True:
                 return stmt.where(false())
 
@@ -183,7 +183,7 @@ class EstateRepository:
             select(1)
             .where(
                 SavedEstate.estate_id == Estate.id,
-                SavedEstate.user_id == current_user_id,
+                SavedEstate.user_id == requester_id,
             )
             .exists()
         )
@@ -344,7 +344,7 @@ class EstateRepository:
         if not conditions:
             return stmt
 
-        return stmt.where(relationship.has(*conditions))
+        return stmt.where(relationship.has(and_(*conditions)))
 
     def _has_presence(
         self,

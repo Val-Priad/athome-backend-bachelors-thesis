@@ -19,6 +19,7 @@ from domain.estate.models.estate_vicinity_model import EstateVicinity
 from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
 from schemas.estate_schemas.requests.estate_create_type import EstateCreateType
 from schemas.estate_schemas.requests.estate_filter_request import (
+    EstateAdminFilterRequest,
     EstatePublicFilterRequest,
 )
 from schemas.estate_schemas.responses.estate_filter_response import (
@@ -140,6 +141,27 @@ class EstateService:
         requester_id: UUID | None = None,
     ) -> EstateFilterResponse:
         estates, total = self.estate_repository.get_public_estates_by_filters(
+            session=session,
+            filters=filters,
+            requester_id=requester_id,
+        )
+
+        return EstateFilterResponse(
+            items=[
+                EstateFilterItem.from_repo_result(estate) for estate in estates
+            ],
+            total=total,
+            page=filters.page,
+            page_size=filters.page_size,
+        )
+
+    def get_admin_filtered_estate(
+        self,
+        session: Session,
+        filters: EstateAdminFilterRequest,
+        requester_id: UUID | None = None,
+    ) -> EstateFilterResponse:
+        estates, total = self.estate_repository.get_admin_estates_by_filters(
             session=session,
             filters=filters,
             requester_id=requester_id,

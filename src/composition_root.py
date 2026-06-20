@@ -7,6 +7,9 @@ from application.admin.change_user_role_use_case import ChangeUserRoleUseCase
 from application.admin.delete_admin_user_use_case import DeleteAdminUserUseCase
 
 # Application Layer - Admin Use Cases
+from application.admin.get_admin_filtered_estate_use_case import (
+    GetAdminFilteredEstateUseCase,
+)
 from application.admin.get_admin_user_use_case import GetAdminUserUseCase
 from application.admin.list_users_use_case import ListUsersUseCase
 
@@ -157,6 +160,9 @@ delete_admin_user_use_case = DeleteAdminUserUseCase(
 )
 list_users_use_case = ListUsersUseCase(
     admin_users_service, authorization_service
+)
+get_admin_filtered_estate_use_case = GetAdminFilteredEstateUseCase(
+    estate_service, authorization_service
 )
 
 # Agent Use Cases

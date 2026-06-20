@@ -32,7 +32,7 @@ from tests.integration.conftest import API_PREFIX, ESTATE_PATH
 FILTER_ESTATE_PATH = f"{API_PREFIX}{ESTATE_PATH}"
 
 
-def _create_filter_estate(  #
+def create_filter_estate(
     db_session,
     *,
     title: str = "Test apartment",
@@ -148,7 +148,7 @@ def _get_ids(response) -> list[str]:
     return [item["id"] for item in body["data"]["items"]]
 
 
-def _assert_ok_filter_response(response, *, total: int):
+def assert_ok_filter_response(response, *, total: int):
     assert response.status_code == 200
 
     body = response.get_json()
@@ -160,12 +160,12 @@ def _assert_ok_filter_response(response, *, total: int):
 
 
 def test_filter_estates_returns_only_active_estates(client, db_session):
-    active_id = _create_filter_estate(
+    active_id = create_filter_estate(
         db_session,
         title="Active apartment",
         status=ListingStatus.active,
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Draft apartment",
         status=ListingStatus.draft,
@@ -173,7 +173,7 @@ def test_filter_estates_returns_only_active_estates(client, db_session):
 
     response = client.get(FILTER_ESTATE_PATH)
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert len(data["items"]) == 1
     assert data["items"][0]["id"] == str(active_id)
@@ -190,17 +190,17 @@ def test_filter_estates_returns_only_active_estates(client, db_session):
 
 
 def test_filter_estates_by_price_range(client, db_session):
-    cheap_id = _create_filter_estate(
+    cheap_id = create_filter_estate(
         db_session,
         title="Cheap apartment",
         price="100000.00",
     )
-    middle_id = _create_filter_estate(
+    middle_id = create_filter_estate(
         db_session,
         title="Middle apartment",
         price="150000.00",
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Expensive apartment",
         price="250000.00",
@@ -216,7 +216,7 @@ def test_filter_estates_by_price_range(client, db_session):
         },
     )
 
-    data = _assert_ok_filter_response(response, total=2)
+    data = assert_ok_filter_response(response, total=2)
 
     assert [item["id"] for item in data["items"]] == [
         str(cheap_id),
@@ -225,17 +225,17 @@ def test_filter_estates_by_price_range(client, db_session):
 
 
 def test_filter_estates_by_usable_area_range(client, db_session):
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Small apartment",
         usable_area=35.0,
     )
-    matching_id = _create_filter_estate(
+    matching_id = create_filter_estate(
         db_session,
         title="Matching apartment",
         usable_area=55.0,
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Large apartment",
         usable_area=90.0,
@@ -249,20 +249,20 @@ def test_filter_estates_by_usable_area_range(client, db_session):
         },
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(matching_id)
     assert data["items"][0]["usable_area"] == pytest.approx(55.0)
 
 
 def test_filter_estates_by_enum_list_uses_or_semantics(client, db_session):
-    first_id = _create_filter_estate(
+    first_id = create_filter_estate(
         db_session,
         title="First sale apartment",
         offer_type=OfferType.sale,
         price="100000.00",
     )
-    second_id = _create_filter_estate(
+    second_id = create_filter_estate(
         db_session,
         title="Second sale apartment",
         offer_type=OfferType.sale,
@@ -278,7 +278,7 @@ def test_filter_estates_by_enum_list_uses_or_semantics(client, db_session):
         ],
     )
 
-    data = _assert_ok_filter_response(response, total=2)
+    data = assert_ok_filter_response(response, total=2)
 
     assert [item["id"] for item in data["items"]] == [
         str(first_id),
@@ -287,12 +287,12 @@ def test_filter_estates_by_enum_list_uses_or_semantics(client, db_session):
 
 
 def test_filter_estates_by_presence_true(client, db_session):
-    with_balcony_id = _create_filter_estate(
+    with_balcony_id = create_filter_estate(
         db_session,
         title="Apartment with balcony",
         balcony_area=5.5,
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Apartment without balcony",
         balcony_area=None,
@@ -303,18 +303,18 @@ def test_filter_estates_by_presence_true(client, db_session):
         query_string={"has_balcony": "true"},
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(with_balcony_id)
 
 
 def test_filter_estates_by_presence_false(client, db_session):
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Apartment with balcony",
         balcony_area=5.5,
     )
-    without_balcony_id = _create_filter_estate(
+    without_balcony_id = create_filter_estate(
         db_session,
         title="Apartment without balcony",
         balcony_area=None,
@@ -325,7 +325,7 @@ def test_filter_estates_by_presence_false(client, db_session):
         query_string={"has_balcony": "false"},
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(without_balcony_id)
 
@@ -334,12 +334,12 @@ def test_filter_estates_by_vicinity_type_uses_and_semantics(
     client,
     db_session,
 ):
-    only_bus_stop_id = _create_filter_estate(
+    only_bus_stop_id = create_filter_estate(
         db_session,
         title="Only bus stop",
         vicinities=[(VicinityType.bus_stop, 120)],
     )
-    both_vicinities_id = _create_filter_estate(
+    both_vicinities_id = create_filter_estate(
         db_session,
         title="Bus stop and closest",
         vicinities=[
@@ -356,19 +356,19 @@ def test_filter_estates_by_vicinity_type_uses_and_semantics(
         ],
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(both_vicinities_id)
     assert str(only_bus_stop_id) not in _get_ids(response)
 
 
 def test_filter_estates_by_vicinity_distance_without_type(client, db_session):
-    near_id = _create_filter_estate(
+    near_id = create_filter_estate(
         db_session,
         title="Near apartment",
         vicinities=[(VicinityType.bus_stop, 120)],
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Far apartment",
         vicinities=[(VicinityType.bus_stop, 500)],
@@ -379,23 +379,23 @@ def test_filter_estates_by_vicinity_distance_without_type(client, db_session):
         query_string={"vicinity_distance_m_to": "200"},
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(near_id)
 
 
 def test_filter_estates_by_vicinity_type_and_distance(client, db_session):
-    matching_id = _create_filter_estate(
+    matching_id = create_filter_estate(
         db_session,
         title="Matching vicinity apartment",
         vicinities=[(VicinityType.bus_stop, 120)],
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Too far apartment",
         vicinities=[(VicinityType.bus_stop, 500)],
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Wrong vicinity apartment",
         vicinities=[(VicinityType.closest, 120)],
@@ -409,7 +409,7 @@ def test_filter_estates_by_vicinity_type_and_distance(client, db_session):
         },
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(matching_id)
 
@@ -420,12 +420,12 @@ def test_filter_estates_saved_by_current_user_true(
     db_session,
     logged_in_user,
 ):
-    saved_id = _create_filter_estate(
+    saved_id = create_filter_estate(
         db_session,
         title="Saved apartment",
         price="100000.00",
     )
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Not saved apartment",
         price="200000.00",
@@ -445,7 +445,7 @@ def test_filter_estates_saved_by_current_user_true(
         headers=logged_in_user.headers,
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(saved_id)
 
@@ -456,12 +456,12 @@ def test_filter_estates_saved_by_current_user_false(
     db_session,
     logged_in_user,
 ):
-    saved_id = _create_filter_estate(
+    saved_id = create_filter_estate(
         db_session,
         title="Saved apartment",
         price="100000.00",
     )
-    not_saved_id = _create_filter_estate(
+    not_saved_id = create_filter_estate(
         db_session,
         title="Not saved apartment",
         price="200000.00",
@@ -485,7 +485,7 @@ def test_filter_estates_saved_by_current_user_false(
         headers=logged_in_user.headers,
     )
 
-    data = _assert_ok_filter_response(response, total=1)
+    data = assert_ok_filter_response(response, total=1)
 
     assert data["items"][0]["id"] == str(not_saved_id)
 
@@ -494,7 +494,7 @@ def test_filter_estates_saved_by_current_user_true_without_auth_returns_empty(
     client,
     db_session,
 ):
-    _create_filter_estate(
+    create_filter_estate(
         db_session,
         title="Public apartment",
     )
@@ -504,23 +504,23 @@ def test_filter_estates_saved_by_current_user_true_without_auth_returns_empty(
         query_string={"saved_by_current_user": "true"},
     )
 
-    data = _assert_ok_filter_response(response, total=0)
+    data = assert_ok_filter_response(response, total=0)
 
     assert data["items"] == []
 
 
 def test_filter_estates_sort_by_price_asc(client, db_session):
-    cheap_id = _create_filter_estate(
+    cheap_id = create_filter_estate(
         db_session,
         title="Cheap apartment",
         price="100000.00",
     )
-    middle_id = _create_filter_estate(
+    middle_id = create_filter_estate(
         db_session,
         title="Middle apartment",
         price="150000.00",
     )
-    expensive_id = _create_filter_estate(
+    expensive_id = create_filter_estate(
         db_session,
         title="Expensive apartment",
         price="250000.00",
@@ -534,7 +534,7 @@ def test_filter_estates_sort_by_price_asc(client, db_session):
         },
     )
 
-    data = _assert_ok_filter_response(response, total=3)
+    data = assert_ok_filter_response(response, total=3)
 
     assert [item["id"] for item in data["items"]] == [
         str(cheap_id),
@@ -544,17 +544,17 @@ def test_filter_estates_sort_by_price_asc(client, db_session):
 
 
 def test_filter_estates_sort_by_price_desc(client, db_session):
-    cheap_id = _create_filter_estate(
+    cheap_id = create_filter_estate(
         db_session,
         title="Cheap apartment",
         price="100000.00",
     )
-    middle_id = _create_filter_estate(
+    middle_id = create_filter_estate(
         db_session,
         title="Middle apartment",
         price="150000.00",
     )
-    expensive_id = _create_filter_estate(
+    expensive_id = create_filter_estate(
         db_session,
         title="Expensive apartment",
         price="250000.00",
@@ -568,7 +568,7 @@ def test_filter_estates_sort_by_price_desc(client, db_session):
         },
     )
 
-    data = _assert_ok_filter_response(response, total=3)
+    data = assert_ok_filter_response(response, total=3)
 
     assert [item["id"] for item in data["items"]] == [
         str(expensive_id),
@@ -578,17 +578,17 @@ def test_filter_estates_sort_by_price_desc(client, db_session):
 
 
 def test_filter_estates_pagination(client, db_session):
-    first_id = _create_filter_estate(
+    first_id = create_filter_estate(
         db_session,
         title="First apartment",
         price="100000.00",
     )
-    second_id = _create_filter_estate(
+    second_id = create_filter_estate(
         db_session,
         title="Second apartment",
         price="200000.00",
     )
-    third_id = _create_filter_estate(
+    third_id = create_filter_estate(
         db_session,
         title="Third apartment",
         price="300000.00",
@@ -604,7 +604,7 @@ def test_filter_estates_pagination(client, db_session):
         },
     )
 
-    data = _assert_ok_filter_response(response, total=3)
+    data = assert_ok_filter_response(response, total=3)
 
     assert data["page"] == 2
     assert data["page_size"] == 1

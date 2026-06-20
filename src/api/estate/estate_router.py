@@ -45,7 +45,7 @@ def get_estate(estate_id: UUID):
     return construct_response(data=response)
 
 
-@bp.post("/")
+@bp.post("")
 @jwt_required()
 def create_estate():
     # TODO: think about combining suggest route and create route # NOSONAR
@@ -55,7 +55,7 @@ def create_estate():
     return construct_response(status=201, data=response)
 
 
-@bp.get("/")
+@bp.get("")
 @jwt_required(optional=True)
 def get_estates():
     requester_id = get_optional_jwt_user_uuid()

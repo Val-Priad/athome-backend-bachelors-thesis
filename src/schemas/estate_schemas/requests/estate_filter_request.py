@@ -29,7 +29,7 @@ from domain.estate.enums.utilities_enums import (
 )
 from schemas.estate_schemas.validators_utils import make_value_error
 from schemas.parent_types import RequestValidation
-from schemas.types import NonNegativeArea, NonNegativeMoneyAmount
+from schemas.types import NonNegativeArea, NonNegativeMoneyAmount, PositiveArea
 
 
 class EstateSortBy(str, Enum):
@@ -200,16 +200,16 @@ class EstatePublicFilterRequest(RequestValidation):
     has_elevator: bool | None = None
 
     has_balcony: bool | None = None
-    balcony_area_from: NonNegativeArea | None = None
-    balcony_area_to: NonNegativeArea | None = None
+    balcony_area_from: PositiveArea | None = None
+    balcony_area_to: PositiveArea | None = None
 
     has_loggia: bool | None = None
-    loggia_area_from: NonNegativeArea | None = None
-    loggia_area_to: NonNegativeArea | None = None
+    loggia_area_from: PositiveArea | None = None
+    loggia_area_to: PositiveArea | None = None
 
     has_terrace: bool | None = None
-    terrace_area_from: NonNegativeArea | None = None
-    terrace_area_to: NonNegativeArea | None = None
+    terrace_area_from: PositiveArea | None = None
+    terrace_area_to: PositiveArea | None = None
 
     # EstateHouse
     room_count: list[RoomCount] | None = Field(
@@ -234,23 +234,23 @@ class EstatePublicFilterRequest(RequestValidation):
     floors_to: int | None = Field(default=None, ge=1)
 
     has_garden: bool | None = None
-    garden_area_from: NonNegativeArea | None = None
-    garden_area_to: NonNegativeArea | None = None
+    garden_area_from: PositiveArea | None = None
+    garden_area_to: PositiveArea | None = None
 
     building_area_from: NonNegativeArea | None = None
     building_area_to: NonNegativeArea | None = None
 
     has_pool: bool | None = None
-    pool_area_from: NonNegativeArea | None = None
-    pool_area_to: NonNegativeArea | None = None
+    pool_area_from: PositiveArea | None = None
+    pool_area_to: PositiveArea | None = None
 
     has_cellar: bool | None = None
-    cellar_area_from: NonNegativeArea | None = None
-    cellar_area_to: NonNegativeArea | None = None
+    cellar_area_from: PositiveArea | None = None
+    cellar_area_to: PositiveArea | None = None
 
     has_garage: bool | None = None
-    garage_area_from: NonNegativeArea | None = None
-    garage_area_to: NonNegativeArea | None = None
+    garage_area_from: PositiveArea | None = None
+    garage_area_to: PositiveArea | None = None
 
     # EstateVicinity
     vicinity_type: list[VicinityType] | None = Field(

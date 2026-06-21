@@ -29,14 +29,17 @@ from application.auth.verify_email_use_case import VerifyEmailUseCase
 from application.auth.verify_new_password_use_case import (
     VerifyNewPasswordUseCase,
 )
-
-# Application Layer - Estate Use Cases
 from application.estate.create_estate_use_case import CreateEstateUseCase
 from application.estate.get_estate_use_case import GetEstateUseCase
 from application.estate.get_filtered_estate_use_case import (
     GetFilteredEstateUseCase,
 )
 from application.estate.suggest_estate_use_case import SuggestEstateUseCase
+
+# Application Layer - Estate Use Cases
+from application.estate.toggle_saved_estate_use_case import (
+    ToggleSavedEstateUseCase,
+)
 from application.users.delete_me_use_case import DeleteMeUseCase
 
 # Application Layer - Users Use Cases
@@ -177,3 +180,4 @@ get_estate_use_case = GetEstateUseCase(
     estate_repository, authorization_service
 )
 get_filtered_estate_use_case = GetFilteredEstateUseCase(estate_service)
+toggle_saved_estate_use_case = ToggleSavedEstateUseCase(estate_repository)

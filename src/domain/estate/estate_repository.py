@@ -22,6 +22,9 @@ from schemas.estate_schemas.requests.estate_filter_request import (
 
 
 class EstateRepository:
+    def estate_exists(self, session: Session, estate_id: UUID) -> bool:
+        return session.get(Estate, estate_id) is not None
+
     def add(self, session: Session, estate: Estate) -> Estate:
         session.add(estate)
         session.flush()
@@ -104,6 +107,32 @@ class EstateRepository:
         estates = list(session.scalars(stmt).unique())
 
         return estates, total
+
+    def toggle_saved(
+        self,
+        session: Session,
+        requester_id: UUID,
+        estate_id: UUID,
+    ) -> None:
+        record = self._get_saved_estate_or_none(
+            session, requester_id, estate_id
+        )
+        if record:
+            session.delete(record)
+        else:
+            session.add(SavedEstate(user_id=requester_id, estate_id=estate_id))
+
+    def _get_saved_estate_or_none(
+        self, session: Session, requester_id: UUID, estate_id: UUID
+    ) -> SavedEstate | None:
+        return session.execute(
+            select(SavedEstate).where(
+                and_(
+                    SavedEstate.user_id == requester_id,
+                    SavedEstate.estate_id == estate_id,
+                )
+            )
+        ).scalar_one_or_none()
 
     def _apply_filters(
         self,

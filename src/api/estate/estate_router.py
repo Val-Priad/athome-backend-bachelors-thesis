@@ -9,6 +9,7 @@ from composition_root import (
     get_estate_use_case,
     get_filtered_estate_use_case,
     suggest_estate_use_case,
+    toggle_saved_estate_use_case,
 )
 from infrastructure.jwt.jwt_utils import (
     get_jwt_user_uuid,
@@ -33,9 +34,6 @@ bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 #     estate_description = .execute(estate_id)
 #     return construct_response(data=estate_description)
 
-# TODO: list estate # NOSONAR
-# TODO: save estate to liked # NOSONAR
-
 
 @bp.get("/<uuid:estate_id>")
 @jwt_required(optional=True)
@@ -48,7 +46,6 @@ def get_estate(estate_id: UUID):
 @bp.post("")
 @jwt_required()
 def create_estate():
-    # TODO: think about combining suggest route and create route # NOSONAR
     requester_id = get_jwt_user_uuid()
     data = EstateCreateRequest.from_request(request.json)
     response = create_estate_use_case.execute(data, requester_id)
@@ -75,6 +72,14 @@ def suggest_estate():
     data = EstateSuggestRequest.from_request(request.json)
     response = suggest_estate_use_case.execute(data, requester_id)
     return construct_response(status=201, data=response)
+
+
+@bp.post("/saved/<uuid:estate_id>")
+@jwt_required()
+def toggle_saved_estate(estate_id):
+    requester_id = get_jwt_user_uuid()
+    toggle_saved_estate_use_case.execute(requester_id, estate_id)
+    return construct_response()
 
 
 @bp.errorhandler(Exception)

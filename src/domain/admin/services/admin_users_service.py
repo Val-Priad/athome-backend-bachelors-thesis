@@ -1,4 +1,3 @@
-from typing import Literal
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -36,30 +35,3 @@ class AdminUsersService:
             raise UserStateConflictError()
 
         user.role = role
-
-    def list_users(
-        self,
-        session: Session,
-        *,
-        role: UserRole | None = None,
-        email: str | None = None,
-        name: str | None = None,
-        phone_number: str | None = None,
-        is_email_verified: bool | None = None,
-        sort_by: str,
-        sort_order: Literal["asc", "desc"],
-        page: int,
-        page_size: int,
-    ):
-        return self.user_repository.list_users(
-            session,
-            role=role,
-            email=email,
-            name=name,
-            phone_number=phone_number,
-            is_email_verified=is_email_verified,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            page=page,
-            page_size=page_size,
-        )

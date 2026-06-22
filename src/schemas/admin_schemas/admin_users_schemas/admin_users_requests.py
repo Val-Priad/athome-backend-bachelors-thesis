@@ -16,6 +16,7 @@ class UsersListRequest(RequestValidation):
 
     email: str | None = None
     name: str | None = None
+    role: UserRole | None = None
     phone_number: str | None = None
     is_email_verified: bool | None = None
 

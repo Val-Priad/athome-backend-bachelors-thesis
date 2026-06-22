@@ -103,6 +103,49 @@ def test_list_users_admin_supports_pagination(
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_list_users_admin_filters_by_role(client, logged_in_user, db_session):
+    db_session.add_all(
+        [
+            User(
+                email="role.user@example.com",
+                password_hash=PasswordCrypto.hash_password("any_password"),
+                is_email_verified=True,
+                role=UserRole.user,
+            ),
+            User(
+                email="role.agent@example.com",
+                password_hash=PasswordCrypto.hash_password("any_password"),
+                is_email_verified=True,
+                role=UserRole.agent,
+            ),
+            User(
+                email="role.admin@example.com",
+                password_hash=PasswordCrypto.hash_password("any_password"),
+                is_email_verified=True,
+                role=UserRole.admin,
+            ),
+        ]
+    )
+    db_session.flush()
+
+    response = client.get(
+        f"{API_PREFIX}{ADMIN_USERS_PATH}?role=agent",
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.get_json()["data"]
+
+    assert data["total"] == 1
+    assert len(data["items"]) == 1
+
+    item = data["items"][0]
+    assert item["email"] == "role.agent@example.com"
+    assert item["role"] == "agent"
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_list_users_admin_filters_by_email(client, logged_in_user, db_session):
     db_session.add_all(
         [

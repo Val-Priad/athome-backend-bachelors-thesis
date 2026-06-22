@@ -161,9 +161,7 @@ change_user_role_use_case = ChangeUserRoleUseCase(
 delete_admin_user_use_case = DeleteAdminUserUseCase(
     admin_users_service, authorization_service
 )
-list_users_use_case = ListUsersUseCase(
-    admin_users_service, authorization_service
-)
+list_users_use_case = ListUsersUseCase(user_repository, authorization_service)
 get_admin_filtered_estate_use_case = GetAdminFilteredEstateUseCase(
     estate_service, authorization_service
 )

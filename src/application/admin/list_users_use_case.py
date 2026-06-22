@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from domain.admin.services.admin_users_service import AdminUsersService
 from domain.user.user_model import UserRole
+from domain.user.user_repository import UserRepository
 from infrastructure.db import db_session
 from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
     UsersListRequest,
@@ -16,10 +16,10 @@ from security.authorization import AuthorizationService
 class ListUsersUseCase:
     def __init__(
         self,
-        admin_users_service: AdminUsersService,
+        user_repository: UserRepository,
         authorization_service: AuthorizationService,
     ):
-        self.admin_users_service = admin_users_service
+        self.user_repository = user_repository
         self.authorization_service = authorization_service
 
     def execute(
@@ -29,9 +29,9 @@ class ListUsersUseCase:
             self.authorization_service.ensure_has_rights(
                 session, requester_id, UserRole.admin
             )
-            users, total = self.admin_users_service.list_users(
+            users, total = self.user_repository.list_users(
                 session,
-                role=None,
+                role=query.role,
                 email=query.email,
                 name=query.name,
                 phone_number=query.phone_number,

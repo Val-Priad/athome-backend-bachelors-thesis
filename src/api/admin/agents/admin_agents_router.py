@@ -13,7 +13,7 @@ bp = Blueprint("admin_agents", __name__, url_prefix="/api/admin/agents")
 
 @bp.get("")
 @jwt_required()
-def list_users():
+def list_agents():
     requester_id = get_jwt_user_uuid()
     query = AgentListRequest.from_query(request.args)
 

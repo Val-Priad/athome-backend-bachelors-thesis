@@ -1,5 +1,6 @@
 from flask import Flask
 
+from api.admin.agents.admin_agents_router import bp as admin_agents_bp
 from api.admin.estate.admin_estate_router import bp as admin_estate_bp
 from api.admin.users.admin_users_router import bp as admin_users_bp
 from api.agents.agents_router import bp as agent_bp
@@ -35,5 +36,6 @@ def create_app(config: type[FlaskConfig]) -> Flask:
     app.register_blueprint(agent_bp)
     app.register_blueprint(estate_bp)
     app.register_blueprint(admin_estate_bp)
+    app.register_blueprint(admin_agents_bp)
 
     return app

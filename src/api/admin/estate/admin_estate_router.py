@@ -27,6 +27,9 @@ def get_estates():
     return construct_response(data=response)
 
 
+# TODO: update_estate # NOSONAR
+
+
 @bp.errorhandler(Exception)
 def handle_exception(e: Exception):
     return construct_error(e)

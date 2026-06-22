@@ -29,18 +29,7 @@ class ListUsersUseCase:
             self.authorization_service.ensure_has_rights(
                 session, requester_id, UserRole.admin
             )
-            users, total = self.user_repository.list_users(
-                session,
-                role=query.role,
-                email=query.email,
-                name=query.name,
-                phone_number=query.phone_number,
-                is_email_verified=query.is_email_verified,
-                sort_by=query.sort_by,
-                sort_order=query.sort_order,
-                page=query.page,
-                page_size=query.page_size,
-            )
+            users, total = self.user_repository.list_users(session, query)
 
             return UsersListResponse(
                 items=[UsersListItem.from_model(user) for user in users],

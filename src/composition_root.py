@@ -41,6 +41,7 @@ from application.estate.suggest_estate_use_case import SuggestEstateUseCase
 from application.estate.toggle_saved_estate_use_case import (
     ToggleSavedEstateUseCase,
 )
+from application.estate.update_estate_use_case import UpdateEstateUseCase
 from application.users.delete_me_use_case import DeleteMeUseCase
 
 # Application Layer - Users Use Cases
@@ -183,3 +184,6 @@ get_estate_use_case = GetEstateUseCase(
 )
 get_filtered_estate_use_case = GetFilteredEstateUseCase(estate_service)
 toggle_saved_estate_use_case = ToggleSavedEstateUseCase(estate_repository)
+update_estate_use_case = UpdateEstateUseCase(
+    estate_service, authorization_service, estate_participants_service
+)

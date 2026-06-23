@@ -7,7 +7,7 @@ from schemas.estate_schemas.requests.estate_suggest_request import (
 from schemas.types import ID
 
 
-class EstateCreateType(EstateSuggestRequest):
+class EstateMutationType(EstateSuggestRequest):
     seller_id: ID | None = None
     agent_id: ID | None = None
     expires_at: date | None = None

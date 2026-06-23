@@ -11,13 +11,18 @@ from exceptions.custom_exceptions.user_exceptions import (
 from schemas.estate_schemas.requests.estate_create_request import (
     EstateCreateRequest,
 )
+from schemas.estate_schemas.requests.estate_update_request import (
+    EstateUpdateRequest,
+)
 
 
 class EstateParticipantsService:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
-    def check_participants(self, session: Session, data: EstateCreateRequest):
+    def check_participants(
+        self, session: Session, data: EstateUpdateRequest | EstateCreateRequest
+    ):
         self._check_seller(session, data.seller_id)
         self._check_agent(session, data.agent_id)
 

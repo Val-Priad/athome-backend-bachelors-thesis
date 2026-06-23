@@ -25,7 +25,7 @@ class GetEstateUseCase:
         self, requester_id: UUID | None, id: UUID
     ) -> EstateGeneralGetResponse | EstateGetResponseWithSeller:
         with db_session() as session:
-            estate = self.estate_repository.get_estate_full_by_id(session, id)
+            estate = self.estate_repository.get_full_estate_by_id(session, id)
 
             requester_is_staff = bool(
                 requester_id

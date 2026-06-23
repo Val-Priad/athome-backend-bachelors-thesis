@@ -7,7 +7,9 @@ from infrastructure.db import db_session
 from schemas.estate_schemas.requests.estate_create_request import (
     EstateCreateRequest,
 )
-from schemas.estate_schemas.requests.estate_create_type import EstateCreateType
+from schemas.estate_schemas.requests.estate_create_type import (
+    EstateMutationType,
+)
 from schemas.estate_schemas.responses.estate_create_response import (
     EstateIDResponse,
 )
@@ -30,7 +32,7 @@ class CreateEstateUseCase:
         data: EstateCreateRequest,
         requester_id: UUID,
     ) -> EstateIDResponse:
-        creation_data = EstateCreateType(**data.model_dump())
+        creation_data = EstateMutationType(**data.model_dump())
 
         with db_session() as session:
             self._ensure_rights_and_data_validity(session, requester_id, data)

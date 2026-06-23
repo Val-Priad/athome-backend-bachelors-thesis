@@ -29,12 +29,6 @@ from schemas.helpers import parse_query_params
 bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 
 
-# @bp.get("/<uuid:estate_id>")
-# def get_estate_description(estate_id: UUID):
-#     estate_description = .execute(estate_id)
-#     return construct_response(data=estate_description)
-
-
 @bp.get("/<uuid:estate_id>")
 @jwt_required(optional=True)
 def get_estate(estate_id: UUID):

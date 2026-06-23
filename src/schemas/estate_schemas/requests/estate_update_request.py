@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import ConfigDict, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
+from typing_extensions import override
 
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from schemas.estate_schemas.requests.estate_listing_validation import (
@@ -14,16 +15,20 @@ from schemas.estate_schemas.requests.estate_suggest_request import (
 from schemas.types import ID
 
 
-class EstateCreateRequest(EstateSuggestRequest):
+class EstateUpdateRequest(EstateSuggestRequest):
     model_config = ConfigDict(extra="forbid")
 
     seller_id: ID | None = None
     agent_id: ID | None = None
     expires_at: date | None = None
-    listing_status: Literal[ListingStatus.draft, ListingStatus.active]
+    listing_status: Literal[
+        ListingStatus.draft,
+        ListingStatus.active,
+        ListingStatus.archived,
+    ]
 
     @model_validator(mode="after")
-    def validate_admin_creation_rules(self):
+    def validate_update_rules(self):
         errors: list[InitErrorDetails] = []
 
         validate_listing_mutation_rules(
@@ -41,3 +46,7 @@ class EstateCreateRequest(EstateSuggestRequest):
             )
 
         return self
+
+    @override
+    def _validate_available_from(self, errors):
+        return

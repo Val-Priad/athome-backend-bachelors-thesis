@@ -1,11 +1,19 @@
+from uuid import UUID
+
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
 from api.responses import construct_error, construct_response
-from composition_root import get_admin_filtered_estate_use_case
+from composition_root import (
+    get_admin_filtered_estate_use_case,
+    update_estate_use_case,
+)
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
 from schemas.estate_schemas.requests.estate_filter_request import (
     EstateAdminFilterRequest,
+)
+from schemas.estate_schemas.requests.estate_update_request import (
+    EstateUpdateRequest,
 )
 from schemas.helpers import parse_query_params
 
@@ -27,7 +35,17 @@ def get_estates():
     return construct_response(data=response)
 
 
-# TODO: update_estate # NOSONAR
+@bp.put("/<uuid:estate_id>")
+@jwt_required()
+def update_estate(estate_id: UUID):
+    requester_id = get_jwt_user_uuid()
+    data = EstateUpdateRequest.from_request(request.json)
+    response = update_estate_use_case.execute(
+        estate_id=estate_id,
+        data=data,
+        requester_id=requester_id,
+    )
+    return construct_response(data=response)
 
 
 @bp.errorhandler(Exception)

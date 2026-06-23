@@ -1,8 +1,8 @@
 import uuid
-from datetime import date, datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey
+from sqlalchemy import Date, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,12 +24,8 @@ class EstateListing(Base):
     status: Mapped[ListingStatus] = mapped_column(
         Enum(ListingStatus, name="listing_status_enum")
     )
-    published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
-    expires_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
+    published_at: Mapped[date | None] = mapped_column(Date)
+    expires_at: Mapped[date | None] = mapped_column(Date)
     available_from: Mapped[date] = mapped_column(Date)
 
     estate: Mapped["Estate"] = relationship("Estate", back_populates="listing")

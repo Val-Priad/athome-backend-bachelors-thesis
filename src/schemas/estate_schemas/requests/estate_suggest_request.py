@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import ConfigDict, Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
@@ -48,12 +50,13 @@ class EstateSuggestRequest(RequestValidation):
     media: list[EstateMediaSection] = Field(min_length=1)
 
     @model_validator(mode="after")
-    def validate_for_creation(self):
+    def validate_estate_schema(self):
         errors: list[InitErrorDetails] = []
 
         self._validate_apartment_section(errors)
         self._validate_house_section(errors)
         self._validate_main_media(errors)
+        self._validate_available_from(errors)
 
         if errors:
             raise ValidationError.from_exception_data(
@@ -125,5 +128,15 @@ class EstateSuggestRequest(RequestValidation):
                     loc=("media",),
                     message="Estate must contain exactly one main media item",
                     input_value=self.media,
+                )
+            )
+
+    def _validate_available_from(self, errors):
+        if self.listing.available_from < date.today():
+            errors.append(
+                make_value_error(
+                    loc=("available_from",),
+                    message="available_from cannot be in the past",
+                    input_value=self.listing.available_from,
                 )
             )

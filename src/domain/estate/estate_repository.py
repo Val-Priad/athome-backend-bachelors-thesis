@@ -30,7 +30,7 @@ class EstateRepository:
         session.flush()
         return estate
 
-    def get_estate_full_by_id(
+    def get_full_estate_by_id(
         self,
         session: Session,
         estate_id: UUID,

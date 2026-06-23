@@ -32,7 +32,9 @@ class Mailer:
         resend.Emails.send(params)  # type: ignore
 
     def send_reset_password_email(self, email_to, token):
-        verification_url = f"{os.getenv('APP_BASE_URL')}/reset-password?token={token}"
+        verification_url = (
+            f"{os.getenv('APP_BASE_URL')}/reset-password?token={token}"
+        )
 
         template = self.env.get_template("password_reset.html")
         html = template.render(verification_url=verification_url)
@@ -47,5 +49,5 @@ class Mailer:
         resend.Emails.send(params)  # type: ignore
 
 
-# TODO: Implement sending email to agent
-# TODO: Create clean HTML email markup
+# TODO: Implement sending email to agent # NOSONAR
+# TODO: Create clean HTML email markup # NOSONAR

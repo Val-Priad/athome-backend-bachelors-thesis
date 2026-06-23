@@ -1,8 +1,9 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from domain.estate.enums.estate_enums import EstateType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_model import Estate
 from domain.estate.estate_repository import EstateRepository
@@ -17,10 +18,15 @@ from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
 from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
-from schemas.estate_schemas.requests.estate_create_type import EstateCreateType
+from schemas.estate_schemas.requests.estate_create_type import (
+    EstateMutationType,
+)
 from schemas.estate_schemas.requests.estate_filter_request import (
     EstateAdminFilterRequest,
     EstatePublicFilterRequest,
+)
+from schemas.estate_schemas.requests.estate_update_request import (
+    EstateUpdateRequest,
 )
 from schemas.estate_schemas.responses.estate_filter_response import (
     EstateFilterItem,
@@ -40,14 +46,10 @@ class EstateService:
         self.estate_repository = estate_repository
         self.vicinity_client = vicinity_client
 
-    @staticmethod
-    def _create_related_model(model_class, data):
-        return model_class(**data.model_dump(exclude_none=True))
-
     def create_estate(
         self,
         session: Session,
-        data: EstateCreateType,
+        data: EstateMutationType,
         vicinities: list[EstateVicinity],
     ) -> Estate:
         estate = Estate(
@@ -175,3 +177,97 @@ class EstateService:
             page=filters.page,
             page_size=filters.page_size,
         )
+
+    def update_estate(
+        self,
+        session: Session,
+        estate_id: UUID,
+        data: EstateUpdateRequest,
+    ) -> Estate:
+
+        estate = self.estate_repository.get_full_estate_by_id(
+            session=session,
+            estate_id=estate_id,
+        )
+
+        old_status = estate.listing.status
+
+        estate.seller_id = data.seller_id
+        estate.agent_id = data.agent_id
+        estate.estate_type = data.estate_type
+        estate.offer_type = data.offer_type
+
+        estate.listing.status = data.listing_status
+        estate.listing.available_from = data.listing.available_from
+        estate.listing.expires_at = data.expires_at
+
+        if (
+            old_status != ListingStatus.active
+            and data.listing_status == ListingStatus.active
+        ):
+            estate.listing.published_at = date.today()
+
+        if data.listing_status == ListingStatus.draft:
+            estate.listing.published_at = None
+
+        self._update_related_model(estate.location, data.location)
+        self._update_related_model(estate.pricing, data.pricing)
+        self._update_related_model(estate.details, data.details)
+
+        if data.utilities is not None:
+            self._update_related_model(estate.utilities, data.utilities)
+        else:
+            estate.utilities = EstateUtilities()
+
+        self._update_property_type_sections(estate, data)
+        self._replace_translations(estate, data)
+        self._replace_media(estate, data)
+
+        estate.vicinities = self.get_vicinities_or_empty(data.location)
+
+        session.flush()
+
+        return estate
+
+    def _update_property_type_sections(self, estate: Estate, data) -> None:
+        if data.estate_type == EstateType.apartment:
+            estate.house = None
+
+            if estate.apartment is None:
+                estate.apartment = self._create_related_model(
+                    EstateApartment,
+                    data.apartment,
+                )
+            else:
+                self._update_related_model(estate.apartment, data.apartment)
+
+        if data.estate_type == EstateType.house:
+            estate.apartment = None
+
+            if estate.house is None:
+                estate.house = self._create_related_model(
+                    EstateHouse,
+                    data.house,
+                )
+            else:
+                self._update_related_model(estate.house, data.house)
+
+    def _replace_translations(self, estate: Estate, data) -> None:
+        estate.translations = [
+            EstateTranslation(**translation.model_dump())
+            for translation in data.translations
+        ]
+
+    def _replace_media(self, estate: Estate, data) -> None:
+        estate.media = [
+            EstateMedia(**media.model_dump()) for media in data.media
+        ]
+
+    @staticmethod
+    def _create_related_model(model_class, data):
+        return model_class(**data.model_dump(exclude_none=True))
+
+    @staticmethod
+    def _update_related_model(model, data) -> None:
+        for key, value in data.model_dump().items():
+            setattr(model, key, value)

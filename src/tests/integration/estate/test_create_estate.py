@@ -123,9 +123,7 @@ def test_admin_create_estate_success(
     assert estate.listing is not None
     assert estate.listing.status == listing_status
     assert estate.listing.expires_at is not None
-    assert estate.listing.expires_at.date() == date.today() + timedelta(
-        days=67
-    )
+    assert estate.listing.expires_at == date.today() + timedelta(days=67)
     assert estate.listing.available_from == date.fromisoformat(
         payload["listing"]["available_from"]
     )

@@ -63,12 +63,3 @@ def handle_exception(e: Exception):
 
 
 # TODO: use leaflet as an interactive map on frontend # NOSONAR
-
-# TODO: Admin Panel: Agent List  # NOSONAR
-# Add filters for admin list
-# Add sorting for admin list
-# + Pagination
-# email
-# name
-# phone_number
-# qty of connected active estate (will be implemented after adding estate entity)

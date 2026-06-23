@@ -3,7 +3,9 @@ from uuid import UUID
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_service import EstateService
 from infrastructure.db import db_session
-from schemas.estate_schemas.requests.estate_create_type import EstateCreateType
+from schemas.estate_schemas.requests.estate_create_type import (
+    EstateMutationType,
+)
 from schemas.estate_schemas.requests.estate_suggest_request import (
     EstateSuggestRequest,
 )
@@ -25,7 +27,7 @@ class SuggestEstateUseCase:
         vicinities = self.estate_service.get_vicinities_or_empty(data.location)
 
         with db_session() as session:
-            creation_data = EstateCreateType(
+            creation_data = EstateMutationType(
                 **data.model_dump(),
                 seller_id=requester_id,
                 agent_id=None,

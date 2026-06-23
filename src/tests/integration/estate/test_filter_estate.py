@@ -49,13 +49,13 @@ def create_filter_estate(
     balcony_area: float | None = None,
     loggia_area: float | None = None,
     terrace_area: float | None = None,
-    published_at: datetime | None = None,
+    published_at: date | None = None,
     seller_id=None,
     agent_id=None,
     vicinities: list[tuple[VicinityType, int]] | None = None,
 ) -> uuid.UUID:
     if published_at is None and status == ListingStatus.active:
-        published_at = datetime.now(timezone.utc)
+        published_at = date.today()
 
     estate = Estate(
         seller_id=seller_id,

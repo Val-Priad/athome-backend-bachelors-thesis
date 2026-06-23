@@ -7,8 +7,10 @@ from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.user_model import UserRole
+from tests.integration.admin_estate.test_create_estate import (
+    get_created_estate,
+)
 from tests.integration.conftest import API_PREFIX, ESTATE_PATH
-from tests.integration.estate.test_create_estate import get_created_estate
 
 SUGGESTIONS_PATH = f"{API_PREFIX}{ESTATE_PATH}/suggestions"
 

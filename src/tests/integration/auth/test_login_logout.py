@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import select
 
 from domain.user.user_model import User
-from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
+from tests.integration.conftest import AUTH_PATH
 
 
 @pytest.fixture()
@@ -10,7 +10,7 @@ def verified_user(db_session, client):
     email = "user@example.com"
     password = "12345678"  # NOSONAR
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
+        f"{AUTH_PATH}/register",
         json={"email": email, "password": password},
     )
     assert response.status_code == 202
@@ -26,7 +26,7 @@ def unverified_user(client):
     email = "user@example.com"
     password = "12345678"  # NOSONAR
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
+        f"{AUTH_PATH}/register",
         json={"email": email, "password": password},
     )
     assert response.status_code == 202
@@ -36,7 +36,7 @@ def unverified_user(client):
 
 def test_login_and_log_out(client, verified_user):
     login_response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/login",
+        f"{AUTH_PATH}/login",
         json={
             "email": verified_user["email"],
             "password": verified_user["password"],
@@ -45,7 +45,7 @@ def test_login_and_log_out(client, verified_user):
     assert login_response.status_code == 200
 
     logout_response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/logout",
+        f"{AUTH_PATH}/logout",
         headers={"X-CSRF-TOKEN": client.get_cookie("csrf_access_token").value},
     )
     assert logout_response.status_code == 200
@@ -53,7 +53,7 @@ def test_login_and_log_out(client, verified_user):
 
 def test_login_unverified_user(client, unverified_user):
     login_response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/login",
+        f"{AUTH_PATH}/login",
         json={
             "email": unverified_user["email"],
             "password": unverified_user["password"],
@@ -64,7 +64,7 @@ def test_login_unverified_user(client, unverified_user):
 
 def test_login_not_registered_user(client):
     login_response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/login",
+        f"{AUTH_PATH}/login",
         json={
             "email": "not_registered@example.com",
             "password": "not_registered",  # NOSONAR
@@ -75,7 +75,7 @@ def test_login_not_registered_user(client):
 
 def test_login_invalid_password(client, verified_user):
     login_response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/login",
+        f"{AUTH_PATH}/login",
         json={
             "email": verified_user["email"],
             "password": "wrong_password",

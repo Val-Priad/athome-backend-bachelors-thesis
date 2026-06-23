@@ -5,7 +5,6 @@ from flask_jwt_extended import jwt_required
 
 from api.responses import construct_error, construct_response
 from composition_root import (
-    create_estate_use_case,
     get_estate_use_case,
     get_filtered_estate_use_case,
     suggest_estate_use_case,
@@ -14,9 +13,6 @@ from composition_root import (
 from infrastructure.jwt.jwt_utils import (
     get_jwt_user_uuid,
     get_optional_jwt_user_uuid,
-)
-from schemas.estate_schemas.requests.estate_create_request import (
-    EstateCreateRequest,
 )
 from schemas.estate_schemas.requests.estate_filter_request import (
     EstatePublicFilterRequest,
@@ -35,15 +31,6 @@ def get_estate(estate_id: UUID):
     requester_id = get_optional_jwt_user_uuid()
     response = get_estate_use_case.execute(requester_id, estate_id)
     return construct_response(data=response)
-
-
-@bp.post("")
-@jwt_required()
-def create_estate():
-    requester_id = get_jwt_user_uuid()
-    data = EstateCreateRequest.from_request(request.json)
-    response = create_estate_use_case.execute(data, requester_id)
-    return construct_response(status=201, data=response)
 
 
 @bp.get("")

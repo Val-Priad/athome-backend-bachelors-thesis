@@ -7,13 +7,13 @@ from domain.email_verification.email_verification_model import (
 )
 from domain.user.user_model import User
 from security import PasswordCrypto
-from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
+from tests.integration.conftest import AUTH_PATH
 
 
 def test_register_valid(client, db_session):
     password = "some_password"
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
+        f"{AUTH_PATH}/register",
         json={"email": "user@example.com", "password": password},
     )
 
@@ -36,7 +36,7 @@ def test_register_user_already_exists(client):
         "email": "user@example.com",
         "password": "some_password",
     }
-    client.post(f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register", json=payload)
+    client.post(f"{AUTH_PATH}/register", json=payload)
     response = client.post("/api/auth/register", json=payload)
     assert response.status_code == 202
 
@@ -59,7 +59,7 @@ def test_register_user_already_exists(client):
 )
 def test_register_user_validation_error(client, payload):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
+        f"{AUTH_PATH}/register",
         json=payload,
     )
     assert response.status_code == 400
@@ -75,7 +75,7 @@ def test_register_internal_error_rolls_back(client, db_session, monkeypatch):
     monkeypatch.setattr(auth_service, "create_user", boom)
 
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/register",
+        f"{AUTH_PATH}/register",
         json={"email": "user@example.com", "password": "some_password"},
     )
     assert response.status_code == 500

@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from domain.password_reset.password_reset_model import PasswordReset
 from domain.user.user_model import User
-from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
+from tests.integration.conftest import AUTH_PATH
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def any_user(db_session):
 
 def test_reset_password_token_valid(client, any_user, db_session):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/reset-password",
+        f"{AUTH_PATH}/reset-password",
         json={"email": any_user["user_email"]},
     )
 
@@ -55,7 +55,7 @@ def test_reset_password_token_valid(client, any_user, db_session):
 
 def test_reset_password_token_no_user(client):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/reset-password",
+        f"{AUTH_PATH}/reset-password",
         json={"email": "user@example.com"},
     )
 
@@ -64,7 +64,7 @@ def test_reset_password_token_no_user(client):
 
 def test_reset_password_token_invalid_email(client):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/reset-password",
+        f"{AUTH_PATH}/reset-password",
         json={"email": "invalid_email"},
     )
 

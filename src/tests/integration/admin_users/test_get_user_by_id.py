@@ -6,13 +6,13 @@ from domain.user.user_model import UserRole
 from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
     UserResponse,
 )
-from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
+from tests.integration.conftest import ADMIN_USERS_PATH
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_get_user_by_id_valid(client, logged_in_user, any_user):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
+        f"{ADMIN_USERS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -29,7 +29,7 @@ def test_get_user_by_id_valid(client, logged_in_user, any_user):
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_get_user_by_id_user_not_found(client, logged_in_user):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}/{uuid4()}",
+        f"{ADMIN_USERS_PATH}/{uuid4()}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 404
@@ -41,7 +41,7 @@ def test_get_user_by_id_user_not_found(client, logged_in_user):
 )
 def test_get_user_by_id_forbidden(client, logged_in_user, any_user):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
+        f"{ADMIN_USERS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 403

@@ -4,7 +4,7 @@ import pytest
 
 from domain.user.user_model import UserRole
 from schemas.agent_schemas.agent_responses import AgentDescriptionResponse
-from tests.integration.conftest import AGENT_PATH, API_PREFIX
+from tests.integration.conftest import AGENTS_PATH
 
 
 @pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
@@ -15,7 +15,7 @@ from tests.integration.conftest import AGENT_PATH, API_PREFIX
 )
 def test_get_agent_description_successful(client, logged_in_user, any_user):
     response = client.get(
-        f"{API_PREFIX}{AGENT_PATH}/{any_user.id}",
+        f"{AGENTS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
     agent_dto: AgentDescriptionResponse = AgentDescriptionResponse.from_model(
@@ -30,7 +30,7 @@ def test_get_agent_description_successful(client, logged_in_user, any_user):
 @pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
 def test_get_agent_description_successful_and_public(client, any_user):
     response = client.get(
-        f"{API_PREFIX}{AGENT_PATH}/{any_user.id}",
+        f"{AGENTS_PATH}/{any_user.id}",
     )
     agent_dto: AgentDescriptionResponse = AgentDescriptionResponse.from_model(
         any_user
@@ -53,7 +53,7 @@ def test_get_agent_description_fails_for_users_and_admins(
     client, logged_in_user, any_user
 ):
     response = client.get(
-        f"{API_PREFIX}{AGENT_PATH}/{any_user.id}",
+        f"{AGENTS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
 
@@ -63,7 +63,7 @@ def test_get_agent_description_fails_for_users_and_admins(
 
 def test_get_agent_description_fails_for_user_who_not_exist(client):
     response = client.get(
-        f"{API_PREFIX}{AGENT_PATH}/{uuid4()}",
+        f"{AGENTS_PATH}/{uuid4()}",
     )
 
     assert response.status_code == 404

@@ -11,9 +11,7 @@ from schemas.admin_schemas.admin_users_schemas.admin_agent_response import (
     AgentsListItem,
 )
 from security.password_crypto import PasswordCrypto
-from tests.integration.conftest import API_PREFIX
-
-ADMIN_AGENTS_PATH = "/admin/agents"
+from tests.integration.conftest import ADMIN_AGENTS_PATH
 
 
 @pytest.fixture
@@ -114,7 +112,7 @@ def test_list_agents_admin_success_defaults(
     populate_agents,
 ):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}",
+        ADMIN_AGENTS_PATH,
         headers=logged_in_user.headers,
     )
 
@@ -149,14 +147,12 @@ def test_list_agents_admin_supports_pagination(
     populate_agents,
 ):
     response_page_1 = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}"
-        "?page=1&page_size=15&sort_by=email&sort_order=asc",
+        f"{ADMIN_AGENTS_PATH}?page=1&page_size=15&sort_by=email&sort_order=asc",
         headers=logged_in_user.headers,
     )
 
     response_page_2 = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}"
-        "?page=2&page_size=15&sort_by=email&sort_order=asc",
+        f"{ADMIN_AGENTS_PATH}?page=2&page_size=15&sort_by=email&sort_order=asc",
         headers=logged_in_user.headers,
     )
 
@@ -216,7 +212,7 @@ def test_list_agents_admin_filters_by_email(
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}?email=target.agent",
+        f"{ADMIN_AGENTS_PATH}?email=target.agent",
         headers=logged_in_user.headers,
     )
 
@@ -257,7 +253,7 @@ def test_list_agents_admin_filters_by_name(
     )
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}?name=target",
+        f"{ADMIN_AGENTS_PATH}?name=target",
         headers=logged_in_user.headers,
     )
 
@@ -298,7 +294,7 @@ def test_list_agents_admin_filters_by_phone_number(
     )
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}?phone_number=701111",
+        f"{ADMIN_AGENTS_PATH}?phone_number=701111",
         headers=logged_in_user.headers,
     )
 
@@ -344,7 +340,7 @@ def test_list_agents_admin_returns_only_agents(
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}?name=Only Agent",
+        f"{ADMIN_AGENTS_PATH}?name=Only Agent",
         headers=logged_in_user.headers,
     )
 
@@ -406,7 +402,7 @@ def test_list_agents_admin_counts_only_active_estates(
     )
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}"
+        f"{ADMIN_AGENTS_PATH}"
         "?email=estate.qty&sort_by=estate_qty&sort_order=desc",
         headers=logged_in_user.headers,
     )
@@ -430,8 +426,7 @@ def test_list_agents_admin_sorts_by_email_desc(
     populate_agents,
 ):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}"
-        "?sort_by=email&sort_order=desc&page_size=50",
+        f"{ADMIN_AGENTS_PATH}?sort_by=email&sort_order=desc&page_size=50",
         headers=logged_in_user.headers,
     )
 
@@ -466,8 +461,7 @@ def test_list_agents_admin_sorts_by_created_at_desc(
     )
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}"
-        "?email=created-sort&sort_by=created_at&sort_order=desc",
+        f"{ADMIN_AGENTS_PATH}?email=created-sort&sort_by=created_at&sort_order=desc",
         headers=logged_in_user.headers,
     )
 
@@ -488,7 +482,7 @@ def test_list_agents_admin_sorts_by_created_at_desc(
 )
 def test_list_agents_forbidden_for_non_admin(client, logged_in_user):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}",
+        ADMIN_AGENTS_PATH,
         headers=logged_in_user.headers,
     )
 
@@ -497,7 +491,7 @@ def test_list_agents_forbidden_for_non_admin(client, logged_in_user):
 
 
 def test_list_agents_unauthorized_without_token(client):
-    response = client.get(f"{API_PREFIX}{ADMIN_AGENTS_PATH}")
+    response = client.get(ADMIN_AGENTS_PATH)
 
     assert response.status_code == 401
 
@@ -519,7 +513,7 @@ def test_list_agents_invalid_query_validation_error(
     query,
 ):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_AGENTS_PATH}?{query}",
+        f"{ADMIN_AGENTS_PATH}?{query}",
         headers=logged_in_user.headers,
     )
 

@@ -8,7 +8,7 @@ from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.estate_model import Estate
 from domain.estate.models.saved_estate_model import SavedEstate
 from domain.user.user_model import UserRole
-from tests.integration.conftest import API_PREFIX, ESTATE_PATH
+from tests.integration.conftest import ESTATE_PATH
 
 
 def create_test_estate(db_session: Session) -> Estate:
@@ -25,7 +25,7 @@ def create_test_estate(db_session: Session) -> Estate:
 def test_toggle_save_estate_add_success(client, logged_in_user, db_session):
     estate = create_test_estate(db_session)
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}/saved/{estate.id}",
+        f"{ESTATE_PATH}/saved/{estate.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -47,7 +47,7 @@ def test_toggle_save_estate_remove_success(client, logged_in_user, db_session):
     db_session.flush()
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}/saved/{estate.id}",
+        f"{ESTATE_PATH}/saved/{estate.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -65,7 +65,7 @@ def test_toggle_save_estate_remove_success(client, logged_in_user, db_session):
 def test_toggle_save_estate_not_found(client, logged_in_user):
     non_existent_id = uuid4()
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}/saved/{non_existent_id}",
+        f"{ESTATE_PATH}/saved/{non_existent_id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 404
@@ -73,5 +73,5 @@ def test_toggle_save_estate_not_found(client, logged_in_user):
 
 def test_toggle_save_estate_unauthorized(client):
     estate_id = uuid4()
-    response = client.post(f"{API_PREFIX}{ESTATE_PATH}/saved/{estate_id}")
+    response = client.post(f"{ESTATE_PATH}/saved/{estate_id}")
     assert response.status_code == 401

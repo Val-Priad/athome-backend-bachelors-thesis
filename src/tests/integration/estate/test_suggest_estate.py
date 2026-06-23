@@ -10,9 +10,7 @@ from domain.user.user_model import UserRole
 from tests.integration.admin_estate.test_create_estate import (
     get_created_estate,
 )
-from tests.integration.conftest import API_PREFIX, ESTATE_PATH
-
-SUGGESTIONS_PATH = f"{API_PREFIX}{ESTATE_PATH}/suggestions"
+from tests.integration.conftest import ESTATE_PATH
 
 
 def base_suggestion_payload():
@@ -72,7 +70,7 @@ def test_user_suggest_estate_success(
     payload = base_suggestion_payload()
 
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -139,7 +137,7 @@ def test_suggest_estate_rejects_listing_status(
     payload["listing_status"] = ListingStatus.active.value
 
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -163,7 +161,7 @@ def test_suggest_estate_rejects_expires_at(
     payload["expires_at"] = (date.today() + timedelta(days=30)).isoformat()
 
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -189,7 +187,7 @@ def test_suggest_estate_rejects_agent_id(
     payload["agent_id"] = str(any_user.id)
 
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -215,7 +213,7 @@ def test_suggest_estate_rejects_seller_id(
     payload["seller_id"] = str(any_user.id)
 
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -234,7 +232,7 @@ def test_suggest_estate_unauthorized_without_token(client):
     payload = base_suggestion_payload()
 
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json=payload,
     )
 
@@ -247,7 +245,7 @@ def test_suggest_estate_validation_error(
     logged_in_user,
 ):
     response = client.post(
-        SUGGESTIONS_PATH,
+        f"{ESTATE_PATH}/suggestions",
         json={},
         headers=logged_in_user.headers,
     )

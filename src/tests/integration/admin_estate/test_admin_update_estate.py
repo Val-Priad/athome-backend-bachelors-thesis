@@ -12,10 +12,8 @@ from domain.estate.estate_model import Estate
 from domain.user.user_model import User, UserRole
 from security.password_crypto import PasswordCrypto
 from tests.integration.admin_estate.test_create_estate import base_payload
-from tests.integration.conftest import API_PREFIX
+from tests.integration.conftest import ADMIN_ESTATE_PATH
 from tests.integration.estate.test_filter_estate import create_filter_estate
-
-ADMIN_ESTATE_PATH = f"{API_PREFIX}/admin/estate"
 
 
 def _create_test_user(

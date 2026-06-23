@@ -27,9 +27,7 @@ from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
 from domain.estate.models.saved_estate_model import SavedEstate
 from domain.user.user_model import UserRole
-from tests.integration.conftest import API_PREFIX, ESTATE_PATH
-
-FILTER_ESTATE_PATH = f"{API_PREFIX}{ESTATE_PATH}"
+from tests.integration.conftest import ESTATE_PATH
 
 
 def create_filter_estate(
@@ -171,7 +169,7 @@ def test_filter_estates_returns_only_active_estates(client, db_session):
         status=ListingStatus.draft,
     )
 
-    response = client.get(FILTER_ESTATE_PATH)
+    response = client.get(ESTATE_PATH)
 
     data = assert_ok_filter_response(response, total=1)
 
@@ -207,7 +205,7 @@ def test_filter_estates_by_price_range(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "price_from": "90000.00",
             "price_to": "160000.00",
@@ -242,7 +240,7 @@ def test_filter_estates_by_usable_area_range(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "usable_area_from": "50",
             "usable_area_to": "60",
@@ -270,7 +268,7 @@ def test_filter_estates_by_enum_list_uses_or_semantics(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string=[
             ("offer_type", OfferType.sale.value),
             ("sort_by", "price"),
@@ -299,7 +297,7 @@ def test_filter_estates_by_presence_true(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={"has_balcony": "true"},
     )
 
@@ -321,7 +319,7 @@ def test_filter_estates_by_presence_false(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={"has_balcony": "false"},
     )
 
@@ -349,7 +347,7 @@ def test_filter_estates_by_vicinity_type_uses_and_semantics(
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string=[
             ("vicinity_type", VicinityType.bus_stop.value),
             ("vicinity_type", VicinityType.closest.value),
@@ -375,7 +373,7 @@ def test_filter_estates_by_vicinity_distance_without_type(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={"vicinity_distance_m_to": "200"},
     )
 
@@ -402,7 +400,7 @@ def test_filter_estates_by_vicinity_type_and_distance(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "vicinity_type": VicinityType.bus_stop.value,
             "vicinity_distance_m_to": "200",
@@ -440,7 +438,7 @@ def test_filter_estates_saved_by_current_user_true(
     db_session.flush()
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={"saved_by_current_user": "true"},
         headers=logged_in_user.headers,
     )
@@ -476,7 +474,7 @@ def test_filter_estates_saved_by_current_user_false(
     db_session.flush()
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "saved_by_current_user": "false",
             "sort_by": "price",
@@ -500,7 +498,7 @@ def test_filter_estates_saved_by_current_user_true_without_auth_returns_empty(
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={"saved_by_current_user": "true"},
     )
 
@@ -527,7 +525,7 @@ def test_filter_estates_sort_by_price_asc(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "sort_by": "price",
             "order": "asc",
@@ -561,7 +559,7 @@ def test_filter_estates_sort_by_price_desc(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "sort_by": "price",
             "order": "desc",
@@ -595,7 +593,7 @@ def test_filter_estates_pagination(client, db_session):
     )
 
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string={
             "sort_by": "price",
             "order": "asc",
@@ -648,7 +646,7 @@ def test_filter_estates_pagination(client, db_session):
 )
 def test_filter_estates_validation_errors(client, query_string, field_name):
     response = client.get(
-        FILTER_ESTATE_PATH,
+        ESTATE_PATH,
         query_string=query_string,
     )
 

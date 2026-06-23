@@ -10,7 +10,7 @@ from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.estate.estate_model import Estate
 from domain.user.user_model import UserRole
-from tests.integration.conftest import API_PREFIX, ESTATE_PATH
+from tests.integration.conftest import ADMIN_ESTATE_PATH
 
 
 def base_payload(
@@ -106,7 +106,7 @@ def test_admin_create_estate_success(
     )
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -181,7 +181,7 @@ def test_admin_create_draft_estate_without_agent_success(
     )
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -207,7 +207,7 @@ def test_admin_create_active_estate_requires_agent(
     )
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -240,7 +240,7 @@ def test_admin_create_estate_rejects_past_available_from(
     }
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -276,7 +276,7 @@ def test_admin_create_estate_rejects_invalid_expires_at(
     payload["expires_at"] = expires_at
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -303,7 +303,7 @@ def test_admin_create_estate_rejects_active_estate_without_expires_field(
     payload["expires_at"] = None
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -338,7 +338,7 @@ def test_create_estate_forbidden_for_non_admin(
     )
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
         headers=logged_in_user.headers,
     )
@@ -357,7 +357,7 @@ def test_create_estate_unauthorized_without_token(client, any_user):
     )
 
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json=payload,
     )
 
@@ -367,7 +367,7 @@ def test_create_estate_unauthorized_without_token(client, any_user):
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_create_estate_validation_error(client, logged_in_user):
     response = client.post(
-        f"{API_PREFIX}{ESTATE_PATH}",
+        ADMIN_ESTATE_PATH,
         json={},
         headers=logged_in_user.headers,
     )

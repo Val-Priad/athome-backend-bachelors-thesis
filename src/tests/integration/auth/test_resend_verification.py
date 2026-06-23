@@ -8,7 +8,7 @@ from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
 from domain.user.user_model import User
-from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
+from tests.integration.conftest import AUTH_PATH
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def test_resend_verification_valid(
     unverified_user_id = unverified_user.id
 
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/resend-verification",
+        f"{AUTH_PATH}/resend-verification",
         json={"email": unverified_user.email},
     )
 
@@ -87,7 +87,7 @@ def test_resend_verification_valid(
 
 def test_resend_verification_validation(client):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/resend-verification",
+        f"{AUTH_PATH}/resend-verification",
         json={"email": "invalid_email"},
     )
 
@@ -96,7 +96,7 @@ def test_resend_verification_validation(client):
 
 def test_resend_verification_if_user_not_found(client):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/resend-verification",
+        f"{AUTH_PATH}/resend-verification",
         json={"email": "user_does_not_exist@example.com"},
     )
 
@@ -105,7 +105,7 @@ def test_resend_verification_if_user_not_found(client):
 
 def test_resend_verification_if_user_already_verified(client, verified_user):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/resend-verification",
+        f"{AUTH_PATH}/resend-verification",
         json={"email": verified_user.email},
     )
 
@@ -121,7 +121,7 @@ def test_resend_verification_on_server_error_returns_500(
     monkeypatch.setattr(email_verification_service, "get_resend_token", boom)
 
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/resend-verification",
+        f"{AUTH_PATH}/resend-verification",
         json={"email": unverified_user.email},
     )
 

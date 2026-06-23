@@ -16,12 +16,13 @@ from infrastructure.vicinity.vicinity_client import (
 )
 from security.password_crypto import PasswordCrypto
 
-API_PREFIX = "/api"
-AUTH_ENDPOINT_PATH = "/auth"
-ME_ENDPOINT_PATH = "/users/me"
-ADMIN_USERS_PATH = "/admin/users"
-AGENT_PATH = "/agents"
-ESTATE_PATH = "/estate"
+ME_PATH = "/api/users/me"
+AGENTS_PATH = "/api/agents"
+ESTATE_PATH = "/api/estate"
+AUTH_PATH = "/api/auth"
+ADMIN_USERS_PATH = "/api/admin/users"
+ADMIN_AGENTS_PATH = "/api/admin/agents"
+ADMIN_ESTATE_PATH = "/api/admin/estate"
 
 
 @fixture

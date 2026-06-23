@@ -2,13 +2,13 @@ import pytest
 from sqlalchemy import select
 
 from domain.user.user_model import User, UserRole
-from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
+from tests.integration.conftest import ADMIN_USERS_PATH
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_delete_user_by_id_valid(logged_in_user, any_user, client, db_session):
     response = client.delete(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
+        f"{ADMIN_USERS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -25,7 +25,7 @@ def test_delete_user_by_id_forbidden(
     logged_in_user, any_user, client, db_session
 ):
     response = client.delete(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}/{any_user.id}",
+        f"{ADMIN_USERS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 403

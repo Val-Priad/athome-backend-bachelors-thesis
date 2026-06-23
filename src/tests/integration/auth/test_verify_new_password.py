@@ -8,7 +8,7 @@ from sqlalchemy import select
 from domain.password_reset.password_reset_model import PasswordReset
 from domain.user.user_model import User
 from security import TokenCrypto
-from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
+from tests.integration.conftest import AUTH_PATH
 
 
 @pytest.fixture()
@@ -37,7 +37,7 @@ def set_token(db_session):
 
 def test_verify_new_password_valid(client, set_token, db_session):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-new-password",
+        f"{AUTH_PATH}/verify-new-password",
         json={
             "token": set_token.raw_token,
             "password": "new_password",
@@ -59,7 +59,7 @@ def test_verify_new_password_valid(client, set_token, db_session):
     assert datetime.now(timezone.utc) > password_reset.used_at
 
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-new-password",
+        f"{AUTH_PATH}/verify-new-password",
         json={
             "token": set_token.raw_token,
             "password": "111111111111111",
@@ -98,7 +98,7 @@ def test_verify_new_password_valid(client, set_token, db_session):
 )
 def test_verify_new_password_validation(client, set_token, payload):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-new-password",
+        f"{AUTH_PATH}/verify-new-password",
         json=payload(set_token),
     )
 

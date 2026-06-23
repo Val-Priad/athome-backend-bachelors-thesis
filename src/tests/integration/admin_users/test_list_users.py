@@ -7,7 +7,7 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
     UsersListItem,
 )
 from security.password_crypto import PasswordCrypto
-from tests.integration.conftest import ADMIN_USERS_PATH, API_PREFIX
+from tests.integration.conftest import ADMIN_USERS_PATH
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ def test_list_users_admin_success_defaults(
     client, logged_in_user, populate_users
 ):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}",
+        f"{ADMIN_USERS_PATH}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -71,12 +71,12 @@ def test_list_users_admin_supports_pagination(
     client, logged_in_user, populate_users
 ):
     response_page_1 = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?page=1&page_size=15&sort_by=email&sort_order=asc",
+        f"{ADMIN_USERS_PATH}?page=1&page_size=15&sort_by=email&sort_order=asc",
         headers=logged_in_user.headers,
     )
 
     response_page_2 = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?page=2&page_size=15&sort_by=email&sort_order=asc",
+        f"{ADMIN_USERS_PATH}?page=2&page_size=15&sort_by=email&sort_order=asc",
         headers=logged_in_user.headers,
     )
 
@@ -129,7 +129,7 @@ def test_list_users_admin_filters_by_role(client, logged_in_user, db_session):
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?role=agent",
+        f"{ADMIN_USERS_PATH}?role=agent",
         headers=logged_in_user.headers,
     )
 
@@ -172,7 +172,7 @@ def test_list_users_admin_filters_by_email(client, logged_in_user, db_session):
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?email=target",
+        f"{ADMIN_USERS_PATH}?email=target",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -220,7 +220,7 @@ def test_list_users_admin_filters_by_name(client, logged_in_user, db_session):
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?name=target",
+        f"{ADMIN_USERS_PATH}?name=target",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -270,7 +270,7 @@ def test_list_users_admin_filters_by_phone_number(
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?phone_number=5555267",
+        f"{ADMIN_USERS_PATH}?phone_number=5555267",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -304,7 +304,7 @@ def test_list_users_admin_filters_by_is_email_verified(
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?is_email_verified=false",
+        f"{ADMIN_USERS_PATH}?is_email_verified=false",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -321,7 +321,7 @@ def test_list_users_admin_filters_by_is_email_verified(
 )
 def test_list_users_forbidden_for_non_admin(client, logged_in_user):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}",
+        f"{ADMIN_USERS_PATH}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 403
@@ -333,7 +333,7 @@ def test_list_users_admin_sorts_by_email_desc(
     client, logged_in_user, populate_users
 ):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?sort_by=email&sort_order=desc&page_size=50",
+        f"{ADMIN_USERS_PATH}?sort_by=email&sort_order=desc&page_size=50",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -376,7 +376,7 @@ def test_list_users_admin_sorts_by_created_at_desc(
     db_session.flush()
 
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?email=created-sort&sort_by=created_at&sort_order=desc&page_size=10",
+        f"{ADMIN_USERS_PATH}?email=created-sort&sort_by=created_at&sort_order=desc&page_size=10",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 200
@@ -390,7 +390,7 @@ def test_list_users_admin_sorts_by_created_at_desc(
 
 
 def test_list_users_unauthorized_without_token(client):
-    response = client.get(f"{API_PREFIX}{ADMIN_USERS_PATH}")
+    response = client.get(f"{ADMIN_USERS_PATH}")
     assert response.status_code == 401
 
 
@@ -410,7 +410,7 @@ def test_list_users_invalid_query_validation_error(
     client, logged_in_user, query
 ):
     response = client.get(
-        f"{API_PREFIX}{ADMIN_USERS_PATH}?{query}",
+        f"{ADMIN_USERS_PATH}?{query}",
         headers=logged_in_user.headers,
     )
     assert response.status_code == 400

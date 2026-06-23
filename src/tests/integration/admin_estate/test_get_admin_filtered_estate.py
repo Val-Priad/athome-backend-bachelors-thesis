@@ -3,13 +3,11 @@ import pytest
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.user.user_model import User, UserRole
 from security.password_crypto import PasswordCrypto
-from tests.integration.conftest import API_PREFIX
+from tests.integration.conftest import ADMIN_ESTATE_PATH
 from tests.integration.estate.test_filter_estate import (
     assert_ok_filter_response,
     create_filter_estate,
 )
-
-ADMIN_ESTATE_PATH = f"{API_PREFIX}/admin/estate"
 
 
 def _create_test_user(

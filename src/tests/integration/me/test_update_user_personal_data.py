@@ -2,12 +2,12 @@ import pytest
 from sqlalchemy import select
 
 from domain.user.user_model import User
-from tests.integration.conftest import API_PREFIX, ME_ENDPOINT_PATH
+from tests.integration.conftest import ME_PATH
 
 
 def test_update_user_personal_data_valid(client, db_session, logged_in_user):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/profile",
+        f"{ME_PATH}/profile",
         json={
             "name": None,
             "avatar_key": None,
@@ -25,7 +25,9 @@ def test_update_user_personal_data_valid(client, db_session, logged_in_user):
     assert data["description"] is None
 
     db_session.expire_all()
-    user = db_session.scalar(select(User).where(User.email == logged_in_user.email))
+    user = db_session.scalar(
+        select(User).where(User.email == logged_in_user.email)
+    )
     assert user.name is None
     assert user.avatar_key is None
     assert user.phone_number is None
@@ -34,7 +36,7 @@ def test_update_user_personal_data_valid(client, db_session, logged_in_user):
 
 def test_update_user_personal_data_partially_valid(client, logged_in_user):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/profile",
+        f"{ME_PATH}/profile",
         json={
             "avatar_key": None,
             "phone_number": None,
@@ -53,7 +55,7 @@ def test_update_user_personal_data_partially_valid(client, logged_in_user):
 
 def test_update_user_personal_data_partially2_valid(client, logged_in_user):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/profile",
+        f"{ME_PATH}/profile",
         json={
             "phone_number": None,
             "description": None,
@@ -71,7 +73,7 @@ def test_update_user_personal_data_partially2_valid(client, logged_in_user):
 
 def test_update_user_personal_data_name_is_trimmed(client, logged_in_user):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/profile",
+        f"{ME_PATH}/profile",
         json={"name": "Val Priad           "},
         headers=logged_in_user.headers,
     )
@@ -100,7 +102,7 @@ def test_update_user_personal_data_name_is_trimmed(client, logged_in_user):
 )
 def test_update_user_personal_data_validation(client, logged_in_user, payload):
     response = client.patch(
-        f"{API_PREFIX}{ME_ENDPOINT_PATH}/profile",
+        f"{ME_PATH}/profile",
         json=payload,
         headers=logged_in_user.headers,
     )

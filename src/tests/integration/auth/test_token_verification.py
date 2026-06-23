@@ -9,7 +9,7 @@ from domain.email_verification.email_verification_model import (
 )
 from domain.user.user_model import User
 from security import TokenCrypto
-from tests.integration.conftest import API_PREFIX, AUTH_ENDPOINT_PATH
+from tests.integration.conftest import AUTH_PATH
 
 
 @pytest.fixture
@@ -51,18 +51,22 @@ def expired_raw_token_verification_id_user_id(db_session):
 def test_token_verification_valid(
     client, raw_token_verification_id_user_id, db_session
 ):
-    raw_token, email_verification_id, user_id = raw_token_verification_id_user_id
+    raw_token, email_verification_id, user_id = (
+        raw_token_verification_id_user_id
+    )
 
     now = datetime.now(timezone.utc)
 
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-email",
+        f"{AUTH_PATH}/verify-email",
         json={"token": raw_token},
     )
     assert response.status_code == 200
 
     email_verification = db_session.scalar(
-        select(EmailVerification).where(EmailVerification.id == email_verification_id)
+        select(EmailVerification).where(
+            EmailVerification.id == email_verification_id
+        )
     )
     assert email_verification.used_at >= now
 
@@ -93,7 +97,7 @@ def test_token_verification_valid(
 )
 def test_token_verification_token_validation(client, payload):
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-email",
+        f"{AUTH_PATH}/verify-email",
         json=payload,
     )
 
@@ -106,7 +110,7 @@ def test_token_verification_token_expired(
     raw_token, _, _ = expired_raw_token_verification_id_user_id
 
     response = client.post(
-        f"{API_PREFIX}{AUTH_ENDPOINT_PATH}/verify-email",
+        f"{AUTH_PATH}/verify-email",
         json={"token": raw_token},
     )
     assert response.status_code == 401

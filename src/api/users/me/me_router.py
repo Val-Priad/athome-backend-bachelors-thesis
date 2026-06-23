@@ -17,7 +17,7 @@ from schemas.me_schemas.me_requests import (
 bp = Blueprint("users_me", __name__, url_prefix="/api/users/me")
 
 
-@bp.get("/")
+@bp.get("")
 @jwt_required()
 def get_me():
     user_id = get_jwt_user_uuid()
@@ -26,7 +26,7 @@ def get_me():
     return construct_response(data=user_response)
 
 
-@bp.delete("/")
+@bp.delete("")
 @jwt_required()
 def delete_me():
     user_id = get_jwt_user_uuid()

@@ -31,7 +31,7 @@ from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
 from domain.user.user_model import UserRole
 from infrastructure.db import db_session
-from tests.integration.conftest import API_PREFIX, ESTATE_PATH
+from tests.integration.conftest import ESTATE_PATH
 
 
 def _create_estate(
@@ -161,7 +161,7 @@ def test_get_active_estate_returns_full_public_data(
         agent_id=logged_in_user.id,
     )
 
-    response = client.get(f"{API_PREFIX}{ESTATE_PATH}/{estate_id}")
+    response = client.get(f"{ESTATE_PATH}/{estate_id}")
 
     assert response.status_code == 200
 
@@ -262,7 +262,7 @@ def test_public_get_active_estate_returns_data_without_seller(
         agent_id=logged_in_user.id,
     )
 
-    response = client.get(f"{API_PREFIX}{ESTATE_PATH}/{estate_id}")
+    response = client.get(f"{ESTATE_PATH}/{estate_id}")
 
     assert response.status_code == 200
 
@@ -303,7 +303,7 @@ def test_staff_can_get_not_active_estate(
     )
 
     response = client.get(
-        f"{API_PREFIX}{ESTATE_PATH}/{estate_id}",
+        f"{ESTATE_PATH}/{estate_id}",
         headers=logged_in_user.headers,
     )
 
@@ -338,7 +338,7 @@ def test_public_cannot_get_not_active_estate(
         seller_id=any_user.id,
     )
 
-    response = client.get(f"{API_PREFIX}{ESTATE_PATH}/{estate_id}")
+    response = client.get(f"{ESTATE_PATH}/{estate_id}")
 
     assert response.status_code == 404
 
@@ -370,7 +370,7 @@ def test_regular_user_cannot_get_not_active_estate(
     )
 
     response = client.get(
-        f"{API_PREFIX}{ESTATE_PATH}/{estate_id}",
+        f"{ESTATE_PATH}/{estate_id}",
         headers=logged_in_user.headers,
     )
 
@@ -388,7 +388,7 @@ def test_get_missing_estate_returns_404_for_staff(
     missing_estate_id = uuid.uuid4()
 
     response = client.get(
-        f"{API_PREFIX}{ESTATE_PATH}/{missing_estate_id}",
+        f"{ESTATE_PATH}/{missing_estate_id}",
         headers=logged_in_user.headers,
     )
 
@@ -401,7 +401,7 @@ def test_get_missing_estate_returns_404_for_staff(
 def test_get_missing_estate_returns_404_for_public(client):
     missing_estate_id = uuid.uuid4()
 
-    response = client.get(f"{API_PREFIX}{ESTATE_PATH}/{missing_estate_id}")
+    response = client.get(f"{ESTATE_PATH}/{missing_estate_id}")
 
     assert response.status_code == 404
 

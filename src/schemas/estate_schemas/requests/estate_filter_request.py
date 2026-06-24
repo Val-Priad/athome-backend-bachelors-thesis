@@ -49,7 +49,7 @@ class SortOrder(str, Enum):
     desc = "desc"
 
 
-class EstatePublicFilterRequest(RequestValidation):
+class EstateBaseFilterRequest(RequestValidation):
     model_config = ConfigDict(extra="forbid")
 
     RANGE_FILTERS: ClassVar[tuple[tuple[str, str], ...]] = (
@@ -103,8 +103,6 @@ class EstatePublicFilterRequest(RequestValidation):
     order: SortOrder = SortOrder.desc
 
     # Estate
-    agent_id: uuid.UUID | None = None
-
     estate_type: list[EstateType] | None = Field(
         default=None,
         min_length=1,
@@ -116,9 +114,6 @@ class EstatePublicFilterRequest(RequestValidation):
 
     created_at_from: datetime.datetime | None = None
     created_at_to: datetime.datetime | None = None
-
-    # saved_by_users
-    saved_by_current_user: bool | None = None
 
     # EstateLocation
     region: list[Region] | None = Field(
@@ -369,11 +364,20 @@ class EstatePublicFilterRequest(RequestValidation):
             )
 
 
-class EstateAdminFilterRequest(EstatePublicFilterRequest):
-    # Estate
-    seller_id: uuid.UUID | None = None
+class EstatePublicFilterRequest(EstateBaseFilterRequest):
+    agent_id: uuid.UUID | None = None
+    saved_by_current_user: bool | None = None
 
-    # EstateListing
+
+class EstateAdminFilterRequest(EstatePublicFilterRequest):
+    seller_id: uuid.UUID | None = None
+    status: list[ListingStatus] | None = Field(
+        default=None,
+        min_length=1,
+    )
+
+
+class EstateAgentOwnFilterRequest(EstateBaseFilterRequest):
     status: list[ListingStatus] | None = Field(
         default=None,
         min_length=1,

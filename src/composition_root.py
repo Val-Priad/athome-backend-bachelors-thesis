@@ -31,6 +31,9 @@ from application.auth.verify_new_password_use_case import (
     VerifyNewPasswordUseCase,
 )
 from application.estate.create_estate_use_case import CreateEstateUseCase
+from application.estate.get_agent_own_estates_use_case import (
+    GetAgentOwnEstatesUseCase,
+)
 from application.estate.get_estate_use_case import GetEstateUseCase
 from application.estate.get_filtered_estate_use_case import (
     GetFilteredEstateUseCase,
@@ -186,4 +189,7 @@ get_filtered_estate_use_case = GetFilteredEstateUseCase(estate_service)
 toggle_saved_estate_use_case = ToggleSavedEstateUseCase(estate_repository)
 update_estate_use_case = UpdateEstateUseCase(
     estate_service, authorization_service, estate_participants_service
+)
+get_agent_own_estates_use_case = GetAgentOwnEstatesUseCase(
+    estate_service, authorization_service
 )

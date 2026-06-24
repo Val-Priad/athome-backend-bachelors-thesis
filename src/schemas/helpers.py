@@ -17,13 +17,17 @@ def _is_list_annotation(annotation) -> bool:
 def parse_query_params(schema_cls, args):
     data = {}
 
-    for field_name, field_info in schema_cls.model_fields.items():
+    for field_name in args.keys():
         values = args.getlist(field_name)
 
         if not values:
             continue
 
-        if _is_list_annotation(field_info.annotation):
+        field_info = schema_cls.model_fields.get(field_name)
+
+        if field_info is not None and _is_list_annotation(
+            field_info.annotation
+        ):
             data[field_name] = values
         else:
             data[field_name] = values[-1]

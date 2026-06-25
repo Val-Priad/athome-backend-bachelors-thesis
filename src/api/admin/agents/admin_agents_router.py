@@ -24,6 +24,3 @@ def list_agents():
 @bp.errorhandler(Exception)
 def handle_exception(e: Exception):
     return construct_error(e)
-
-
-# TODO: agent estate management view # NOSONAR

@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required
 from api.responses import construct_error, construct_response
 from composition_root import (
     create_estate_use_case,
+    delete_estate_use_case,
     get_admin_filtered_estate_use_case,
     update_estate_use_case,
 )
@@ -54,11 +55,22 @@ def update_estate(estate_id: UUID):
     requester_id = get_jwt_user_uuid()
     data = EstateUpdateRequest.from_request(request.json)
     response = update_estate_use_case.execute(
-        estate_id=estate_id,
-        data=data,
-        requester_id=requester_id,
+        estate_id,
+        data,
+        requester_id,
     )
     return construct_response(data=response)
+
+
+@bp.delete("/<uuid:estate_id>")
+@jwt_required()
+def delete_estate(estate_id: UUID):
+    requester_id = get_jwt_user_uuid()
+    delete_estate_use_case.execute(
+        estate_id,
+        requester_id,
+    )
+    return construct_response()
 
 
 @bp.errorhandler(Exception)

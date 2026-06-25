@@ -109,6 +109,8 @@ def test_admin_update_estate_success(
 
     _assert_ok_id_response(response, estate_id)
 
+    db_session.expire_all()
+
     estate = _get_estate(db_session, estate_id)
 
     assert estate.seller_id == seller.id

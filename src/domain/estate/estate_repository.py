@@ -48,6 +48,12 @@ class EstateRepository:
 
         return estate
 
+    def delete_estate_by_id(self, session: Session, estate_id):
+        estate = session.get(Estate, estate_id)
+        if estate is None:
+            raise EstateNotFoundError()
+        session.delete(estate)
+
     def get_public_estates_by_filters(
         self,
         session: Session,

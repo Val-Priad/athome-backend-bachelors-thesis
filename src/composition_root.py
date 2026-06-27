@@ -32,6 +32,9 @@ from application.auth.verify_new_password_use_case import (
 )
 from application.estate.create_estate_use_case import CreateEstateUseCase
 from application.estate.delete_estate_use_case import DeleteEstateUseCase
+from application.estate.email_to_estate_agent_use_case import (
+    EmailToAgentUseCase,
+)
 from application.estate.get_agent_own_estates_use_case import (
     GetAgentOwnEstatesUseCase,
 )
@@ -197,3 +200,4 @@ get_agent_own_estates_use_case = GetAgentOwnEstatesUseCase(
 delete_estate_use_case = DeleteEstateUseCase(
     estate_repository, authorization_service
 )
+email_to_agent_use_case = EmailToAgentUseCase(estate_repository, mailer)

@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 
 from api.responses import construct_error, construct_response
 from composition_root import (
+    email_to_agent_use_case,
     get_estate_use_case,
     get_filtered_estate_use_case,
     suggest_estate_use_case,
@@ -13,6 +14,10 @@ from composition_root import (
 from infrastructure.jwt.jwt_utils import (
     get_jwt_user_uuid,
     get_optional_jwt_user_uuid,
+)
+from infrastructure.rate_limiting.limiter_config import limiter
+from schemas.estate_schemas.requests.email_to_agent_request import (
+    EmailToAgentRequest,
 )
 from schemas.estate_schemas.requests.estate_filter_request import (
     EstatePublicFilterRequest,
@@ -60,6 +65,14 @@ def suggest_estate():
 def toggle_saved_estate(estate_id):
     requester_id = get_jwt_user_uuid()
     toggle_saved_estate_use_case.execute(requester_id, estate_id)
+    return construct_response()
+
+
+@bp.post("/<uuid:estate_id>/contact")
+@limiter.limit("3/minute")
+def send_email_to_estate_agent(estate_id):
+    payload = EmailToAgentRequest.from_request(request.json)
+    email_to_agent_use_case.execute(estate_id, payload)
     return construct_response()
 
 

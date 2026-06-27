@@ -1,3 +1,4 @@
+**/node_modules/**
 # VScode related
 .vscode
 
@@ -22,3 +23,4 @@ wheels/
 
 # thoughts files
 _sandbox
+

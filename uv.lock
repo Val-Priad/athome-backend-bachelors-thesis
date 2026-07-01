@@ -25,7 +25,7 @@ wheels = [
 ]
 
 [[package]]
-name = "athome"
+name = "athome-back"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

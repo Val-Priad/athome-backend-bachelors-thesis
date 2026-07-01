@@ -3,7 +3,8 @@
     "mjml": "^5.3.0"
   },
   "scripts": {
-    "build:emails": "mjml src/infrastructure/email/templates/mjml/*.mjml -o src/infrastructure/email/templates/html"
+    "build:emails": "mjml src/infrastructure/email/templates/mjml/*.mjml -o src/infrastructure/email/templates/html",
+    "dev": "PYTHONPATH=src uv run python -m flask --app wsgi:app run --debug"
   },
   "devDependencies": {
     "mjml": "^4.15.3"

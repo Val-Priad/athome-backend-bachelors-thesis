@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Annotated, Union
+from typing import Annotated, TypeAlias
 from uuid import UUID
 
 from pydantic import BeforeValidator, EmailStr, Field
@@ -22,11 +22,11 @@ UserName = Annotated[
     BeforeValidator(strip_string),
 ]
 E164PhoneNumberType = Annotated[
-    Union[PydanticPhoneNumber], PhoneNumberValidator(number_format="E164")
+    PydanticPhoneNumber, PhoneNumberValidator(number_format="E164")
 ]
 ImageKey = Annotated[str, Field(min_length=1, max_length=1024)]
 UserDescription = Annotated[str, Field(min_length=1, max_length=510)]
-UserEmail = Annotated[EmailStr, Field(min_length=1, max_length=255)]
+UserEmail: TypeAlias = Annotated[EmailStr, Field(min_length=1, max_length=255)]
 Password = Annotated[
     str,
     Field(min_length=8, max_length=255),

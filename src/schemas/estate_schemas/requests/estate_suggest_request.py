@@ -135,7 +135,10 @@ class EstateSuggestRequest(RequestValidation):
         if self.listing.available_from < date.today():
             errors.append(
                 make_value_error(
-                    loc=("available_from",),
+                    loc=(
+                        "listing",
+                        "available_from",
+                    ),
                     message="available_from cannot be in the past",
                     input_value=self.listing.available_from,
                 )

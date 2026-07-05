@@ -9,7 +9,7 @@ class ValidationError(DomainError):
     def __init__(
         self,
         message: str | None = None,
-        errors: list[dict[str, str]] | None = None,
+        errors: list[dict[str, Any]] | None = None,
     ):
         super().__init__(message)
         self.errors = errors or []
@@ -23,13 +23,33 @@ class ValidationError(DomainError):
         return cls(message=message)
 
     @staticmethod
+    def _normalize_error_params(ctx: Any) -> dict[str, Any]:
+        if not isinstance(ctx, dict):
+            return {}
+
+        result: dict[str, Any] = {}
+
+        for key, value in ctx.items():
+            if key == "error":
+                continue
+
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                result[key] = value
+            else:
+                result[key] = str(value)
+
+        return result
+
+    @classmethod
     def _normalize_pydantic_errors(
+        cls,
         exc: PydanticValidationError,
-    ) -> list[dict[str, str]]:
-        normalized: list[dict[str, str]] = []
+    ) -> list[dict[str, Any]]:
+        normalized: list[dict[str, Any]] = []
 
         for err in exc.errors():
             loc = err.get("loc", ())
+
             if isinstance(loc, (list, tuple)):
                 filtered = [
                     str(p)
@@ -42,10 +62,18 @@ class ValidationError(DomainError):
 
             raw_msg: Any = err.get("msg", "Validation error")
             msg = str(raw_msg)
+
             if msg.startswith("Value error, "):
                 msg = msg.removeprefix("Value error, ")
 
-            normalized.append({"field": field, "message": msg})
+            normalized.append(
+                {
+                    "field": field,
+                    "code": str(err.get("type", "validation_error")),
+                    "message": msg,
+                    "params": cls._normalize_error_params(err.get("ctx")),
+                }
+            )
 
         return normalized
 

@@ -27,6 +27,7 @@ def raw_token_verification_id_user_id(db_session):
     )
     db_session.add(email_verification)
     db_session.flush()
+
     return raw_token, email_verification.id, user.id
 
 
@@ -45,6 +46,7 @@ def expired_raw_token_verification_id_user_id(db_session):
     )
     db_session.add(email_verification)
     db_session.flush()
+
     return raw_token, email_verification.id, user.id
 
 
@@ -57,10 +59,11 @@ def test_token_verification_valid(
 
     now = datetime.now(timezone.utc)
 
-    response = client.post(
+    response = client.get(
         f"{AUTH_PATH}/verify-email",
-        json={"token": raw_token},
+        query_string={"token": raw_token},
     )
+
     assert response.status_code == 200
 
     email_verification = db_session.scalar(
@@ -75,7 +78,7 @@ def test_token_verification_valid(
 
 
 @pytest.mark.parametrize(
-    "payload",
+    "query_string",
     [
         pytest.param(
             {"token": ""},
@@ -86,8 +89,8 @@ def test_token_verification_valid(
             id="token_too_long",
         ),
         pytest.param(
-            {"token": 67},
-            id="token_wrong_type",
+            {"token": "67"},
+            id="token_too_short",
         ),
         pytest.param(
             {},
@@ -95,10 +98,10 @@ def test_token_verification_valid(
         ),
     ],
 )
-def test_token_verification_token_validation(client, payload):
-    response = client.post(
+def test_token_verification_token_validation(client, query_string):
+    response = client.get(
         f"{AUTH_PATH}/verify-email",
-        json=payload,
+        query_string=query_string,
     )
 
     assert response.status_code == 400
@@ -109,10 +112,11 @@ def test_token_verification_token_expired(
 ):
     raw_token, _, _ = expired_raw_token_verification_id_user_id
 
-    response = client.post(
+    response = client.get(
         f"{AUTH_PATH}/verify-email",
-        json={"token": raw_token},
+        query_string={"token": raw_token},
     )
+
     assert response.status_code == 401
 
     body = response.get_json()

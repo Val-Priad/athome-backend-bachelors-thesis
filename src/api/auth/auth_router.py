@@ -50,9 +50,9 @@ def register():
     )
 
 
-@bp.post("/verify-email")
+@bp.get("/verify-email")
 def verify_token():
-    data = TokenRequest.from_request((request.json))
+    data = TokenRequest.from_query(request.args)
 
     verify_email_use_case.execute(data.token)
     return construct_response()

@@ -12,6 +12,10 @@ def setup_logging():
 
     root_logger.setLevel(logging.INFO)
 
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+        handler.close()
+
     file_handler = RotatingFileHandler(
         f"{LOG_FOLDER}/log.log",
         maxBytes=5 * 1024 * 1024,
@@ -26,6 +30,5 @@ def setup_logging():
     file_handler.setFormatter(formatter)
     stream_handler.setFormatter(formatter)
 
-    root_logger.handlers.clear()
     root_logger.addHandler(file_handler)
     root_logger.addHandler(stream_handler)

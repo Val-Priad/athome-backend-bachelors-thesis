@@ -10,6 +10,7 @@ from domain.token.token_lifecycle_service import TokenLifecycleService
 from domain.user.user_model import User
 from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
 from exceptions.custom_exceptions.user_exceptions import (
+    TokenVerificationError,
     UserAlreadyVerifiedError,
 )
 from infrastructure.email.mailer_protocol import MailerProtocol
@@ -58,14 +59,39 @@ class EmailVerificationService:
     def get_resend_token(self, session: Session, user_id: uuid.UUID):
         return self.create_token(session, user_id)
 
-    def verify_token(self, session: Session, raw_token):
-        token = self.email_verification_repository.get_valid_token(
-            session, self.token_hasher.hash_token(raw_token)
+    def verify_token(self, session: Session, raw_token: str) -> None:
+        token = self.email_verification_repository.find_by_hash(
+            session,
+            self.token_hasher.hash_token(raw_token),
         )
 
-        token.used_at = datetime.now(timezone.utc)
+        if token is None:
+            raise TokenVerificationError(
+                "The email verification token is invalid, expired, or already used"
+            )
+
+        now = datetime.now(timezone.utc)
+
+        if token.user.is_email_verified:
+            return
+
+        if token.used_at is not None:
+            raise TokenVerificationError(
+                "The email verification token is invalid, expired, or already used"
+            )
+
+        if token.expires_at <= now:
+            if token.user.is_email_verified:
+                return
+
+            raise TokenVerificationError(
+                "The email verification token is expired"
+            )
+
+        token.used_at = now
         token.user.is_email_verified = True
 
         self.email_verification_repository.deactivate_all_user_tokens(
-            session, token.user.id
+            session,
+            token.user.id,
         )

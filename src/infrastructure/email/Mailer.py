@@ -20,7 +20,9 @@ class Mailer:
         )
 
     def send_verification_email(self, email_to: str, token: str) -> None:
-        verification_url = f"{os.getenv('APP_BASE_URL')}/verify?token={token}"
+        verification_url = (
+            f"{os.getenv('APP_BASE_URL')}/verify-email?token={token}"
+        )
 
         template = self.env.get_template("email_verification.html")
         html = template.render(verification_url=verification_url)

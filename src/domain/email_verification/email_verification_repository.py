@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
-from exceptions.custom_exceptions.user_exceptions import TokenVerificationError
 
 
 class EmailVerificationRepository:
@@ -36,18 +35,11 @@ class EmailVerificationRepository:
             )
         )
 
-    def get_valid_token(
+    def find_by_hash(
         self, session: Session, hashed_token: bytes
-    ) -> EmailVerification:
-        token = session.scalar(
+    ) -> EmailVerification | None:
+        return session.scalar(
             select(EmailVerification).where(
                 EmailVerification.token_hash == hashed_token,
-                EmailVerification.used_at.is_(None),
-                EmailVerification.expires_at > datetime.now(timezone.utc),
             )
         )
-        if token is None:
-            raise TokenVerificationError(
-                "The email verification token is invalid, expired, or already used"
-            )
-        return token

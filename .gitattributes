@@ -1,0 +1,33 @@
+# Default: let Git detect text files and normalize them
+* text=auto
+
+# Python
+*.py text eol=lf diff=python
+
+# Project/config files
+*.toml text eol=lf
+*.yml  text eol=lf
+*.json text eol=lf
+
+# Lock files
+package-lock.json text eol=lf -diff
+uv.lock           text eol=lf -diff
+
+# Email templates
+*.html text eol=lf diff=html
+*.mjml text eol=lf
+
+# Documentation
+*.md  text eol=lf diff=markdown
+*.txt text eol=lf
+
+# Logs
+*.log text eol=lf
+
+# Root dotfiles
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+.python-version text eol=lf
+
+# Environment
+.env text eol=lf

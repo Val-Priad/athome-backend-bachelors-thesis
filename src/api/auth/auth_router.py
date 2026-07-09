@@ -58,7 +58,7 @@ def verify_token():
     return construct_response()
 
 
-@bp.post("/resend-verification")
+@bp.post("/resend-verification-email")
 @limiter.limit("2/minute")
 def resend_verification():
     data = EmailRequest.from_request(request.json)

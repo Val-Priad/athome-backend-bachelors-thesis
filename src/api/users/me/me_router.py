@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.responses import construct_error, construct_response
+from api.responses import construct_response
 from composition_root import (
     delete_me_use_case,
     get_me_use_case,
@@ -58,8 +58,3 @@ def patch_profile():
         data=user_response,
         message="User personal data was updated successfully",
     )
-
-
-@bp.errorhandler(Exception)
-def handle_exception(e: Exception):
-    return construct_error(e)

@@ -35,6 +35,14 @@ line_length = 79
 [tool.ruff]
 line-length = 79
 
+
+[tool.ruff.lint]
+extend-select = ["I", "TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"src" = { msg = "Do not import through `src`; import from the top-level package instead." }
+
+
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]
 testpaths = ["src/tests"]

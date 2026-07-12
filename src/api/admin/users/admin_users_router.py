@@ -3,7 +3,7 @@ from uuid import UUID
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.responses import construct_error, construct_response
+from api.responses import construct_response
 from composition_root import (
     change_user_role_use_case,
     delete_admin_user_use_case,
@@ -55,11 +55,3 @@ def list_users():
 
     response = list_users_use_case.execute(requester_id, query)
     return construct_response(data=response)
-
-
-@bp.errorhandler(Exception)
-def handle_exception(e: Exception):
-    return construct_error(e)
-
-
-# TODO: use leaflet as an interactive map on frontend # NOSONAR

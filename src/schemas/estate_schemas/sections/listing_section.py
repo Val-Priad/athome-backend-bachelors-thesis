@@ -1,6 +1,5 @@
 from datetime import date
 
-
 from schemas.parent_types import RequestValidation
 
 

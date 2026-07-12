@@ -3,7 +3,7 @@ from uuid import UUID
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.responses import construct_error, construct_response
+from api.responses import construct_response
 from composition_root import (
     email_to_agent_use_case,
     get_estate_use_case,
@@ -74,8 +74,3 @@ def send_email_to_estate_agent(estate_id):
     payload = EmailToAgentRequest.from_request(request.json)
     email_to_agent_use_case.execute(estate_id, payload)
     return construct_response()
-
-
-@bp.errorhandler(Exception)
-def handle_exception(e: Exception):
-    return construct_error(e)

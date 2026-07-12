@@ -1,9 +1,7 @@
 import logging
-import re
 from dataclasses import dataclass
 from typing import Type
 
-from flask_jwt_extended.exceptions import JWTExtendedException
 from werkzeug.exceptions import HTTPException
 
 _logger = logging.getLogger(__name__)
@@ -57,17 +55,7 @@ def get_description_for_exception(e: Exception) -> ErrorSpec:
 
 
 def _is_external_exception(e: Exception) -> bool:
-    return isinstance(e, (JWTExtendedException, HTTPException))
-
-
-def _jwt_error_code(e: JWTExtendedException) -> str:
-    name = e.__class__.__name__
-    if name.endswith("Error"):
-        name = name[:-5]
-
-    first_rule = re.sub("(?<=[a-z])(?=[A-Z])", "_", name)
-    second_rule = re.sub("(?<=[A-Z])(?=[A-Z][a-z])", "_", first_rule)
-    return second_rule.lower()
+    return isinstance(e, HTTPException)
 
 
 def _get_http_exception_description(e: HTTPException):
@@ -78,18 +66,14 @@ def _get_http_exception_name(e: HTTPException):
     return e.name.lower().replace(" ", "_")
 
 
-def get_description_for_external_exception(e: Exception) -> ErrorSpec:
-    if isinstance(e, JWTExtendedException):
+def get_description_for_external_exception(
+    error: Exception,
+) -> ErrorSpec:
+    if isinstance(error, HTTPException):
         return ErrorSpec(
-            status=401,
-            code=_jwt_error_code(e),
-            message="Authentication error",
-        )
-    elif isinstance(e, HTTPException):
-        return ErrorSpec(
-            status=e.code if e.code is not None else 500,
-            message=_get_http_exception_description(e),
-            code=_get_http_exception_name(e),
+            status=error.code if error.code is not None else 500,
+            message=_get_http_exception_description(error),
+            code=_get_http_exception_name(error),
         )
 
     raise RuntimeError("Not registered external exception")
@@ -111,9 +95,43 @@ def register_custom_error(
     map_code(code, status, message)
 
 
+def _register_jwt_errors():
+    map_code(
+        "no_authorization",
+        401,
+        "Authentication is required",
+    )
+    map_code(
+        "token_expired",
+        401,
+        "Authentication token has expired",
+    )
+    map_code(
+        "invalid_token",
+        401,
+        "Authentication token is invalid",
+    )
+    map_code(
+        "token_revoked",
+        401,
+        "Authentication token has been revoked",
+    )
+    map_code(
+        "fresh_token_required",
+        401,
+        "Fresh authentication is required",
+    )
+
+
 def _register_default_errors():
+    _register_jwt_errors()
     map_code("validation_error", 400, "Validation error")
-    map_code(DEFAULT_ERROR_CODE, 500, "Internal server error")
+
+    map_code(
+        DEFAULT_ERROR_CODE,
+        500,
+        "Internal server error",
+    )
 
 
 def _register_custom_errors():

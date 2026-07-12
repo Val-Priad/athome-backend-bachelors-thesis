@@ -3,7 +3,7 @@ from uuid import UUID
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.responses import construct_error, construct_response
+from api.responses import construct_response
 from composition_root import (
     get_agent_description_use_case,
     get_agent_own_estates_use_case,
@@ -40,8 +40,3 @@ def get_my_estates():
     )
 
     return construct_response(data=response)
-
-
-@bp.errorhandler(Exception)
-def handle_exception(e: Exception):
-    return construct_error(e)

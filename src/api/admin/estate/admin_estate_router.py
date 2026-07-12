@@ -3,7 +3,7 @@ from uuid import UUID
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
-from api.responses import construct_error, construct_response
+from api.responses import construct_response
 from composition_root import (
     create_estate_use_case,
     delete_estate_use_case,
@@ -71,8 +71,3 @@ def delete_estate(estate_id: UUID):
         requester_id,
     )
     return construct_response()
-
-
-@bp.errorhandler(Exception)
-def handle_exception(e: Exception):
-    return construct_error(e)

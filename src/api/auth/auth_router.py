@@ -121,8 +121,3 @@ def verify_new_password():
 
     verify_new_password_use_case.execute(data.token, data.password)
     return construct_response()
-
-
-@bp.errorhandler(Exception)
-def handle_exception(e: Exception):
-    return construct_error(e)

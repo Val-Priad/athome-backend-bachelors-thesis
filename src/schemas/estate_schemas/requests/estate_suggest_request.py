@@ -47,7 +47,7 @@ class EstateSuggestRequest(RequestValidation):
     house: EstateHouseSection | None = None
 
     translations: list[EstateTranslationSection] = Field(min_length=1)
-    media: list[EstateMediaSection] = Field(min_length=1)
+    media: list[EstateMediaSection] = Field(min_length=1, max_length=20)
 
     @model_validator(mode="after")
     def validate_estate_schema(self):
@@ -55,7 +55,7 @@ class EstateSuggestRequest(RequestValidation):
 
         self._validate_apartment_section(errors)
         self._validate_house_section(errors)
-        self._validate_main_media(errors)
+        self._validate_unique_media_object_keys(errors)
         self._validate_available_from(errors)
 
         if errors:
@@ -116,17 +116,17 @@ class EstateSuggestRequest(RequestValidation):
                 )
             )
 
-    def _validate_main_media(
+    def _validate_unique_media_object_keys(
         self,
         errors: list[InitErrorDetails],
     ) -> None:
-        main_media_count = sum(1 for m in self.media if m.is_main)
+        object_keys = [media.object_key for media in self.media]
 
-        if main_media_count != 1:
+        if len(object_keys) != len(set(object_keys)):
             errors.append(
                 make_value_error(
                     loc=("media",),
-                    message="Estate must contain exactly one main media item",
+                    message="Media object_key values must be unique",
                     input_value=self.media,
                 )
             )

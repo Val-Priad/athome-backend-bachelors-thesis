@@ -81,6 +81,9 @@ from domain.user.services.auth_service import AuthService
 from domain.user.services.me_service import MeService
 from domain.user.user_repository import UserRepository
 from infrastructure.email.Mailer import Mailer
+from infrastructure.object_storage.noop_object_storage import (
+    NoOpObjectStorage,
+)
 from infrastructure.vicinity.retry_vicinity_client import (
     RetryingVicinityClient,
 )
@@ -94,6 +97,7 @@ from security import AuthorizationService, PasswordCrypto, TokenCrypto
 # ============================================================================
 
 mailer = Mailer()
+object_storage = NoOpObjectStorage()
 password_hasher = PasswordCrypto()
 token_hasher = TokenCrypto()
 
@@ -192,7 +196,10 @@ get_estate_use_case = GetEstateUseCase(
 get_filtered_estate_use_case = GetFilteredEstateUseCase(estate_service)
 toggle_saved_estate_use_case = ToggleSavedEstateUseCase(estate_repository)
 update_estate_use_case = UpdateEstateUseCase(
-    estate_service, authorization_service, estate_participants_service
+    estate_service,
+    authorization_service,
+    estate_participants_service,
+    object_storage,
 )
 get_agent_own_estates_use_case = GetAgentOwnEstatesUseCase(
     estate_service, authorization_service

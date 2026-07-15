@@ -4,6 +4,8 @@ from pydantic import ConfigDict, Field, ValidationError, model_validator
 from pydantic_core import InitErrorDetails
 
 from domain.estate.enums.estate_enums import EstateType, OfferType
+from domain.estate.enums.estate_listing_enums import ListingStatus
+from domain.estate.enums.estate_media_enums import MediaType
 from schemas.estate_schemas.sections.apartment_section import (
     EstateApartmentSection,
 )
@@ -47,7 +49,10 @@ class EstateSuggestRequest(RequestValidation):
     house: EstateHouseSection | None = None
 
     translations: list[EstateTranslationSection] = Field(min_length=1)
-    media: list[EstateMediaSection] = Field(min_length=1, max_length=20)
+    media: list[EstateMediaSection] = Field(
+        default_factory=list,
+        max_length=20,
+    )
 
     @model_validator(mode="after")
     def validate_estate_schema(self):
@@ -55,6 +60,7 @@ class EstateSuggestRequest(RequestValidation):
 
         self._validate_apartment_section(errors)
         self._validate_house_section(errors)
+        self._validate_media_for_status(errors)
         self._validate_unique_media_object_keys(errors)
         self._validate_available_from(errors)
 
@@ -130,6 +136,40 @@ class EstateSuggestRequest(RequestValidation):
                     input_value=self.media,
                 )
             )
+
+    def _validate_media_for_status(
+        self,
+        errors: list[InitErrorDetails],
+    ) -> None:
+        listing_status = getattr(
+            self,
+            "listing_status",
+            ListingStatus.suggested,
+        )
+
+        if listing_status not in {
+            ListingStatus.active,
+            ListingStatus.suggested,
+        }:
+            return
+
+        has_image = any(
+            media.media_type == MediaType.image for media in self.media
+        )
+
+        if has_image:
+            return
+
+        errors.append(
+            make_value_error(
+                loc=("media",),
+                message=(
+                    "At least one image is required when "
+                    "listing_status is active or suggested"
+                ),
+                input_value=self.media,
+            )
+        )
 
     def _validate_available_from(self, errors):
         if self.listing.available_from < date.today():

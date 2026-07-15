@@ -123,10 +123,7 @@ class Estate(Base):
         "EstateMedia",
         back_populates="estate",
         cascade=_CASCADE_ALL_DELETE_ORPHAN,
-        order_by=(
-            EstateMedia.is_main.desc(),
-            EstateMedia.created_at.asc(),
-        ),
+        order_by=EstateMedia.position.asc(),
     )
     vicinities: Mapped[list["EstateVicinity"]] = relationship(
         "EstateVicinity",

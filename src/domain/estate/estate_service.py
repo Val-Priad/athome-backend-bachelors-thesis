@@ -88,7 +88,7 @@ class EstateService:
                 EstateTranslation(**translation.model_dump())
                 for translation in data.translations
             ],
-            media=[EstateMedia(**media.model_dump()) for media in data.media],
+            media=self._create_media(data.media),
         )
 
         if data.apartment is not None:
@@ -259,8 +259,18 @@ class EstateService:
         ]
 
     def _replace_media(self, estate: Estate, data) -> None:
-        estate.media = [
-            EstateMedia(**media.model_dump()) for media in data.media
+        estate.media = self._create_media(data.media)
+
+    @staticmethod
+    def _create_media(media_items) -> list[EstateMedia]:
+        return [
+            EstateMedia(
+                object_key=item.object_key,
+                media_type=item.media_type,
+                alt=item.alt,
+                position=position,
+            )
+            for position, item in enumerate(media_items)
         ]
 
     @staticmethod

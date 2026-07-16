@@ -2,8 +2,8 @@ from uuid import UUID
 
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.admin.services.admin_users_service import AdminUsersService
+from domain.user.services.authorization import AuthorizationService
 from domain.user.user_model import UserRole
-from security.authorization import AuthorizationService
 
 
 class DeleteAdminUserUseCase:

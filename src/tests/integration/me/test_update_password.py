@@ -1,11 +1,11 @@
 import pytest
 from sqlalchemy import select
 
+from domain.user.services.password_hasher import PasswordHasher
 from domain.user.user_model import User
 from exceptions.custom_exceptions.user_exceptions import (
     PasswordVerificationError,
 )
-from security.password_crypto import PasswordCrypto
 from tests.integration.conftest import ME_PATH
 
 
@@ -28,11 +28,11 @@ def test_update_user_password_valid(client, db_session, logged_in_user):
     )
 
     with pytest.raises(PasswordVerificationError):
-        PasswordCrypto.verify_password(
+        PasswordHasher.verify_password(
             logged_in_user.password, user.password_hash
         )
 
-    PasswordCrypto.verify_password(new_password, user.password_hash)
+    PasswordHasher.verify_password(new_password, user.password_hash)
 
 
 def test_update_user_password_old_password_matches_new(client, logged_in_user):

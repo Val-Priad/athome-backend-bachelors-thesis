@@ -5,6 +5,7 @@ from application.ports.object_storage import ObjectStorageProtocol
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
+from domain.user.services.authorization import AuthorizationService
 from domain.user.user_model import UserRole
 from schemas.estate_schemas.requests.estate_update_request import (
     EstateUpdateRequest,
@@ -12,7 +13,6 @@ from schemas.estate_schemas.requests.estate_update_request import (
 from schemas.estate_schemas.responses.estate_create_response import (
     EstateIDResponse,
 )
-from security.authorization import AuthorizationService
 
 logger = logging.getLogger(__name__)
 

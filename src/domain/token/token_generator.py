@@ -2,7 +2,7 @@ import hashlib
 import secrets
 
 
-class TokenCrypto:
+class TokenGenerator:
     @staticmethod
     def generate_token() -> str:
         return secrets.token_urlsafe(32)

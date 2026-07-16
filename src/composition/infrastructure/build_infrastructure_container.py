@@ -19,8 +19,6 @@ from infrastructure.vicinity.retry_vicinity_client import (
 from infrastructure.vicinity.vicinity_client import (
     OpenStreetMapVicinityClient,
 )
-from security.password_crypto import PasswordCrypto
-from security.token_crypto import TokenCrypto
 
 
 def build_infrastructure_container(
@@ -60,8 +58,6 @@ def build_infrastructure_container(
         mailer=mailer,
         object_storage=object_storage,
         vicinity_client=vicinity_client,
-        password_hasher=PasswordCrypto(),
-        token_hasher=TokenCrypto(),
         urls=ApplicationUrls(
             app_base_url=app.config["APP_BASE_URL"],
             media_base_url=app.config["MEDIA_BASE_URL"],

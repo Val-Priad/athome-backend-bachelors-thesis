@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from application.estate.media_url_builder import MediaUrlBuilder
+from application.estate.mapping.media_url_builder import MediaUrlBuilder
 from domain.estate.enums.estate_media_enums import MediaType
 from domain.estate.estate_model import Estate
 from domain.estate.models.estate_media_model import EstateMedia

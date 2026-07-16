@@ -7,6 +7,7 @@ from application.ports.mailer import MailerProtocol
 from domain.email_verification.email_verification_repository import (
     EmailVerificationRepository,
 )
+from domain.token.token_generator import TokenGenerator
 from domain.token.token_lifecycle_service import TokenLifecycleService
 from domain.user.user_model import User
 from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
@@ -14,7 +15,6 @@ from exceptions.custom_exceptions.user_exceptions import (
     TokenVerificationError,
     UserAlreadyVerifiedError,
 )
-from security import TokenCrypto
 
 
 class EmailVerificationService:
@@ -22,7 +22,7 @@ class EmailVerificationService:
         self,
         email_verification_repository: EmailVerificationRepository,
         mailer: MailerProtocol,
-        token_hasher: TokenCrypto,
+        token_hasher: TokenGenerator,
         token_lifecycle_service: TokenLifecycleService,
     ):
         self.email_verification_repository = email_verification_repository

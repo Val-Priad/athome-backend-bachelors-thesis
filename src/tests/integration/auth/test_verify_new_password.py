@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy import select
 
 from domain.password_reset.password_reset_model import PasswordReset
+from domain.token.token_generator import TokenGenerator
 from domain.user.user_model import User
-from security import TokenCrypto
 from tests.integration.conftest import AUTH_PATH
 
 
@@ -23,7 +23,7 @@ def set_token(db_session):
 
     password_reset = PasswordReset(
         user_id=user.id,
-        token_hash=TokenCrypto.hash_token(raw_token),
+        token_hash=TokenGenerator.hash_token(raw_token),
         expires_at=datetime.now(timezone.utc) + timedelta(hours=5),
     )
     db_session.add(password_reset)

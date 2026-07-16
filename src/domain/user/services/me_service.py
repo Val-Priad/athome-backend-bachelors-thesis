@@ -3,17 +3,17 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from domain.user.services.password_hasher import PasswordHasher
 from domain.user.user_repository import UserRepository
 from exceptions.custom_exceptions.user_exceptions import (
     MissingUpdateDataError,
     NewPasswordMatchesOldError,
 )
-from security import PasswordCrypto
 
 
 class MeService:
     def __init__(
-        self, user_repository: UserRepository, password_hasher: PasswordCrypto
+        self, user_repository: UserRepository, password_hasher: PasswordHasher
     ):
         self.user_repository = user_repository
         self.password_hasher = password_hasher

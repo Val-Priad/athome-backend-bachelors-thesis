@@ -3,10 +3,12 @@ from application.estate.delete_estate_use_case import DeleteEstateUseCase
 from application.estate.email_to_estate_agent_use_case import (
     EmailToAgentUseCase,
 )
-from application.estate.estate_response_mapper import EstateResponseMapper
 from application.estate.get_estate_use_case import GetEstateUseCase
 from application.estate.get_filtered_estate_use_case import (
     GetFilteredEstateUseCase,
+)
+from application.estate.mapping.estate_response_mapper import (
+    EstateResponseMapper,
 )
 from application.estate.suggest_estate_use_case import SuggestEstateUseCase
 from application.estate.toggle_saved_estate_use_case import (

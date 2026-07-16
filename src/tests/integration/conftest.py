@@ -20,9 +20,9 @@ from composition.container_access import APPLICATION_CONTAINER_KEY
 from composition.dependency_overrides import DependencyOverrides
 from config import TestingConfig
 from domain.estate.enums.estate_vicinity_enums import VicinityType
+from domain.user.services.password_hasher import PasswordHasher
 from domain.user.user_model import User, UserRole
 from infrastructure.db import db
-from security.password_crypto import PasswordCrypto
 
 ME_PATH = "/api/users/me"
 AGENTS_PATH = "/api/agents"
@@ -201,7 +201,7 @@ def application_container(app: Flask) -> ApplicationContainer:
 
 @fixture(scope="session")
 def test_password_hash() -> bytes:
-    return PasswordCrypto.hash_password(TEST_PASSWORD)
+    return PasswordHasher.hash_password(TEST_PASSWORD)
 
 
 @fixture

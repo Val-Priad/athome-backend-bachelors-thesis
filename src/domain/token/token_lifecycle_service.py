@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from security.token_crypto import TokenCrypto
+from domain.token.token_generator import TokenGenerator
 
 
 class TokenLifecycleService:
@@ -9,7 +9,7 @@ class TokenLifecycleService:
         session,
         user_id,
         *,
-        token_crypto: TokenCrypto,
+        token_crypto: TokenGenerator,
         repository,
         ttl: timedelta,
     ):

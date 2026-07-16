@@ -10,8 +10,8 @@ from domain.password_reset.password_reset_service import PasswordResetService
 from domain.token.token_lifecycle_service import TokenLifecycleService
 from domain.user.services.agent_service import AgentService
 from domain.user.services.auth_service import AuthService
+from domain.user.services.authorization import AuthorizationService
 from domain.user.services.me_service import MeService
-from security.authorization import AuthorizationService
 
 
 @dataclass(frozen=True, slots=True)

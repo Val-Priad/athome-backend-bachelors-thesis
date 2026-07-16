@@ -1,9 +1,11 @@
 from application.agent.get_agent_description_use_case import (
     GetAgentDescriptionUseCase,
 )
-from application.estate.estate_response_mapper import EstateResponseMapper
 from application.estate.get_agent_own_estates_use_case import (
     GetAgentOwnEstatesUseCase,
+)
+from application.estate.mapping.estate_response_mapper import (
+    EstateResponseMapper,
 )
 from composition.infrastructure.infrastructure_container import (
     InfrastructureContainer,

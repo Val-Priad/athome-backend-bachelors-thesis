@@ -4,8 +4,8 @@ from sqlalchemy import select
 from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
+from domain.user.services.password_hasher import PasswordHasher
 from domain.user.user_model import User
-from security import PasswordCrypto
 from tests.integration.conftest import AUTH_PATH
 
 
@@ -22,7 +22,7 @@ def test_register_valid(client, db_session):
         select(User).where(User.email == "user@example.com")
     )
     assert user is not None
-    assert PasswordCrypto.verify_password(password, user.password_hash) is None
+    assert PasswordHasher.verify_password(password, user.password_hash) is None
 
     email_verification = db_session.scalar(
         select(EmailVerification).where(EmailVerification.user_id == user.id)

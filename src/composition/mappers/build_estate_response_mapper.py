@@ -1,5 +1,7 @@
-from application.estate.estate_response_mapper import EstateResponseMapper
-from application.estate.media_url_builder import MediaUrlBuilder
+from application.estate.mapping.estate_response_mapper import (
+    EstateResponseMapper,
+)
+from application.estate.mapping.media_url_builder import MediaUrlBuilder
 from composition.infrastructure.infrastructure_container import (
     InfrastructureContainer,
 )

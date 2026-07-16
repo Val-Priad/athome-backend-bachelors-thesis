@@ -6,7 +6,9 @@ from application.admin.get_admin_filtered_estate_use_case import (
 from application.admin.get_admin_user_use_case import GetAdminUserUseCase
 from application.admin.list_agents_use_case import ListAgentsUseCase
 from application.admin.list_users_use_case import ListUsersUseCase
-from application.estate.estate_response_mapper import EstateResponseMapper
+from application.estate.mapping.estate_response_mapper import (
+    EstateResponseMapper,
+)
 from composition.infrastructure.infrastructure_container import (
     InfrastructureContainer,
 )

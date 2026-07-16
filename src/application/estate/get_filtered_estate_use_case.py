@@ -1,4 +1,6 @@
-from application.estate.estate_response_mapper import EstateResponseMapper
+from application.estate.mapping.estate_response_mapper import (
+    EstateResponseMapper,
+)
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_service import EstateService
 from schemas.estate_schemas.responses.estate_filter_response import (

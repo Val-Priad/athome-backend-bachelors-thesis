@@ -2,8 +2,8 @@ from uuid import UUID
 
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_repository import EstateRepository
+from domain.user.services.authorization import AuthorizationService
 from domain.user.user_model import UserRole
-from security.authorization import AuthorizationService
 
 
 class DeleteEstateUseCase:

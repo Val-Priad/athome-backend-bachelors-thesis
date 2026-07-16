@@ -1,8 +1,11 @@
 from uuid import UUID
 
-from application.estate.estate_response_mapper import EstateResponseMapper
+from application.estate.mapping.estate_response_mapper import (
+    EstateResponseMapper,
+)
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_service import EstateService
+from domain.user.services.authorization import AuthorizationService
 from domain.user.user_model import UserRole
 from schemas.estate_schemas.requests.estate_filter_request import (
     EstateAdminFilterRequest,
@@ -11,7 +14,6 @@ from schemas.estate_schemas.requests.estate_filter_request import (
 from schemas.estate_schemas.responses.estate_filter_response import (
     EstateFilterResponse,
 )
-from security.authorization import AuthorizationService
 
 
 class GetAgentOwnEstatesUseCase:

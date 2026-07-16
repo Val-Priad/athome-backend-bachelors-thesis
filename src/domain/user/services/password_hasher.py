@@ -5,7 +5,7 @@ from exceptions.custom_exceptions.user_exceptions import (
 )
 
 
-class PasswordCrypto:
+class PasswordHasher:
     @staticmethod
     def hash_password(raw_password: str) -> bytes:
         return bcrypt.hashpw(raw_password.encode(), bcrypt.gensalt())

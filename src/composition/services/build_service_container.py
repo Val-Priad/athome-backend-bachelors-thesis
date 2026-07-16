@@ -10,11 +10,13 @@ from domain.email_verification.email_verification_service import (
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
 from domain.password_reset.password_reset_service import PasswordResetService
+from domain.token.token_generator import TokenGenerator
 from domain.token.token_lifecycle_service import TokenLifecycleService
 from domain.user.services.agent_service import AgentService
 from domain.user.services.auth_service import AuthService
+from domain.user.services.authorization import AuthorizationService
 from domain.user.services.me_service import MeService
-from security.authorization import AuthorizationService
+from domain.user.services.password_hasher import PasswordHasher
 
 
 def build_service_container(
@@ -22,6 +24,8 @@ def build_service_container(
     repositories: RepositoryContainer,
 ) -> ServiceContainer:
     token_lifecycle = TokenLifecycleService()
+    token_hasher = TokenGenerator()
+    password_hasher = PasswordHasher()
 
     return ServiceContainer(
         token_lifecycle=token_lifecycle,
@@ -31,23 +35,23 @@ def build_service_container(
         email_verification=EmailVerificationService(
             email_verification_repository=repositories.email_verifications,
             mailer=infrastructure.mailer,
-            token_hasher=infrastructure.token_hasher,
+            token_hasher=token_hasher,
             token_lifecycle_service=token_lifecycle,
         ),
         password_reset=PasswordResetService(
             password_reset_repository=repositories.password_resets,
             mailer=infrastructure.mailer,
-            token_hasher=infrastructure.token_hasher,
-            password_hasher=infrastructure.password_hasher,
+            token_hasher=token_hasher,
+            password_hasher=password_hasher,
             token_lifecycle_service=token_lifecycle,
         ),
         auth=AuthService(
             user_repository=repositories.users,
-            password_hasher=infrastructure.password_hasher,
+            password_hasher=password_hasher,
         ),
         me=MeService(
             user_repository=repositories.users,
-            password_hasher=infrastructure.password_hasher,
+            password_hasher=password_hasher,
         ),
         admin_users=AdminUsersService(
             user_repository=repositories.users,

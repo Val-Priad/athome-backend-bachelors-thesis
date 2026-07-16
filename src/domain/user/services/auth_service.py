@@ -1,19 +1,19 @@
 from sqlalchemy.orm import Session
 
+from domain.user.services.password_hasher import PasswordHasher
 from domain.user.user_model import User
 from domain.user.user_repository import UserRepository
 from exceptions.custom_exceptions.user_exceptions import (
     UserAlreadyExistsError,
     UserIsNotVerifiedError,
 )
-from security import PasswordCrypto
 
 
 class AuthService:
     def __init__(
         self,
         user_repository: UserRepository,
-        password_hasher: PasswordCrypto,
+        password_hasher: PasswordHasher,
     ):
         self.user_repository = user_repository
         self.password_hasher = password_hasher

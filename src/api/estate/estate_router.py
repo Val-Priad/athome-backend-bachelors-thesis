@@ -4,13 +4,7 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
 from api.responses import construct_response
-from composition_root import (
-    email_to_agent_use_case,
-    get_estate_use_case,
-    get_filtered_estate_use_case,
-    suggest_estate_use_case,
-    toggle_saved_estate_use_case,
-)
+from composition.container_access import get_application_container
 from infrastructure.jwt.jwt_utils import (
     get_jwt_user_uuid,
     get_optional_jwt_user_uuid,
@@ -34,7 +28,8 @@ bp = Blueprint("estate", __name__, url_prefix="/api/estate")
 @jwt_required(optional=True)
 def get_estate(estate_id: UUID):
     requester_id = get_optional_jwt_user_uuid()
-    response = get_estate_use_case.execute(requester_id, estate_id)
+    container = get_application_container()
+    response = container.estates.get_one.execute(requester_id, estate_id)
     return construct_response(data=response)
 
 
@@ -47,7 +42,8 @@ def get_estates():
         args=request.args,
     )
     filters = EstatePublicFilterRequest.from_request(raw_filters)
-    response = get_filtered_estate_use_case.execute(filters, requester_id)
+    container = get_application_container()
+    response = container.estates.get_filtered.execute(filters, requester_id)
     return construct_response(data=response)
 
 
@@ -56,7 +52,8 @@ def get_estates():
 def suggest_estate():
     requester_id = get_jwt_user_uuid()
     data = EstateSuggestRequest.from_request(request.json)
-    response = suggest_estate_use_case.execute(data, requester_id)
+    container = get_application_container()
+    response = container.estates.suggest.execute(data, requester_id)
     return construct_response(status=201, data=response)
 
 
@@ -64,7 +61,8 @@ def suggest_estate():
 @jwt_required()
 def toggle_saved_estate(estate_id):
     requester_id = get_jwt_user_uuid()
-    toggle_saved_estate_use_case.execute(requester_id, estate_id)
+    container = get_application_container()
+    container.estates.toggle_saved.execute(requester_id, estate_id)
     return construct_response()
 
 
@@ -72,5 +70,6 @@ def toggle_saved_estate(estate_id):
 @limiter.limit("3/minute")
 def send_email_to_estate_agent(estate_id):
     payload = EmailToAgentRequest.from_request(request.json)
-    email_to_agent_use_case.execute(estate_id, payload)
+    container = get_application_container()
+    container.estates.email_agent.execute(estate_id, payload)
     return construct_response()

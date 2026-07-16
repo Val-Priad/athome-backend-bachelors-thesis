@@ -1,8 +1,8 @@
 from uuid import UUID
 
+from application.transactions import TransactionManagerProtocol
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_service import EstateService
-from infrastructure.db import db_session
 from schemas.estate_schemas.requests.estate_create_type import (
     EstateMutationType,
 )
@@ -15,8 +15,13 @@ from schemas.estate_schemas.responses.estate_create_response import (
 
 
 class SuggestEstateUseCase:
-    def __init__(self, estate_service: EstateService):
-        self.estate_service = estate_service
+    def __init__(
+        self,
+        transactions: TransactionManagerProtocol,
+        estate_service: EstateService,
+    ) -> None:
+        self._transactions = transactions
+        self._estate_service = estate_service
 
     def execute(
         self,
@@ -24,9 +29,11 @@ class SuggestEstateUseCase:
         requester_id: UUID,
     ) -> EstateIDResponse:
 
-        vicinities = self.estate_service.get_vicinities_or_empty(data.location)
+        vicinities = self._estate_service.get_vicinities_or_empty(
+            data.location
+        )
 
-        with db_session() as session:
+        with self._transactions.session() as session:
             creation_data = EstateMutationType(
                 **data.model_dump(),
                 seller_id=requester_id,
@@ -34,7 +41,7 @@ class SuggestEstateUseCase:
                 listing_status=ListingStatus.suggested,
             )
 
-            estate = self.estate_service.create_estate(
+            estate = self._estate_service.create_estate(
                 session, creation_data, vicinities
             )
             return EstateIDResponse(id=estate.id)

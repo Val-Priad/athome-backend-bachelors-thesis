@@ -1,7 +1,6 @@
 import pytest
 from sqlalchemy import select
 
-from composition_root import auth_service
 from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
@@ -65,14 +64,23 @@ def test_register_user_validation_error(client, payload):
     assert response.status_code == 400
 
 
-def test_register_internal_error_rolls_back(client, db_session, monkeypatch):
+def test_register_internal_error_rolls_back(
+    client,
+    db_session,
+    application_container,
+    monkeypatch,
+):
     def boom(db, email, password):  # Do not touch arguments!
         user = User(email=email, password_hash=b"hash")  # NOSONAR
         db.add(user)
         db.flush()
         raise Exception("boom")  # NOSONAR
 
-    monkeypatch.setattr(auth_service, "create_user", boom)
+    monkeypatch.setattr(
+        application_container.auth.register_user._auth_service,
+        "create_user",
+        boom,
+    )
 
     response = client.post(
         f"{AUTH_PATH}/register",

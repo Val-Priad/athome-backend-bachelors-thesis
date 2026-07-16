@@ -1,8 +1,8 @@
 from uuid import UUID
 
+from application.transactions import TransactionManagerProtocol
 from domain.user.user_model import UserRole
 from domain.user.user_repository import UserRepository
-from infrastructure.db import db_session
 from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
     UsersListRequest,
 )
@@ -16,20 +16,22 @@ from security.authorization import AuthorizationService
 class ListUsersUseCase:
     def __init__(
         self,
+        transactions: TransactionManagerProtocol,
         user_repository: UserRepository,
         authorization_service: AuthorizationService,
-    ):
-        self.user_repository = user_repository
-        self.authorization_service = authorization_service
+    ) -> None:
+        self._transactions = transactions
+        self._user_repository = user_repository
+        self._authorization_service = authorization_service
 
     def execute(
         self, requester_id: UUID, query: UsersListRequest
     ) -> UsersListResponse:
-        with db_session() as session:
-            self.authorization_service.ensure_has_rights(
+        with self._transactions.session() as session:
+            self._authorization_service.ensure_has_rights(
                 session, requester_id, UserRole.admin
             )
-            users, total = self.user_repository.list_users(session, query)
+            users, total = self._user_repository.list_users(session, query)
 
             return UsersListResponse(
                 items=[UsersListItem.from_model(user) for user in users],

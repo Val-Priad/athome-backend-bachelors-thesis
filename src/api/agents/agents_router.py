@@ -4,10 +4,7 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
 from api.responses import construct_response
-from composition_root import (
-    get_agent_description_use_case,
-    get_agent_own_estates_use_case,
-)
+from composition.container_access import get_application_container
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
 from schemas.estate_schemas.requests.estate_filter_request import (
     EstateAgentOwnFilterRequest,
@@ -19,7 +16,8 @@ bp = Blueprint("agent", __name__, url_prefix="/api/agents")
 
 @bp.get("/<uuid:agent_id>")
 def get_agent_description(agent_id: UUID):
-    agent_description = get_agent_description_use_case.execute(agent_id)
+    container = get_application_container()
+    agent_description = container.agents.get_description.execute(agent_id)
     return construct_response(data=agent_description)
 
 
@@ -34,7 +32,8 @@ def get_my_estates():
     )
     filters = EstateAgentOwnFilterRequest.from_request(raw_filters)
 
-    response = get_agent_own_estates_use_case.execute(
+    container = get_application_container()
+    response = container.agents.get_own_estates.execute(
         requester_id=requester_id,
         filters=filters,
     )

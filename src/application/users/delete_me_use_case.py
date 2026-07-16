@@ -1,15 +1,20 @@
 from uuid import UUID
 
+from application.transactions import TransactionManagerProtocol
 from domain.user.user_repository import UserRepository
-from infrastructure.db import db_session
 
 
 class DeleteMeUseCase:
-    def __init__(self, user_repository: UserRepository):
-        self.user_repository = user_repository
+    def __init__(
+        self,
+        transactions: TransactionManagerProtocol,
+        user_repository: UserRepository,
+    ) -> None:
+        self._transactions = transactions
+        self._user_repository = user_repository
 
     def execute(self, user_id: UUID) -> None:
-        with db_session() as session:
+        with self._transactions.session() as session:
             session.delete(
-                self.user_repository.get_user_by_id(session, user_id)
+                self._user_repository.get_user_by_id(session, user_id)
             )

@@ -61,44 +61,8 @@ def disable_rate_limiter(app):
 
 
 @pytest.fixture
-def sent_estate_contact_emails(monkeypatch):
-    import composition_root
-
-    sent_emails = []
-
-    def fake_send_estate_contact_email(
-        *,
-        agent_email: str,
-        estate_title: str,
-        estate_url: str,
-        estate_address: str,
-        sender_name: str,
-        sender_email: str,
-        sender_phone: str,
-        message: str,
-    ) -> None:
-        sent_emails.append(
-            {
-                "agent_email": agent_email,
-                "estate_title": estate_title,
-                "estate_url": estate_url,
-                "estate_address": estate_address,
-                "sender_name": sender_name,
-                "sender_email": sender_email,
-                "sender_phone": sender_phone,
-                "message": message,
-            }
-        )
-
-    monkeypatch.setenv("FRONTEND_BASE_URL", "https://athome.test")
-
-    monkeypatch.setattr(
-        composition_root.email_to_agent_use_case.mailer,
-        "send_estate_contact_email",
-        fake_send_estate_contact_email,
-    )
-
-    return sent_emails
+def sent_estate_contact_emails(fake_mailer):
+    return fake_mailer.sent_estate_contact_emails
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.agent], indirect=True)

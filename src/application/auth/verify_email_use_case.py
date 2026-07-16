@@ -1,13 +1,18 @@
+from application.transactions import TransactionManagerProtocol
 from domain.email_verification.email_verification_service import (
     EmailVerificationService,
 )
-from infrastructure.db import db_session
 
 
 class VerifyEmailUseCase:
-    def __init__(self, email_verification_service: EmailVerificationService):
-        self.email_verification_service = email_verification_service
+    def __init__(
+        self,
+        transactions: TransactionManagerProtocol,
+        email_verification_service: EmailVerificationService,
+    ) -> None:
+        self._transactions = transactions
+        self._email_verification_service = email_verification_service
 
     def execute(self, token: str) -> None:
-        with db_session() as session:
-            self.email_verification_service.verify_token(session, token)
+        with self._transactions.session() as session:
+            self._email_verification_service.verify_token(session, token)

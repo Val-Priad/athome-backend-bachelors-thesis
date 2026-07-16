@@ -9,22 +9,14 @@ dependencies = [
     "flask>=3.1.2",
     "flask-jwt-extended>=4.7.1",
     "flask-limiter>=4.1.1",
-    "isort>=7.0.0",
     "jinja2>=3.1.6",
     "phonenumbers>=9.0.22",
-    "pip>=26.1.1",
     "psycopg>=3.3.4",
-    "psycopg2-binary>=2.9.11",
     "pydantic-extra-types>=2.11.0",
     "pydantic[email]>=2.12.5",
-    "pyright>=1.1.409",
-    "pytest>=9.0.2",
-    "pytest-cov>=7.0.0",
-    "pytest-env>=1.2.0",
     "python-dotenv>=1.2.1",
     "redis>=7.1.0",
     "resend>=2.19.0",
-    "ruff>=0.14.14",
     "sqlalchemy>=2.0.45",
 ]
 
@@ -46,3 +38,19 @@ extend-select = ["I", "TID251"]
 [tool.pytest.ini_options]
 pythonpath = ["src", "."]
 testpaths = ["src/tests"]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.10"
+extraPaths = ["src"]
+typeCheckingMode = "standard"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.39.9",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-env>=1.6.0",
+    "ruff>=0.15.21",
+]

@@ -4,17 +4,19 @@ from typing import cast
 
 from sqlalchemy import CursorResult, delete
 
+from application.transactions import TransactionManagerProtocol
 from domain.user.user_model import User
-from infrastructure.db import db_session
 
 _logger = logging.getLogger(__name__)
 
 
-def cleanup_unverified_users():
+def cleanup_unverified_users(
+    transactions: TransactionManagerProtocol,
+) -> None:
     try:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
-        with db_session() as session:
+        with transactions.session() as session:
             result = cast(
                 CursorResult,
                 session.execute(
@@ -24,6 +26,8 @@ def cleanup_unverified_users():
                     )
                 ),
             )
-        _logger.info("Successfully deleted %s unverified users", result.rowcount)
+        _logger.info(
+            "Successfully deleted %s unverified users", result.rowcount
+        )
     except Exception:
         _logger.exception("Error occurred during deletion of unverified users")

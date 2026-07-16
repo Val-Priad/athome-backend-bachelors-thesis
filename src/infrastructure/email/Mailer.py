@@ -1,30 +1,36 @@
-import os
+from pathlib import Path
 
-import resend
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from infrastructure.email.resend_client import (
+    EmailClientProtocol,
+    ResendClient,
+)
 
 
 class Mailer:
     FROM_EMAIL = "noreply@valpriad.online"
 
-    def __init__(self) -> None:
-        resend.api_key = os.getenv("RESEND_API_KEY")
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        app_base_url: str,
+        client: EmailClientProtocol | None = None,
+    ) -> None:
+        self._app_base_url = app_base_url.rstrip("/")
+        self._client = client or ResendClient(api_key)
+        templates_dir = Path(__file__).resolve().parent / "templates" / "html"
 
-        templates_dir = os.path.join(
-            os.path.dirname(__file__), "templates", "html"
-        )
-
-        self.env = Environment(
-            loader=FileSystemLoader(templates_dir),
+        self._environment = Environment(
+            loader=FileSystemLoader(str(templates_dir)),
             autoescape=select_autoescape(["html"]),
         )
 
     def send_verification_email(self, email_to: str, token: str) -> None:
-        verification_url = (
-            f"{os.getenv('APP_BASE_URL')}/verify-email?token={token}"
-        )
+        verification_url = f"{self._app_base_url}/verify-email?token={token}"
 
-        template = self.env.get_template("email_verification.html")
+        template = self._environment.get_template("email_verification.html")
         html = template.render(verification_url=verification_url)
 
         params = {
@@ -39,14 +45,14 @@ class Mailer:
             ),
         }
 
-        resend.Emails.send(params)  # type: ignore
+        self._client.send(params)
 
     def send_reset_password_email(self, email_to: str, token: str) -> None:
         reset_password_url = (
-            f"{os.getenv('APP_BASE_URL')}/reset-password?token={token}"
+            f"{self._app_base_url}/reset-password?token={token}"
         )
 
-        template = self.env.get_template("password_reset.html")
+        template = self._environment.get_template("password_reset.html")
         html = template.render(verification_url=reset_password_url)
 
         params = {
@@ -60,7 +66,7 @@ class Mailer:
             ),
         }
 
-        resend.Emails.send(params)  # type: ignore
+        self._client.send(params)
 
     def send_estate_contact_email(
         self,
@@ -73,7 +79,7 @@ class Mailer:
         sender_phone: str,
         message: str,
     ) -> None:
-        template = self.env.get_template("agent_contact.html")
+        template = self._environment.get_template("agent_contact.html")
 
         html = template.render(
             estate_title=estate_title,
@@ -107,4 +113,4 @@ class Mailer:
             "text": text,
         }
 
-        resend.Emails.send(params)  # type: ignore
+        self._client.send(params)

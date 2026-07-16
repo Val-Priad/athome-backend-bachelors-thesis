@@ -1,11 +1,18 @@
+from application.transactions import TransactionManagerProtocol
 from domain.password_reset.password_reset_service import PasswordResetService
-from infrastructure.db import db_session
 
 
 class VerifyNewPasswordUseCase:
-    def __init__(self, password_reset_service: PasswordResetService):
-        self.password_reset_service = password_reset_service
+    def __init__(
+        self,
+        transactions: TransactionManagerProtocol,
+        password_reset_service: PasswordResetService,
+    ) -> None:
+        self._transactions = transactions
+        self._password_reset_service = password_reset_service
 
     def execute(self, token: str, password: str) -> None:
-        with db_session() as session:
-            self.password_reset_service.reset_password(session, token, password)
+        with self._transactions.session() as session:
+            self._password_reset_service.reset_password(
+                session, token, password
+            )

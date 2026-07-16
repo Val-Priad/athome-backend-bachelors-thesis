@@ -7,14 +7,7 @@ from flask_jwt_extended import (
 )
 
 from api.responses import construct_error, construct_response
-from composition_root import (
-    login_user_use_case,
-    register_user_use_case,
-    resend_verification_use_case,
-    reset_password_use_case,
-    verify_email_use_case,
-    verify_new_password_use_case,
-)
+from composition.container_access import get_application_container
 from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
 from exceptions.custom_exceptions.user_exceptions import (
     InvalidCredentialsError,
@@ -39,9 +32,10 @@ bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 @limiter.limit("2/minute")
 def register():
     data = EmailPasswordRequest.from_request(request.json)
+    container = get_application_container()
 
     try:
-        register_user_use_case.execute(data)
+        container.auth.register_user.execute(data)
     except (UserAlreadyExistsError, EmailSendError):
         pass
     return construct_response(
@@ -54,7 +48,8 @@ def register():
 def verify_token():
     data = TokenRequest.from_query(request.args)
 
-    verify_email_use_case.execute(data.token)
+    container = get_application_container()
+    container.auth.verify_email.execute(data.token)
     return construct_response()
 
 
@@ -62,9 +57,10 @@ def verify_token():
 @limiter.limit("2/minute")
 def resend_verification():
     data = EmailRequest.from_request(request.json)
+    container = get_application_container()
 
     try:
-        resend_verification_use_case.execute(data.email)
+        container.auth.resend_verification.execute(data.email)
     except (UserNotFoundError, UserAlreadyVerifiedError, EmailSendError):
         pass
 
@@ -77,9 +73,10 @@ def resend_verification():
 @bp.post("/login")
 def login():
     data = EmailPasswordRequest.from_request(request.json)
+    container = get_application_container()
 
     try:
-        user_id = login_user_use_case.execute(data.email, data.password)
+        user_id = container.auth.login_user.execute(data.email, data.password)
     except (
         UserNotFoundError,
         UserIsNotVerifiedError,
@@ -104,9 +101,10 @@ def logout():
 @limiter.limit("2/minute")
 def reset_password():
     data = EmailRequest.from_request(request.json)
+    container = get_application_container()
 
     try:
-        reset_password_use_case.execute(data.email)
+        container.auth.reset_password.execute(data.email)
     except (UserNotFoundError, EmailSendError):
         pass
 
@@ -119,5 +117,6 @@ def reset_password():
 def verify_new_password():
     data = TokenPasswordRequest.from_request(request.json)
 
-    verify_new_password_use_case.execute(data.token, data.password)
+    container = get_application_container()
+    container.auth.verify_new_password.execute(data.token, data.password)
     return construct_response()

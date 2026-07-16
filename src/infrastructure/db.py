@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from dataclasses import dataclass
 
 from flask import Flask
 from sqlalchemy import Engine, create_engine
@@ -9,56 +9,52 @@ class Base(DeclarativeBase):
     pass
 
 
-_engine: Engine | None = None
-_session_factory: sessionmaker | None = None
+@dataclass(frozen=True, slots=True)
+class DatabaseState:
+    engine: Engine
+    session_factory: sessionmaker[Session]
 
 
-def init_db(app: Flask) -> None:
-    global _engine, _session_factory
+class Database:
+    extension_key = "database"
 
-    database_url = app.config["DATABASE_URL"]
+    def init_app(self, app: Flask) -> None:
+        database_url = app.config["DATABASE_URL"]
 
-    if not database_url:
-        raise RuntimeError("DATABASE_URL is not set")
+        if not database_url:
+            raise RuntimeError("DATABASE_URL is not set")
 
-    if _engine is not None:
-        _engine.dispose()
+        engine = create_db_engine(database_url)
+        session_factory = create_session_factory(engine)
 
-    _engine = create_db_engine(database_url)
-    _session_factory = create_session_factory(_engine)
+        app.extensions[self.extension_key] = DatabaseState(
+            engine=engine,
+            session_factory=session_factory,
+        )
+
+    def get_state(self, app: Flask) -> DatabaseState:
+        state = app.extensions.get(self.extension_key)
+
+        if not isinstance(state, DatabaseState):
+            raise RuntimeError("Database is not initialized for this app")
+
+        return state
+
+    def get_engine(self, app: Flask) -> Engine:
+        return self.get_state(app).engine
+
+    def get_session_factory(self, app: Flask) -> sessionmaker[Session]:
+        return self.get_state(app).session_factory
 
 
-def create_db_engine(database_url: str):
+def create_db_engine(database_url: str) -> Engine:
     return create_engine(database_url)
 
 
-def create_session_factory(engine: Engine):
+def create_session_factory(engine: Engine) -> sessionmaker[Session]:
     return sessionmaker(
         bind=engine,
     )
 
 
-def get_engine() -> Engine:
-    if _engine is None:
-        raise RuntimeError("Database engine is not initialized")
-
-    return _engine
-
-
-def get_session() -> Session:
-    if _session_factory is None:
-        raise RuntimeError("Database session factory is not initialized")
-    return _session_factory()
-
-
-@contextmanager
-def db_session():
-    session = get_session()
-    try:
-        yield session
-        session.commit()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+db = Database()

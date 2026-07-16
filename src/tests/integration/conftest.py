@@ -1,3 +1,4 @@
+import os
 from types import SimpleNamespace
 
 from dotenv import load_dotenv
@@ -7,10 +8,16 @@ from pytest import FixtureRequest, fixture
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
 
+from app import create_app
+from composition.application_container import ApplicationContainer
+from composition.build_application_container import build_application_container
+from composition.container_access import APPLICATION_CONTAINER_KEY
+from composition.dependency_overrides import DependencyOverrides
+from config import TestingConfig
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.user_model import User, UserRole
-from infrastructure import db as db_module
-from infrastructure.vicinity.vicinity_client import (
+from infrastructure.db import db
+from infrastructure.vicinity.vicinity_protocol import (
     Place,
     VicinityFetchResult,
 )
@@ -25,32 +32,48 @@ ADMIN_AGENTS_PATH = "/api/admin/agents"
 ADMIN_ESTATE_PATH = "/api/admin/estate"
 
 
-@fixture
-def app() -> Flask:
-    load_dotenv()
+class FakeMailer:
+    def __init__(self) -> None:
+        self.sent_estate_contact_emails: list[dict[str, str]] = []
 
-    from app import create_app
-    from config import TestingConfig
+    def send_verification_email(self, email_to: str, token: str) -> None:
+        pass
 
-    return create_app(TestingConfig)
+    def send_reset_password_email(self, email_to: str, token: str) -> None:
+        pass
+
+    def send_estate_contact_email(
+        self,
+        agent_email: str,
+        estate_title: str,
+        estate_url: str,
+        estate_address: str,
+        sender_name: str,
+        sender_email: str,
+        sender_phone: str,
+        message: str,
+    ) -> None:
+        self.sent_estate_contact_emails.append(
+            {
+                "agent_email": agent_email,
+                "estate_title": estate_title,
+                "estate_url": estate_url,
+                "estate_address": estate_address,
+                "sender_name": sender_name,
+                "sender_email": sender_email,
+                "sender_phone": sender_phone,
+                "message": message,
+            }
+        )
 
 
-@fixture
-def client(app) -> FlaskClient:
-    return app.test_client()
+class FakeObjectStorage:
+    def delete_objects(self, object_keys) -> None:
+        pass
 
 
-@fixture(autouse=True)
-def noop_send_verification_email(monkeypatch):
-    monkeypatch.setattr(
-        "infrastructure.email.Mailer.Mailer.send_verification_email",
-        lambda *args, **kwargs: None,
-    )
-
-
-@fixture(autouse=True)
-def noop_fetch_vicinity(monkeypatch):
-    def fetch_vicinity(lat, lon, radius=10000):
+class FakeVicinityClient:
+    def fetch_vicinity(self, lat, lon, radius=10000):
         return VicinityFetchResult(
             ok=True,
             data={
@@ -77,26 +100,82 @@ def noop_fetch_vicinity(monkeypatch):
             },
         )
 
-    monkeypatch.setattr(
-        "composition_root.estate_service.vicinity_client.fetch_vicinity",
-        fetch_vicinity,
+
+@fixture
+def fake_mailer() -> FakeMailer:
+    return FakeMailer()
+
+
+@fixture
+def fake_vicinity_client() -> FakeVicinityClient:
+    return FakeVicinityClient()
+
+
+@fixture
+def fake_object_storage() -> FakeObjectStorage:
+    return FakeObjectStorage()
+
+
+@fixture
+def app(
+    fake_mailer: FakeMailer,
+    fake_vicinity_client: FakeVicinityClient,
+    fake_object_storage: FakeObjectStorage,
+) -> Flask:
+    load_dotenv()
+    test_database_url = os.environ["TEST_DATABASE_URL"]
+
+    return create_app(
+        TestingConfig,
+        config_overrides={
+            "DATABASE_URL": test_database_url,
+            "JWT_SECRET_KEY": "test-secret-key-at-least-32-bytes-long",
+            "APP_BASE_URL": "https://athome.test",
+            "MEDIA_BASE_URL": "https://media.test",
+            "RESEND_API_KEY": "test-resend-key",
+            "RATELIMIT_STORAGE_URI": "memory://",
+        },
+        dependency_overrides=DependencyOverrides(
+            mailer=fake_mailer,
+            vicinity_client=fake_vicinity_client,
+            object_storage=fake_object_storage,
+        ),
     )
 
 
+@fixture
+def client(app) -> FlaskClient:
+    return app.test_client()
+
+
 @fixture(autouse=True)
-def db_session(app: Flask, monkeypatch):
+def db_session(
+    app: Flask,
+    fake_mailer: FakeMailer,
+    fake_vicinity_client: FakeVicinityClient,
+    fake_object_storage: FakeObjectStorage,
+):
     with app.app_context():
-        engine = db_module.get_engine()
+        engine = db.get_engine(app)
         connection = engine.connect()
         transaction = connection.begin()
 
         testing_session_factory = sessionmaker(bind=connection)
+        original_container = app.extensions[APPLICATION_CONTAINER_KEY]
+        app.extensions[APPLICATION_CONTAINER_KEY] = (
+            build_application_container(
+                app,
+                overrides=DependencyOverrides(
+                    session_factory=testing_session_factory,
+                    mailer=fake_mailer,
+                    vicinity_client=fake_vicinity_client,
+                    object_storage=fake_object_storage,
+                ),
+            )
+        )
+
         session = testing_session_factory()
         session.begin_nested()
-
-        monkeypatch.setattr(
-            db_module, "_session_factory", testing_session_factory
-        )
 
         @event.listens_for(session, "after_transaction_end")
         def restart_savepoint(session, transaction_):
@@ -106,8 +185,15 @@ def db_session(app: Flask, monkeypatch):
         yield session
 
         session.close()
-        transaction.rollback()
+        app.extensions[APPLICATION_CONTAINER_KEY] = original_container
+        if transaction.is_active:
+            transaction.rollback()
         connection.close()
+
+
+@fixture
+def application_container(app: Flask) -> ApplicationContainer:
+    return app.extensions[APPLICATION_CONTAINER_KEY]
 
 
 @fixture

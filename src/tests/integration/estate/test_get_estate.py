@@ -2,6 +2,7 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy.orm import Session
 
 from domain.estate.enums.apartment_enums import ApartmentLayout
 from domain.estate.enums.estate_details_enums import (
@@ -30,11 +31,11 @@ from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
 from domain.user.user_model import UserRole
-from infrastructure.db import db_session
 from tests.integration.conftest import ESTATE_PATH
 
 
 def _create_estate(
+    db_session: Session,
     *,
     status: ListingStatus,
     seller_id=None,
@@ -138,10 +139,9 @@ def _create_estate(
         ],
     )
 
-    with db_session() as session:
-        session.add(estate)
-        session.flush()
-        estate_id = estate.id
+    db_session.add(estate)
+    db_session.flush()
+    estate_id = estate.id
 
     return estate_id
 
@@ -154,8 +154,10 @@ def test_get_active_estate_returns_full_public_data(
     client,
     any_user,
     logged_in_user,
+    db_session,
 ):
     estate_id = _create_estate(
+        db_session,
         status=ListingStatus.active,
         seller_id=any_user.id,
         agent_id=logged_in_user.id,
@@ -262,8 +264,10 @@ def test_public_get_active_estate_returns_data_without_seller(
     client,
     any_user,
     logged_in_user,
+    db_session,
 ):
     estate_id = _create_estate(
+        db_session,
         status=ListingStatus.active,
         seller_id=any_user.id,
         agent_id=logged_in_user.id,
@@ -303,8 +307,10 @@ def test_staff_can_get_not_active_estate(
     logged_in_user,
     any_user,
     status,
+    db_session,
 ):
     estate_id = _create_estate(
+        db_session,
         status=status,
         seller_id=any_user.id,
     )
@@ -339,8 +345,10 @@ def test_public_cannot_get_not_active_estate(
     client,
     any_user,
     status,
+    db_session,
 ):
     estate_id = _create_estate(
+        db_session,
         status=status,
         seller_id=any_user.id,
     )
@@ -370,8 +378,10 @@ def test_regular_user_cannot_get_not_active_estate(
     logged_in_user,
     any_user,
     status,
+    db_session,
 ):
     estate_id = _create_estate(
+        db_session,
         status=status,
         seller_id=any_user.id,
     )

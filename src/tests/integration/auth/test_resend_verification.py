@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from sqlalchemy import select
 
-from composition_root import email_verification_service
 from domain.email_verification.email_verification_model import (
     EmailVerification,
 )
@@ -113,12 +112,19 @@ def test_resend_verification_if_user_already_verified(client, verified_user):
 
 
 def test_resend_verification_on_server_error_returns_500(
-    client, unverified_user, monkeypatch
+    client,
+    unverified_user,
+    application_container,
+    monkeypatch,
 ):
     def boom(*args, **kwargs):  # Do not touch arguments!
         raise Exception("boom")  # NOSONAR
 
-    monkeypatch.setattr(email_verification_service, "get_resend_token", boom)
+    monkeypatch.setattr(
+        application_container.auth.resend_verification._email_verification_service,
+        "get_resend_token",
+        boom,
+    )
 
     response = client.post(
         f"{AUTH_PATH}/resend-verification-email",

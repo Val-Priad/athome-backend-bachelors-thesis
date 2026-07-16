@@ -4,9 +4,12 @@
   },
   "scripts": {
     "build:emails": "mjml src/infrastructure/email/templates/mjml/*.mjml -o src/infrastructure/email/templates/html",
-    "dev": "PYTHONPATH=src uv run python -m flask --app wsgi:app run --debug"
+    "dev": "PYTHONPATH=src uv run python -m flask --app wsgi:app run --debug",
+    "spellcheck": "cspell ."
   },
   "devDependencies": {
+    "@cspell/dict-uk-ua": "^4.0.6",
+    "cspell": "^10.0.1",
     "mjml": "^4.15.3"
   }
 }

@@ -1,43 +1,47 @@
+from collections.abc import Mapping
+
 from flask import Flask
 
-from api.admin.agents.admin_agents_router import bp as admin_agents_bp
-from api.admin.estate.admin_estate_router import bp as admin_estate_bp
-from api.admin.users.admin_users_router import bp as admin_users_bp
-from api.agents.agents_router import bp as agent_bp
-from api.auth.auth_router import bp as auth_bp
+from api.blueprints import register_blueprints
 from api.error_handlers import register_error_handler
-from api.estate.estate_router import bp as estate_bp
-from api.users.me.me_router import bp as me_bp
+from composition.build_application_container import build_application_container
+from composition.container_access import APPLICATION_CONTAINER_KEY
+from composition.dependency_overrides import DependencyOverrides
 from config import FlaskConfig
+from configuration import configure_app
 from exceptions.error_catalog import register_errors
-from infrastructure.db import init_db
-from infrastructure.jwt.jwt_config import create_jwt_manager
+from infrastructure.db import db
+from infrastructure.jwt.jwt_config import jwt
+from infrastructure.jwt.jwt_error_handlers import register_jwt_error_handlers
 from infrastructure.jwt.jwt_handlers import register_jwt_handlers
 from infrastructure.logging.setup_logging import setup_logging
-from infrastructure.rate_limiting.limiter_config import create_limiter
+from infrastructure.rate_limiting.limiter_config import limiter
 
 
-def create_app(config: type[FlaskConfig]) -> Flask:
-    setup_logging()
+def create_app(
+    config: type[FlaskConfig],
+    *,
+    config_overrides: Mapping[str, object] | None = None,
+    dependency_overrides: DependencyOverrides | None = None,
+) -> Flask:
     app = Flask(__name__)
 
-    app.config.from_object(config)
-    init_db(app)
+    configure_app(app, config, config_overrides)
+    setup_logging(app)
 
-    create_limiter(app)
-    create_jwt_manager(app)
+    db.init_app(app)
+    limiter.init_app(app)
+    jwt.init_app(app)
 
+    app.extensions[APPLICATION_CONTAINER_KEY] = build_application_container(
+        app,
+        overrides=dependency_overrides,
+    )
+
+    register_jwt_error_handlers(jwt)
     register_jwt_handlers(app)
-
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(me_bp)
-    app.register_blueprint(admin_users_bp)
-    app.register_blueprint(agent_bp)
-    app.register_blueprint(estate_bp)
-    app.register_blueprint(admin_estate_bp)
-    app.register_blueprint(admin_agents_bp)
-
     register_errors()
     register_error_handler(app)
+    register_blueprints(app)
 
     return app

@@ -1,10 +1,10 @@
 import logging
 from uuid import UUID
 
+from application.transactions import TransactionManagerProtocol
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
 from domain.user.user_model import UserRole
-from infrastructure.db import db_session
 from infrastructure.object_storage.object_storage_protocol import (
     ObjectStorageProtocol,
 )
@@ -22,15 +22,17 @@ logger = logging.getLogger(__name__)
 class UpdateEstateUseCase:
     def __init__(
         self,
+        transactions: TransactionManagerProtocol,
         estate_service: EstateService,
         authorization_service: AuthorizationService,
         participants_service: EstateParticipantsService,
         object_storage: ObjectStorageProtocol,
-    ):
-        self.estate_service = estate_service
-        self.authorization_service = authorization_service
-        self.participants_service = participants_service
-        self.object_storage = object_storage
+    ) -> None:
+        self._transactions = transactions
+        self._estate_service = estate_service
+        self._authorization_service = authorization_service
+        self._participants_service = participants_service
+        self._object_storage = object_storage
 
     def execute(
         self,
@@ -38,12 +40,12 @@ class UpdateEstateUseCase:
         data: EstateUpdateRequest,
         requester_id: UUID,
     ) -> EstateIDResponse:
-        with db_session() as session:
-            self.authorization_service.ensure_has_rights(
+        with self._transactions.session() as session:
+            self._authorization_service.ensure_has_rights(
                 session, requester_id, UserRole.admin
             )
-            self.participants_service.check_participants(session, data)
-            estate, removed_object_keys = self.estate_service.update_estate(
+            self._participants_service.check_participants(session, data)
+            estate, removed_object_keys = self._estate_service.update_estate(
                 session=session,
                 estate_id=estate_id,
                 data=data,
@@ -52,7 +54,7 @@ class UpdateEstateUseCase:
 
         if removed_object_keys:
             try:
-                self.object_storage.delete_objects(removed_object_keys)
+                self._object_storage.delete_objects(removed_object_keys)
             except Exception:
                 logger.exception(
                     "Failed to delete removed estate media objects",

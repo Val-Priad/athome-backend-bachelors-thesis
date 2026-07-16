@@ -2,7 +2,6 @@ import pytest
 
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.user.user_model import User, UserRole
-from security.password_crypto import PasswordCrypto
 from tests.integration.conftest import ADMIN_ESTATE_PATH
 from tests.integration.estate.test_filter_estate import (
     assert_ok_filter_response,
@@ -13,12 +12,13 @@ from tests.integration.estate.test_filter_estate import (
 def _create_test_user(
     db_session,
     *,
+    password_hash: bytes,
     email: str,
     role: UserRole = UserRole.user,
 ) -> User:
     user = User(
         email=email,
-        password_hash=PasswordCrypto.hash_password("test_password"),
+        password_hash=password_hash,
         is_email_verified=True,
         role=role,
     )
@@ -119,13 +119,16 @@ def test_admin_filter_estates_by_seller_id(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller_a = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="seller_a@example.com",
     )
     seller_b = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="seller_b@example.com",
     )
 
@@ -174,13 +177,16 @@ def test_admin_filter_estates_by_seller_status_and_public_filter(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller_a = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="combo_seller_a@example.com",
     )
     seller_b = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="combo_seller_b@example.com",
     )
 

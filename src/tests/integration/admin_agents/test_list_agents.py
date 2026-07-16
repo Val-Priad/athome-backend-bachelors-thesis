@@ -10,17 +10,16 @@ from domain.user.user_model import User, UserRole
 from schemas.admin_schemas.admin_users_schemas.admin_agent_response import (
     AgentsListItem,
 )
-from security.password_crypto import PasswordCrypto
 from tests.integration.conftest import ADMIN_AGENTS_PATH
 
 
 @pytest.fixture
-def populate_agents(db_session):
+def populate_agents(db_session, test_password_hash):
     for i in range(37):
         db_session.add(
             User(
                 email=f"agent_{i:02d}@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.agent,
                 name=f"Agent {i:02d}",
@@ -33,7 +32,7 @@ def populate_agents(db_session):
         db_session.add(
             User(
                 email=f"user_{i}@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
             )
@@ -43,7 +42,7 @@ def populate_agents(db_session):
         db_session.add(
             User(
                 email=f"admin_{i}@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.admin,
             )
@@ -55,6 +54,7 @@ def populate_agents(db_session):
 def _create_agent(
     db_session,
     *,
+    password_hash: bytes,
     email: str,
     name: str | None = None,
     phone_number: str | None = None,
@@ -62,7 +62,7 @@ def _create_agent(
 ):
     agent = User(
         email=email,
-        password_hash=PasswordCrypto.hash_password("any_password"),
+        password_hash=password_hash,
         is_email_verified=True,
         role=UserRole.agent,
         name=name,
@@ -184,19 +184,23 @@ def test_list_agents_admin_filters_by_email(
     client,
     logged_in_user,
     db_session,
+    test_password_hash,
 ):
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="target.agent.1@example.com",
         name="Agent One",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="target.agent.2@example.com",
         name="Agent Two",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="other.agent@example.com",
         name="Other Agent",
     )
@@ -204,7 +208,7 @@ def test_list_agents_admin_filters_by_email(
     db_session.add(
         User(
             email="target.user@example.com",
-            password_hash=PasswordCrypto.hash_password("any_password"),
+            password_hash=test_password_hash,
             is_email_verified=True,
             role=UserRole.user,
         )
@@ -230,24 +234,29 @@ def test_list_agents_admin_filters_by_name(
     client,
     logged_in_user,
     db_session,
+    test_password_hash,
 ):
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="name.target.1@example.com",
         name="Target Alpha",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="name.target.2@example.com",
         name="beta target",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="name.other@example.com",
         name="Not matching",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="name.null@example.com",
         name=None,
     )
@@ -271,24 +280,29 @@ def test_list_agents_admin_filters_by_phone_number(
     client,
     logged_in_user,
     db_session,
+    test_password_hash,
 ):
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="phone.target.1@example.com",
         phone_number="+420701111111",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="phone.target.2@example.com",
         phone_number="+420701111222",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="phone.other@example.com",
         phone_number="+420702222222",
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="phone.null@example.com",
         phone_number=None,
     )
@@ -312,9 +326,11 @@ def test_list_agents_admin_returns_only_agents(
     client,
     logged_in_user,
     db_session,
+    test_password_hash,
 ):
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="only.agent@example.com",
         name="Only Agent",
     )
@@ -323,14 +339,14 @@ def test_list_agents_admin_returns_only_agents(
         [
             User(
                 email="not.agent.user@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 name="Only Agent",
             ),
             User(
                 email="not.agent.admin@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.admin,
                 name="Only Agent",
@@ -358,19 +374,23 @@ def test_list_agents_admin_counts_only_active_estates(
     client,
     logged_in_user,
     db_session,
+    test_password_hash,
 ):
     agent_with_two_active = _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="estate.qty.2@example.com",
         name="Estate Qty Two",
     )
     agent_with_one_active = _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="estate.qty.1@example.com",
         name="Estate Qty One",
     )
     agent_with_zero_active = _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="estate.qty.0@example.com",
         name="Estate Qty Zero",
     )
@@ -441,21 +461,25 @@ def test_list_agents_admin_sorts_by_created_at_desc(
     client,
     logged_in_user,
     db_session,
+    test_password_hash,
 ):
     base_dt = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
 
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="created-sort-1@example.com",
         created_at=base_dt,
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="created-sort-2@example.com",
         created_at=base_dt + datetime.timedelta(days=1),
     )
     _create_agent(
         db_session,
+        password_hash=test_password_hash,
         email="created-sort-3@example.com",
         created_at=base_dt + datetime.timedelta(days=2),
     )

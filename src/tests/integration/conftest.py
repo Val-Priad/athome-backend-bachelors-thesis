@@ -31,6 +31,7 @@ AUTH_PATH = "/api/auth"
 ADMIN_USERS_PATH = "/api/admin/users"
 ADMIN_AGENTS_PATH = "/api/admin/agents"
 ADMIN_ESTATE_PATH = "/api/admin/estate"
+TEST_PASSWORD = "any_password"
 
 
 class FakeMailer:
@@ -198,6 +199,11 @@ def application_container(app: Flask) -> ApplicationContainer:
     return app.extensions[APPLICATION_CONTAINER_KEY]
 
 
+@fixture(scope="session")
+def test_password_hash() -> bytes:
+    return PasswordCrypto.hash_password(TEST_PASSWORD)
+
+
 @fixture
 def logged_in_user(
     request: FixtureRequest, client: FlaskClient, db_session: Session
@@ -205,7 +211,7 @@ def logged_in_user(
     user_role = getattr(request, "param", UserRole.user)
 
     email = "logged_in_user@example.com"
-    password = "12345678"  # NOSONAR test-only password for integration tests
+    password = TEST_PASSWORD
     payload = {"email": email, "password": password}
 
     register_response = client.post("/api/auth/register", json=payload)
@@ -238,12 +244,16 @@ def logged_in_user(
 
 
 @fixture
-def any_user(request: FixtureRequest, db_session: Session):
+def any_user(
+    request: FixtureRequest,
+    db_session: Session,
+    test_password_hash: bytes,
+):
     user_role = getattr(request, "param", UserRole.user)
 
     user = User(
         email="any_user@example.com",
-        password_hash=PasswordCrypto.hash_password("any_password"),
+        password_hash=test_password_hash,
         is_email_verified=True,
         role=user_role,
     )

@@ -10,7 +10,6 @@ from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.estate.estate_model import Estate
 from domain.user.user_model import User, UserRole
-from security.password_crypto import PasswordCrypto
 from tests.integration.admin_estate.test_create_estate import base_payload
 from tests.integration.conftest import ADMIN_ESTATE_PATH
 from tests.integration.estate.test_filter_estate import create_filter_estate
@@ -19,12 +18,13 @@ from tests.integration.estate.test_filter_estate import create_filter_estate
 def _create_test_user(
     db_session,
     *,
+    password_hash: bytes,
     email: str,
     role: UserRole = UserRole.user,
 ) -> User:
     user = User(
         email=email,
-        password_hash=PasswordCrypto.hash_password("test_password"),
+        password_hash=password_hash,
         is_email_verified=True,
         role=role,
     )
@@ -52,14 +52,17 @@ def test_admin_update_estate_success(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="update_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="update_agent@example.com",
         role=UserRole.agent,
     )
@@ -161,14 +164,17 @@ def test_admin_update_draft_to_active_sets_published_at(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="active_update_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="active_update_agent@example.com",
         role=UserRole.agent,
     )
@@ -208,14 +214,17 @@ def test_admin_update_active_to_draft_clears_published_at(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="draft_update_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="draft_update_agent@example.com",
         role=UserRole.agent,
     )
@@ -258,14 +267,17 @@ def test_admin_update_active_to_archived_keeps_published_at(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="archive_update_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="archive_update_agent@example.com",
         role=UserRole.agent,
     )
@@ -309,14 +321,17 @@ def test_admin_update_estate_allows_past_available_from(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="past_available_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="past_available_agent@example.com",
         role=UserRole.agent,
     )
@@ -357,9 +372,11 @@ def test_admin_update_active_estate_requires_agent(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="requires_agent_seller@example.com",
         role=UserRole.user,
     )
@@ -400,14 +417,17 @@ def test_admin_update_active_estate_requires_expires_at(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="requires_expires_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="requires_expires_agent@example.com",
         role=UserRole.agent,
     )
@@ -447,14 +467,17 @@ def test_admin_update_estate_rejects_invalid_expires_at(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="invalid_expires_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="invalid_expires_agent@example.com",
         role=UserRole.agent,
     )
@@ -498,14 +521,17 @@ def test_update_estate_forbidden_for_non_admin(
     client,
     db_session,
     logged_in_user,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email=f"forbidden_seller_{logged_in_user.role.value}@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email=f"forbidden_agent_{logged_in_user.role.value}@example.com",
         role=UserRole.agent,
     )
@@ -538,14 +564,17 @@ def test_update_estate_forbidden_for_non_admin(
 def test_update_estate_unauthorized_without_token(
     client,
     db_session,
+    test_password_hash,
 ):
     seller = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="unauthorized_update_seller@example.com",
         role=UserRole.user,
     )
     agent = _create_test_user(
         db_session,
+        password_hash=test_password_hash,
         email="unauthorized_update_agent@example.com",
         role=UserRole.agent,
     )

@@ -6,17 +6,16 @@ from domain.user.user_model import User, UserRole
 from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
     UsersListItem,
 )
-from security.password_crypto import PasswordCrypto
 from tests.integration.conftest import ADMIN_USERS_PATH
 
 
 @pytest.fixture
-def populate_users(db_session):
+def populate_users(db_session, test_password_hash):
     for i in range(37):
         db_session.add(
             User(
                 email=f"user_{i}@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
             )
@@ -26,7 +25,7 @@ def populate_users(db_session):
         db_session.add(
             User(
                 email=f"agent_{i}@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.agent,
             )
@@ -36,7 +35,7 @@ def populate_users(db_session):
         db_session.add(
             User(
                 email=f"admin_{i}@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.admin,
             )
@@ -103,24 +102,26 @@ def test_list_users_admin_supports_pagination(
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_list_users_admin_filters_by_role(client, logged_in_user, db_session):
+def test_list_users_admin_filters_by_role(
+    client, logged_in_user, db_session, test_password_hash
+):
     db_session.add_all(
         [
             User(
                 email="role.user@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
             ),
             User(
                 email="role.agent@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.agent,
             ),
             User(
                 email="role.admin@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.admin,
             ),
@@ -146,24 +147,26 @@ def test_list_users_admin_filters_by_role(client, logged_in_user, db_session):
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_list_users_admin_filters_by_email(client, logged_in_user, db_session):
+def test_list_users_admin_filters_by_email(
+    client, logged_in_user, db_session, test_password_hash
+):
     db_session.add_all(
         [
             User(
                 email="target.1@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
             ),
             User(
                 email="target.2@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=False,
                 role=UserRole.agent,
             ),
             User(
                 email="other@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
             ),
@@ -184,33 +187,35 @@ def test_list_users_admin_filters_by_email(client, logged_in_user, db_session):
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_list_users_admin_filters_by_name(client, logged_in_user, db_session):
+def test_list_users_admin_filters_by_name(
+    client, logged_in_user, db_session, test_password_hash
+):
     db_session.add_all(
         [
             User(
                 email="name.target.1@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 name="Target Alpha",
             ),
             User(
                 email="name.target.2@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.agent,
                 name="beta target",
             ),
             User(
                 email="name.other@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 name="Not matching",
             ),
             User(
                 email="name.null@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 name=None,
@@ -233,34 +238,34 @@ def test_list_users_admin_filters_by_name(client, logged_in_user, db_session):
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_list_users_admin_filters_by_phone_number(
-    client, logged_in_user, db_session
+    client, logged_in_user, db_session, test_password_hash
 ):
     db_session.add_all(
         [
             User(
                 email="phone.target.1@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 phone_number="+14155552671",
             ),
             User(
                 email="phone.target.2@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=False,
                 role=UserRole.agent,
                 phone_number="+14155552672",
             ),
             User(
                 email="phone.other@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 phone_number="+14156660000",
             ),
             User(
                 email="phone.null@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 phone_number=None,
@@ -283,19 +288,19 @@ def test_list_users_admin_filters_by_phone_number(
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_list_users_admin_filters_by_is_email_verified(
-    client, logged_in_user, db_session
+    client, logged_in_user, db_session, test_password_hash
 ):
     db_session.add_all(
         [
             User(
                 email="verified_true@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
             ),
             User(
                 email="verified_false@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=False,
                 role=UserRole.user,
             ),
@@ -344,7 +349,7 @@ def test_list_users_admin_sorts_by_email_desc(
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
 def test_list_users_admin_sorts_by_created_at_desc(
-    client, logged_in_user, db_session
+    client, logged_in_user, db_session, test_password_hash
 ):
     base_dt = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
 
@@ -352,21 +357,21 @@ def test_list_users_admin_sorts_by_created_at_desc(
         [
             User(
                 email="created-sort-1@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 created_at=base_dt,
             ),
             User(
                 email="created-sort-2@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 created_at=base_dt + datetime.timedelta(days=1),
             ),
             User(
                 email="created-sort-3@example.com",
-                password_hash=PasswordCrypto.hash_password("any_password"),
+                password_hash=test_password_hash,
                 is_email_verified=True,
                 role=UserRole.user,
                 created_at=base_dt + datetime.timedelta(days=2),

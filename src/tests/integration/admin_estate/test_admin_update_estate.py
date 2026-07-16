@@ -95,9 +95,8 @@ def test_admin_update_estate_success(
     ]
     payload["media"] = [
         {
-            "url": "https://example.com/updated-main.jpg",
+            "object_key": "estate-media/updated-main.webp",
             "media_type": "image",
-            "is_main": True,
         }
     ]
 
@@ -145,8 +144,8 @@ def test_admin_update_estate_success(
     assert estate.translations[0].title == "Updated apartment"
 
     assert len(estate.media) == 1
-    assert estate.media[0].url == "https://example.com/updated-main.jpg"
-    assert estate.media[0].is_main is True
+    assert estate.media[0].object_key == "estate-media/updated-main.webp"
+    assert estate.media[0].position == 0
 
     assert len(estate.vicinities) == 2
     assert estate.vicinities[0].type == VicinityType.bus_stop

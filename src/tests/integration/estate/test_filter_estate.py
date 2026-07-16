@@ -51,6 +51,7 @@ def create_filter_estate(
     seller_id=None,
     agent_id=None,
     vicinities: list[tuple[VicinityType, int]] | None = None,
+    media: list[EstateMedia] | None = None,
 ) -> uuid.UUID:
     if published_at is None and status == ListingStatus.active:
         published_at = date.today()
@@ -115,14 +116,20 @@ def create_filter_estate(
                 description=f"{title} description",
             )
         ],
-        media=[
-            EstateMedia(
-                url=f"https://example.com/{title.lower().replace(' ', '-')}.jpg",
-                media_type=MediaType.image,
-                alt=title,
-                is_main=True,
-            )
-        ],
+        media=(
+            media
+            if media is not None
+            else [
+                EstateMedia(
+                    object_key=(
+                        f"estate-media/{title.lower().replace(' ', '-')}.webp"
+                    ),
+                    media_type=MediaType.image,
+                    alt=title,
+                    position=0,
+                )
+            ]
+        ),
         vicinities=[
             EstateVicinity(
                 type=vicinity_type,
@@ -184,7 +191,55 @@ def test_filter_estates_returns_only_active_estates(client, db_session):
     assert data["items"][0]["usable_area"] == pytest.approx(50.0)
     assert data["items"][0]["price"] == "100000.00"
     assert data["items"][0]["price_unit"] == PriceUnit.per_property.value
-    assert data["items"][0]["main_media"]["is_main"] is True
+    assert data["items"][0]["preview"]["object_key"] == (
+        "estate-media/active-apartment.webp"
+    )
+    assert data["items"][0]["preview"]["url"] == (
+        "https://media.test/estate-media/active-apartment.webp"
+    )
+    assert data["items"][0]["preview"]["position"] == 0
+
+
+def test_filter_estates_uses_first_image_as_preview(client, db_session):
+    create_filter_estate(
+        db_session,
+        title="Estate with videos first",
+        media=[
+            EstateMedia(
+                object_key="estate-media/video-0.webp",
+                media_type=MediaType.video,
+                alt="First video",
+                position=0,
+            ),
+            EstateMedia(
+                object_key="estate-media/image-2.webp",
+                media_type=MediaType.image,
+                alt="Preview image",
+                position=2,
+            ),
+            EstateMedia(
+                object_key="estate-media/video-1.webp",
+                media_type=MediaType.video,
+                alt="Second video",
+                position=1,
+            ),
+            EstateMedia(
+                object_key="estate-media/image-3.webp",
+                media_type=MediaType.image,
+                alt="Second image",
+                position=3,
+            ),
+        ],
+    )
+
+    response = client.get(ESTATE_PATH)
+
+    data = assert_ok_filter_response(response, total=1)
+    preview = data["items"][0]["preview"]
+
+    assert preview["object_key"] == "estate-media/image-2.webp"
+    assert preview["media_type"] == MediaType.image.value
+    assert preview["position"] == 2
 
 
 def test_filter_estates_by_price_range(client, db_session):

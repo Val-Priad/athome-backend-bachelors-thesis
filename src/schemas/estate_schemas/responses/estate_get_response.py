@@ -12,7 +12,6 @@ from domain.estate.enums.estate_details_enums import (
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.enums.estate_location_enums import Region
-from domain.estate.enums.estate_media_enums import MediaType
 from domain.estate.enums.estate_pricing_enums import PriceUnit
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.estate.enums.house_enums import HouseType, RoomCount
@@ -21,6 +20,9 @@ from domain.estate.enums.utilities_enums import (
     PrimaryInternetConnectionType,
 )
 from domain.user.user_model import UserRole
+from schemas.estate_schemas.responses.estate_media_response import (
+    EstateMediaResponse,
+)
 from schemas.parent_types import ResponseValidation
 from schemas.types import (
     ID,
@@ -127,16 +129,6 @@ class EstateTranslationResponse(EstateBaseResponse):
     lang_code: str
     title: str
     description: str
-
-
-class EstateMediaResponse(EstateBaseResponse):
-    id: ID
-
-    url: str
-    media_type: MediaType
-    alt: str | None
-    is_main: bool
-    created_at: datetime
 
 
 class EstateVicinityResponse(EstateBaseResponse):

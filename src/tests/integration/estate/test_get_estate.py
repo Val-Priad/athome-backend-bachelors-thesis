@@ -115,16 +115,16 @@ def _create_estate(
         ],
         media=[
             EstateMedia(
-                url="https://example.com/main.jpg",
+                object_key="estate-media/main.webp",
                 media_type=MediaType.image,
                 alt="Main image",
-                is_main=True,
+                position=0,
             ),
             EstateMedia(
-                url="https://example.com/second.jpg",
+                object_key="estate-media/second.webp",
                 media_type=MediaType.image,
                 alt="Second image",
-                is_main=False,
+                position=1,
             ),
         ],
         vicinities=[
@@ -240,8 +240,15 @@ def test_get_active_estate_returns_full_public_data(
     } == {"en", "uk"}
 
     assert len(data["media"]) == 2
-    assert data["media"][0]["is_main"] is True
-    assert data["media"][0]["url"] == "https://example.com/main.jpg"
+    assert data["media"][0] == {
+        "id": str(data["media"][0]["id"]),
+        "object_key": "estate-media/main.webp",
+        "url": "https://media.test/estate-media/main.webp",
+        "media_type": MediaType.image.value,
+        "alt": "Main image",
+        "position": 0,
+    }
+    assert data["media"][1]["position"] == 1
 
     assert len(data["vicinities"]) == 1
     assert data["vicinities"][0]["type"] == VicinityType.bus_stop.value

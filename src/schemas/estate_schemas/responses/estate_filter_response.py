@@ -7,17 +7,11 @@ from domain.estate.enums.estate_pricing_enums import PriceUnit
 from domain.estate.enums.house_enums import HouseType, RoomCount
 from domain.estate.estate_model import Estate
 from domain.estate.models.estate_media_model import EstateMedia
+from schemas.estate_schemas.responses.estate_media_response import (
+    EstateMediaResponse,
+)
 from schemas.parent_types import ResponseValidation
 from schemas.types import ID, PositiveArea, PositiveMoneyAmount
-
-
-class EstateFilterMediaResponse(ResponseValidation):
-    url: str
-    media_type: MediaType
-    alt: str | None
-    is_main: bool
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 class EstateFilterItem(ResponseValidation):
@@ -29,7 +23,7 @@ class EstateFilterItem(ResponseValidation):
     house_type: HouseType | None
 
     usable_area: PositiveArea
-    main_media: EstateFilterMediaResponse | None
+    preview: EstateMediaResponse | None
 
     price: PositiveMoneyAmount
     price_unit: PriceUnit
@@ -38,7 +32,7 @@ class EstateFilterItem(ResponseValidation):
 
     @classmethod
     def from_repo_result(cls, estate: Estate):
-        main_media = cls._get_main_media(estate.media)
+        preview = cls._get_preview(estate.media)
 
         return cls(
             id=estate.id,
@@ -55,9 +49,9 @@ class EstateFilterItem(ResponseValidation):
                 estate.house.house_type if estate.house is not None else None
             ),
             usable_area=estate.details.usable_area,
-            main_media=(
-                EstateFilterMediaResponse.from_model(main_media)
-                if main_media is not None
+            preview=(
+                EstateMediaResponse.from_model(preview)
+                if preview is not None
                 else None
             ),
             price=estate.pricing.price,
@@ -65,11 +59,15 @@ class EstateFilterItem(ResponseValidation):
         )
 
     @staticmethod
-    def _get_main_media(media: list[EstateMedia]) -> EstateMedia | None:
-        if not media:
-            return None
-
-        return next((item for item in media if item.is_main), media[0])
+    def _get_preview(media: list[EstateMedia]) -> EstateMedia | None:
+        return next(
+            (
+                item
+                for item in sorted(media, key=lambda item: item.position)
+                if item.media_type == MediaType.image
+            ),
+            None,
+        )
 
 
 class EstateFilterResponse(ResponseValidation):

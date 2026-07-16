@@ -6,6 +6,7 @@ Necessary env variables are:
 
 ```
 APP_BASE_URL=
+MEDIA_BASE_URL=
 RESEND_API_KEY=
 JWT_SECRET_KEY=
 

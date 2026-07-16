@@ -3,6 +3,7 @@ from application.estate.delete_estate_use_case import DeleteEstateUseCase
 from application.estate.email_to_estate_agent_use_case import (
     EmailToAgentUseCase,
 )
+from application.estate.estate_response_mapper import EstateResponseMapper
 from application.estate.get_estate_use_case import GetEstateUseCase
 from application.estate.get_filtered_estate_use_case import (
     GetFilteredEstateUseCase,
@@ -24,6 +25,7 @@ def build_estates_container(
     infrastructure: InfrastructureContainer,
     repositories: RepositoryContainer,
     services: ServiceContainer,
+    estate_response_mapper: EstateResponseMapper,
 ) -> EstatesContainer:
     transactions = infrastructure.transactions
 
@@ -54,10 +56,12 @@ def build_estates_container(
             transactions=transactions,
             estate_repository=repositories.estates,
             authorization_service=services.authorization,
+            response_mapper=estate_response_mapper,
         ),
         get_filtered=GetFilteredEstateUseCase(
             transactions=transactions,
             estate_service=services.estates,
+            response_mapper=estate_response_mapper,
         ),
         toggle_saved=ToggleSavedEstateUseCase(
             transactions=transactions,

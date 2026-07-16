@@ -1,5 +1,4 @@
-from flask import current_app
-from pydantic import ConfigDict, Field, computed_field
+from pydantic import ConfigDict, Field
 
 from domain.estate.enums.estate_media_enums import MediaType
 from schemas.parent_types import ResponseValidation
@@ -12,11 +11,6 @@ class EstateMediaResponse(ResponseValidation):
     media_type: MediaType
     alt: str | None
     position: int = Field(ge=0)
+    url: str
 
     model_config = ConfigDict(from_attributes=True)
-
-    @computed_field
-    @property
-    def url(self) -> str:
-        base_url = current_app.config["MEDIA_BASE_URL"]
-        return f"{base_url.rstrip('/')}/{self.object_key.lstrip('/')}"

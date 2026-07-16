@@ -5,6 +5,9 @@ from composition.dependency_overrides import DependencyOverrides
 from composition.infrastructure.build_infrastructure_container import (
     build_infrastructure_container,
 )
+from composition.mappers.build_estate_response_mapper import (
+    build_estate_response_mapper,
+)
 from composition.modules.admin.build_admin_container import (
     build_admin_container,
 )
@@ -40,6 +43,7 @@ def build_application_container(
         infrastructure=infrastructure,
         repositories=repositories,
     )
+    estate_response_mapper = build_estate_response_mapper(infrastructure)
 
     return ApplicationContainer(
         auth=build_auth_container(
@@ -56,14 +60,17 @@ def build_application_container(
             infrastructure=infrastructure,
             repositories=repositories,
             services=services,
+            estate_response_mapper=estate_response_mapper,
         ),
         agents=build_agents_container(
             infrastructure=infrastructure,
             services=services,
+            estate_response_mapper=estate_response_mapper,
         ),
         estates=build_estates_container(
             infrastructure=infrastructure,
             repositories=repositories,
             services=services,
+            estate_response_mapper=estate_response_mapper,
         ),
     )

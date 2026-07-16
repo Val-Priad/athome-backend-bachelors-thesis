@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from application.estate.estate_response_mapper import EstateResponseMapper
 from application.transactions import TransactionManagerProtocol
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_repository import EstateRepository
@@ -18,10 +19,12 @@ class GetEstateUseCase:
         transactions: TransactionManagerProtocol,
         estate_repository: EstateRepository,
         authorization_service: AuthorizationService,
+        response_mapper: EstateResponseMapper,
     ) -> None:
         self._transactions = transactions
         self._estate_repository = estate_repository
         self._authorization_service = authorization_service
+        self._response_mapper = response_mapper
 
     def execute(
         self, requester_id: UUID | None, estate_id: UUID
@@ -45,6 +48,6 @@ class GetEstateUseCase:
                 raise EstateNotFoundError()
 
             if requester_is_staff:
-                return EstateGetResponseWithSeller.from_model(estate)
+                return self._response_mapper.to_staff_estate(estate)
 
-            return EstateGeneralGetResponse.from_model(estate)
+            return self._response_mapper.to_public_estate(estate)

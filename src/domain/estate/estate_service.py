@@ -28,10 +28,6 @@ from schemas.estate_schemas.requests.estate_filter_request import (
 from schemas.estate_schemas.requests.estate_update_request import (
     EstateUpdateRequest,
 )
-from schemas.estate_schemas.responses.estate_filter_response import (
-    EstateFilterItem,
-    EstateFilterResponse,
-)
 from schemas.estate_schemas.sections.location_section import (
     EstateLocationSection,
 )
@@ -141,20 +137,11 @@ class EstateService:
         session: Session,
         filters: EstatePublicFilterRequest,
         requester_id: UUID | None = None,
-    ) -> EstateFilterResponse:
-        estates, total = self.estate_repository.get_public_estates_by_filters(
+    ) -> tuple[list[Estate], int]:
+        return self.estate_repository.get_public_estates_by_filters(
             session=session,
             filters=filters,
             requester_id=requester_id,
-        )
-
-        return EstateFilterResponse(
-            items=[
-                EstateFilterItem.from_repo_result(estate) for estate in estates
-            ],
-            total=total,
-            page=filters.page,
-            page_size=filters.page_size,
         )
 
     def get_admin_filtered_estate(
@@ -162,20 +149,11 @@ class EstateService:
         session: Session,
         filters: EstateAdminFilterRequest,
         requester_id: UUID | None = None,
-    ) -> EstateFilterResponse:
-        estates, total = self.estate_repository.get_admin_estates_by_filters(
+    ) -> tuple[list[Estate], int]:
+        return self.estate_repository.get_admin_estates_by_filters(
             session=session,
             filters=filters,
             requester_id=requester_id,
-        )
-
-        return EstateFilterResponse(
-            items=[
-                EstateFilterItem.from_repo_result(estate) for estate in estates
-            ],
-            total=total,
-            page=filters.page,
-            page_size=filters.page_size,
         )
 
     def update_estate(

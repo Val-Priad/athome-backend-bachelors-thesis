@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from dotenv import load_dotenv
 from flask import Flask
 from flask.testing import FlaskClient
+from flask_jwt_extended import create_access_token, decode_token
 from pytest import FixtureRequest, fixture
-from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import create_app
@@ -206,40 +206,47 @@ def test_password_hash() -> bytes:
 
 @fixture
 def logged_in_user(
-    request: FixtureRequest, client: FlaskClient, db_session: Session
+    request: FixtureRequest,
+    app: Flask,
+    client: FlaskClient,
+    db_session: Session,
+    test_password_hash: bytes,
 ):
     user_role = getattr(request, "param", UserRole.user)
 
-    email = "logged_in_user@example.com"
-    password = TEST_PASSWORD
-    payload = {"email": email, "password": password}
-
-    register_response = client.post("/api/auth/register", json=payload)
-    assert register_response.status_code == 202
-
-    user = db_session.scalar(select(User).where(User.email == email))
-    assert user is not None
-
-    user.is_email_verified = True
-    user.phone_number = "+420701234567"
-    user.name = "Val Priad"
-    user.avatar_key = "avatars/default/user_1.png"
-    user.description = "Test user account for integration tests"
-    user.role = user_role
+    user = User(
+        email="logged_in_user@example.com",
+        password_hash=test_password_hash,
+        is_email_verified=True,
+        phone_number="+420701234567",
+        name="Val Priad",
+        avatar_key="avatars/default/user_1.png",
+        description="Test user account for integration tests",
+        role=user_role,
+    )
+    db_session.add(user)
     db_session.flush()
 
-    login_response = client.post("/api/auth/login", json=payload)
-    assert login_response.status_code == 200
+    access_token = create_access_token(identity=str(user.id), fresh=True)
+    csrf_token = decode_token(access_token)["csrf"]
 
-    cookie = client.get_cookie("csrf_access_token")
-    assert cookie is not None
+    client.set_cookie(
+        key=app.config["JWT_ACCESS_COOKIE_NAME"],
+        value=access_token,
+        path=app.config["JWT_ACCESS_COOKIE_PATH"],
+    )
+    client.set_cookie(
+        key=app.config["JWT_ACCESS_CSRF_COOKIE_NAME"],
+        value=csrf_token,
+        path=app.config["JWT_ACCESS_CSRF_COOKIE_PATH"],
+    )
 
     return SimpleNamespace(
         id=user.id,
         role=user.role,
-        email=email,
-        password=password,
-        headers={"X-CSRF-TOKEN": cookie.value},
+        email=user.email,
+        password=TEST_PASSWORD,
+        headers={app.config["JWT_ACCESS_CSRF_HEADER_NAME"]: csrf_token},
     )
 
 

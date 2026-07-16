@@ -24,34 +24,33 @@ def build_admin_container(
 
     return AdminContainer(
         get_user=GetAdminUserUseCase(
-            transactions,
-            services.admin_users,
-            authorization,
-            repositories.users,
+            transactions=transactions,
+            authorization_service=authorization,
+            user_repository=repositories.users,
         ),
         change_user_role=ChangeUserRoleUseCase(
-            transactions,
-            services.admin_users,
-            authorization,
+            transactions=transactions,
+            admin_users_service=services.admin_users,
+            authorization_service=authorization,
         ),
         delete_user=DeleteAdminUserUseCase(
-            transactions,
-            services.admin_users,
-            authorization,
+            transactions=transactions,
+            admin_users_service=services.admin_users,
+            authorization_service=authorization,
         ),
         list_users=ListUsersUseCase(
-            transactions,
-            repositories.users,
-            authorization,
+            transactions=transactions,
+            user_repository=repositories.users,
+            authorization_service=authorization,
         ),
         list_agents=ListAgentsUseCase(
-            transactions,
-            repositories.users,
-            authorization,
+            transactions=transactions,
+            user_repository=repositories.users,
+            authorization_service=authorization,
         ),
         get_filtered_estates=GetAdminFilteredEstateUseCase(
-            transactions,
-            services.estates,
-            authorization,
+            transactions=transactions,
+            estate_service=services.estates,
+            authorization_service=authorization,
         ),
     )

@@ -1,11 +1,12 @@
 import os
+from collections.abc import Collection, Iterator
 from types import SimpleNamespace
 
 from dotenv import load_dotenv
 from flask import Flask
 from flask.testing import FlaskClient
 from pytest import FixtureRequest, fixture
-from sqlalchemy import event, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import create_app
@@ -68,7 +69,7 @@ class FakeMailer:
 
 
 class FakeObjectStorage:
-    def delete_objects(self, object_keys) -> None:
+    def delete_objects(self, object_keys: Collection[str]) -> None:
         pass
 
 
@@ -121,19 +122,17 @@ def app(
     fake_mailer: FakeMailer,
     fake_vicinity_client: FakeVicinityClient,
     fake_object_storage: FakeObjectStorage,
-) -> Flask:
+) -> Iterator[Flask]:
     load_dotenv()
     test_database_url = os.environ["TEST_DATABASE_URL"]
 
-    return create_app(
+    app = create_app(
         TestingConfig,
         config_overrides={
             "DATABASE_URL": test_database_url,
             "JWT_SECRET_KEY": "test-secret-key-at-least-32-bytes-long",
             "APP_BASE_URL": "https://athome.test",
             "MEDIA_BASE_URL": "https://media.test",
-            "RESEND_API_KEY": "test-resend-key",
-            "RATELIMIT_STORAGE_URI": "memory://",
         },
         dependency_overrides=DependencyOverrides(
             mailer=fake_mailer,
@@ -141,6 +140,11 @@ def app(
             object_storage=fake_object_storage,
         ),
     )
+
+    try:
+        yield app
+    finally:
+        db.get_engine(app).dispose()
 
 
 @fixture
@@ -154,13 +158,17 @@ def db_session(
     fake_mailer: FakeMailer,
     fake_vicinity_client: FakeVicinityClient,
     fake_object_storage: FakeObjectStorage,
-):
+) -> Iterator[Session]:
     with app.app_context():
         engine = db.get_engine(app)
         connection = engine.connect()
         transaction = connection.begin()
 
-        testing_session_factory = sessionmaker(bind=connection)
+        testing_session_factory = sessionmaker(
+            bind=connection,
+            expire_on_commit=False,
+            join_transaction_mode="create_savepoint",
+        )
         original_container = app.extensions[APPLICATION_CONTAINER_KEY]
         app.extensions[APPLICATION_CONTAINER_KEY] = (
             build_application_container(
@@ -175,20 +183,14 @@ def db_session(
         )
 
         session = testing_session_factory()
-        session.begin_nested()
 
-        @event.listens_for(session, "after_transaction_end")
-        def restart_savepoint(session, transaction_):
-            if transaction_.nested:
-                session.begin_nested()
-
-        yield session
-
-        session.close()
-        app.extensions[APPLICATION_CONTAINER_KEY] = original_container
-        if transaction.is_active:
+        try:
+            yield session
+        finally:
+            session.close()
+            app.extensions[APPLICATION_CONTAINER_KEY] = original_container
             transaction.rollback()
-        connection.close()
+            connection.close()
 
 
 @fixture

@@ -25,33 +25,41 @@ def build_service_container(
 
     return ServiceContainer(
         token_lifecycle=token_lifecycle,
-        authorization=AuthorizationService(repositories.users),
+        authorization=AuthorizationService(
+            user_repository=repositories.users,
+        ),
         email_verification=EmailVerificationService(
-            repositories.email_verifications,
-            infrastructure.mailer,
-            infrastructure.token_hasher,
-            token_lifecycle,
+            email_verification_repository=repositories.email_verifications,
+            mailer=infrastructure.mailer,
+            token_hasher=infrastructure.token_hasher,
+            token_lifecycle_service=token_lifecycle,
         ),
         password_reset=PasswordResetService(
-            repositories.password_resets,
-            infrastructure.mailer,
-            infrastructure.token_hasher,
-            infrastructure.password_hasher,
-            token_lifecycle,
+            password_reset_repository=repositories.password_resets,
+            mailer=infrastructure.mailer,
+            token_hasher=infrastructure.token_hasher,
+            password_hasher=infrastructure.password_hasher,
+            token_lifecycle_service=token_lifecycle,
         ),
         auth=AuthService(
-            repositories.users,
-            infrastructure.password_hasher,
+            user_repository=repositories.users,
+            password_hasher=infrastructure.password_hasher,
         ),
         me=MeService(
-            repositories.users,
-            infrastructure.password_hasher,
+            user_repository=repositories.users,
+            password_hasher=infrastructure.password_hasher,
         ),
-        admin_users=AdminUsersService(repositories.users),
-        agents=AgentService(repositories.users),
+        admin_users=AdminUsersService(
+            user_repository=repositories.users,
+        ),
+        agents=AgentService(
+            user_repository=repositories.users,
+        ),
         estates=EstateService(
-            repositories.estates,
-            infrastructure.vicinity_client,
+            estate_repository=repositories.estates,
+            vicinity_client=infrastructure.vicinity_client,
         ),
-        estate_participants=EstateParticipantsService(repositories.users),
+        estate_participants=EstateParticipantsService(
+            user_repository=repositories.users,
+        ),
     )

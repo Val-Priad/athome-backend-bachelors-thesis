@@ -24,10 +24,12 @@ class GetEstateUseCase:
         self._authorization_service = authorization_service
 
     def execute(
-        self, requester_id: UUID | None, id: UUID
+        self, requester_id: UUID | None, estate_id: UUID
     ) -> EstateGeneralGetResponse | EstateGetResponseWithSeller:
         with self._transactions.session() as session:
-            estate = self._estate_repository.get_full_estate_by_id(session, id)
+            estate = self._estate_repository.get_full_estate_by_id(
+                session, estate_id
+            )
 
             requester_is_staff = bool(
                 requester_id

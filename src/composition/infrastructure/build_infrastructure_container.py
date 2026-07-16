@@ -7,7 +7,7 @@ from composition.infrastructure.infrastructure_container import (
     InfrastructureContainer,
 )
 from infrastructure.db import db
-from infrastructure.email.Mailer import Mailer
+from infrastructure.email.mailer import Mailer
 from infrastructure.object_storage.noop_object_storage import (
     NoOpObjectStorage,
 )
@@ -46,11 +46,13 @@ def build_infrastructure_container(
     vicinity_client = (
         overrides.vicinity_client
         if overrides and overrides.vicinity_client is not None
-        else RetryingVicinityClient(OpenStreetMapVicinityClient())
+        else RetryingVicinityClient(
+            client=OpenStreetMapVicinityClient(),
+        )
     )
 
     return InfrastructureContainer(
-        transactions=TransactionManager(session_factory),
+        transactions=TransactionManager(session_factory=session_factory),
         mailer=mailer,
         object_storage=object_storage,
         vicinity_client=vicinity_client,

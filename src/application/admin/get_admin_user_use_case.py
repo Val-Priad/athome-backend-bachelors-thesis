@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from application.transactions import TransactionManagerProtocol
-from domain.admin.services.admin_users_service import AdminUsersService
 from domain.user.user_model import UserRole
 from domain.user.user_repository import UserRepository
 from schemas.admin_schemas.admin_users_schemas.admin_users_responses import (
@@ -14,12 +13,10 @@ class GetAdminUserUseCase:
     def __init__(
         self,
         transactions: TransactionManagerProtocol,
-        admin_users_service: AdminUsersService,
         authorization_service: AuthorizationService,
         user_repository: UserRepository,
     ) -> None:
         self._transactions = transactions
-        self._admin_users_service = admin_users_service
         self._authorization_service = authorization_service
         self._user_repository = user_repository
 

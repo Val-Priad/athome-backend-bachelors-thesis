@@ -1,6 +1,5 @@
 from collections.abc import Mapping
 
-from dotenv import load_dotenv
 from flask import Flask
 
 from config import FlaskConfig
@@ -13,7 +12,6 @@ def configure_app(
     config: type[FlaskConfig],
     overrides: Mapping[str, object] | None = None,
 ) -> None:
-    load_dotenv()
     app.config.from_object(config)
     load_environment_config(app)
 

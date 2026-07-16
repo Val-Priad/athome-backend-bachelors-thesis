@@ -19,12 +19,12 @@ def build_agents_container(
 
     return AgentsContainer(
         get_description=GetAgentDescriptionUseCase(
-            transactions,
-            services.agents,
+            transactions=transactions,
+            agent_service=services.agents,
         ),
         get_own_estates=GetAgentOwnEstatesUseCase(
-            transactions,
-            services.estates,
-            services.authorization,
+            transactions=transactions,
+            estate_service=services.estates,
+            authorization_service=services.authorization,
         ),
     )

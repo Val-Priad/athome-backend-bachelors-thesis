@@ -32,11 +32,11 @@ class EmailToAgentUseCase:
 
             estate_url = f"{self._app_base_url}/estate/{estate.id}"
 
-            estate_translation = self.get_english_translation(estate)
+            estate_translation = self._get_english_translation(estate)
 
             agent_email = estate.agent.email
             estate_title = estate_translation.title
-            estate_address = self.get_estate_address(estate)
+            estate_address = self._get_estate_address(estate)
 
         self._mailer.send_estate_contact_email(
             agent_email=agent_email,
@@ -49,14 +49,14 @@ class EmailToAgentUseCase:
             message=payload.message,
         )
 
-    def get_english_translation(self, estate: Estate):
+    def _get_english_translation(self, estate: Estate):
         for translation in estate.translations:
             if translation.lang_code == "en":
                 return translation
 
         return estate.translations[0]
 
-    def get_estate_address(self, estate: Estate) -> str:
+    def _get_estate_address(self, estate: Estate) -> str:
         location = estate.location
 
         parts = [

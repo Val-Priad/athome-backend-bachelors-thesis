@@ -20,10 +20,20 @@ def build_users_container(
     transactions = infrastructure.transactions
 
     return UsersContainer(
-        get_me=GetMeUseCase(transactions, repositories.users),
-        delete_me=DeleteMeUseCase(transactions, repositories.users),
-        update_password=UpdatePasswordUseCase(transactions, services.me),
+        get_me=GetMeUseCase(
+            transactions=transactions,
+            user_repository=repositories.users,
+        ),
+        delete_me=DeleteMeUseCase(
+            transactions=transactions,
+            user_repository=repositories.users,
+        ),
+        update_password=UpdatePasswordUseCase(
+            transactions=transactions,
+            me_service=services.me,
+        ),
         update_personal_data=UpdatePersonalDataUseCase(
-            transactions, services.me
+            transactions=transactions,
+            me_service=services.me,
         ),
     )

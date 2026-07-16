@@ -31,21 +31,39 @@ def build_application_container(
     *,
     overrides: DependencyOverrides | None = None,
 ) -> ApplicationContainer:
-    infrastructure = build_infrastructure_container(app, overrides)
+    infrastructure = build_infrastructure_container(
+        app=app,
+        overrides=overrides,
+    )
     repositories = build_repository_container()
-    services = build_service_container(infrastructure, repositories)
+    services = build_service_container(
+        infrastructure=infrastructure,
+        repositories=repositories,
+    )
 
     return ApplicationContainer(
-        auth=build_auth_container(infrastructure, repositories, services),
-        users=build_users_container(infrastructure, repositories, services),
-        admin=build_admin_container(infrastructure, repositories, services),
+        auth=build_auth_container(
+            infrastructure=infrastructure,
+            repositories=repositories,
+            services=services,
+        ),
+        users=build_users_container(
+            infrastructure=infrastructure,
+            repositories=repositories,
+            services=services,
+        ),
+        admin=build_admin_container(
+            infrastructure=infrastructure,
+            repositories=repositories,
+            services=services,
+        ),
         agents=build_agents_container(
-            infrastructure,
-            services,
+            infrastructure=infrastructure,
+            services=services,
         ),
         estates=build_estates_container(
-            infrastructure,
-            repositories,
-            services,
+            infrastructure=infrastructure,
+            repositories=repositories,
+            services=services,
         ),
     )

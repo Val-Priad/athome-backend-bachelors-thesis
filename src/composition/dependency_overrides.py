@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from application.transactions import SessionFactory
-from infrastructure.email.mailer_protocol import MailerProtocol
-from infrastructure.object_storage.object_storage_protocol import (
+from application.ports import (
+    MailerProtocol,
     ObjectStorageProtocol,
+    VicinityClientProtocol,
 )
-from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
+from application.ports.transaction_manager import SessionFactory
 
 
 @dataclass(frozen=True, slots=True)

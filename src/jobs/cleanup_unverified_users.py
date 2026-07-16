@@ -4,7 +4,7 @@ from typing import cast
 
 from sqlalchemy import CursorResult, delete
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.user.user_model import User
 
 _logger = logging.getLogger(__name__)

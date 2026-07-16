@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_repository import EstateRepository
 from exceptions.custom_exceptions.estate_exceptions import EstateNotFoundError
 

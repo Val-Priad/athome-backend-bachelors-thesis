@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.user.services.agent_service import AgentService
 from schemas.agent_schemas.agent_responses import AgentDescriptionResponse
 

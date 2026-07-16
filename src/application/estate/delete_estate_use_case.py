@@ -1,4 +1,6 @@
-from application.transactions import TransactionManagerProtocol
+from uuid import UUID
+
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_repository import EstateRepository
 from domain.user.user_model import UserRole
 from security.authorization import AuthorizationService
@@ -15,7 +17,7 @@ class DeleteEstateUseCase:
         self._estate_repository = estate_repository
         self._authorization_service = authorization_service
 
-    def execute(self, estate_id, requester_id):
+    def execute(self, estate_id: UUID, requester_id: UUID) -> None:
         with self._transactions.session() as session:
             self._authorization_service.ensure_has_rights(
                 session, requester_id, UserRole.admin

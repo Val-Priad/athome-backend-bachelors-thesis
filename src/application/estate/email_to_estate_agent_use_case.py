@@ -1,8 +1,8 @@
-from application.transactions import TransactionManagerProtocol
+from application.ports.mailer import MailerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_model import Estate
 from domain.estate.estate_repository import EstateRepository
 from exceptions.custom_exceptions.user_exceptions import AgentNotFoundError
-from infrastructure.email.mailer_protocol import MailerProtocol
 from schemas.estate_schemas.requests.email_to_agent_request import (
     EmailToAgentRequest,
 )

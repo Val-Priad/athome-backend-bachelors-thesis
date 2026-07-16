@@ -1,19 +1,14 @@
 from dataclasses import dataclass
 
-from application.transactions import TransactionManagerProtocol
-from infrastructure.email.mailer_protocol import MailerProtocol
-from infrastructure.object_storage.object_storage_protocol import (
+from application.ports import (
+    MailerProtocol,
     ObjectStorageProtocol,
+    VicinityClientProtocol,
 )
-from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
+from configuration.application_urls import ApplicationUrls
 from security.password_crypto import PasswordCrypto
 from security.token_crypto import TokenCrypto
-
-
-@dataclass(frozen=True, slots=True)
-class ApplicationUrls:
-    app_base_url: str
-    media_base_url: str
 
 
 @dataclass(frozen=True, slots=True)

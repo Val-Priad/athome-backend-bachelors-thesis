@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
 from domain.user.user_model import UserRole

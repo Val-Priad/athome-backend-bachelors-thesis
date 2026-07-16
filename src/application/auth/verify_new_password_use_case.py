@@ -1,4 +1,4 @@
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.password_reset.password_reset_service import PasswordResetService
 
 

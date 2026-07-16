@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.user.user_repository import UserRepository
 from schemas.me_schemas.me_responses import MeResponse
 

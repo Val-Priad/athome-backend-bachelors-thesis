@@ -6,11 +6,8 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from application.ports.vicinity_client import Place, VicinityFetchResult
 from domain.estate.enums.estate_vicinity_enums import VicinityType
-from infrastructure.vicinity.vicinity_protocol import (
-    Place,
-    VicinityFetchResult,
-)
 
 _logger = logging.getLogger(__name__)
 

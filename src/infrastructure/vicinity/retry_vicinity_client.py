@@ -1,7 +1,7 @@
 import logging
 import time
 
-from infrastructure.vicinity.vicinity_protocol import (
+from application.ports.vicinity_client import (
     VicinityClientProtocol,
     VicinityFetchResult,
 )

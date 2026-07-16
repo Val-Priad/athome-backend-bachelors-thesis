@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from application.ports.vicinity_client import VicinityClientProtocol
 from domain.estate.enums.estate_enums import EstateType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_model import Estate
@@ -17,7 +18,6 @@ from domain.estate.models.estate_pricing_model import EstatePricing
 from domain.estate.models.estate_translation_model import EstateTranslation
 from domain.estate.models.estate_utilities_model import EstateUtilities
 from domain.estate.models.estate_vicinity_model import EstateVicinity
-from infrastructure.vicinity.vicinity_protocol import VicinityClientProtocol
 from schemas.estate_schemas.requests.estate_create_type import (
     EstateMutationType,
 )

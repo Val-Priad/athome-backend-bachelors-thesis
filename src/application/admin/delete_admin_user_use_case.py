@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.admin.services.admin_users_service import AdminUsersService
 from domain.user.user_model import UserRole
 from security.authorization import AuthorizationService

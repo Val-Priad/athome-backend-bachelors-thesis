@@ -1,15 +1,17 @@
 from flask import Flask
 
-from application.transactions import TransactionManager
 from composition.dependency_overrides import DependencyOverrides
 from composition.infrastructure.infrastructure_container import (
-    ApplicationUrls,
     InfrastructureContainer,
 )
+from configuration.application_urls import ApplicationUrls
 from infrastructure.db import db
 from infrastructure.email.mailer import Mailer
 from infrastructure.object_storage.noop_object_storage import (
     NoOpObjectStorage,
+)
+from infrastructure.sqlalchemy_transaction_manager import (
+    SqlAlchemyTransactionManager,
 )
 from infrastructure.vicinity.retry_vicinity_client import (
     RetryingVicinityClient,
@@ -52,7 +54,9 @@ def build_infrastructure_container(
     )
 
     return InfrastructureContainer(
-        transactions=TransactionManager(session_factory=session_factory),
+        transactions=SqlAlchemyTransactionManager(
+            session_factory=session_factory
+        ),
         mailer=mailer,
         object_storage=object_storage,
         vicinity_client=vicinity_client,

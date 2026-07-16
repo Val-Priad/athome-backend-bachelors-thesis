@@ -10,6 +10,10 @@ from pytest import FixtureRequest, fixture
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import create_app
+from application.ports.vicinity_client import (
+    Place,
+    VicinityFetchResult,
+)
 from composition.application_container import ApplicationContainer
 from composition.build_application_container import build_application_container
 from composition.container_access import APPLICATION_CONTAINER_KEY
@@ -18,10 +22,6 @@ from config import TestingConfig
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.user_model import User, UserRole
 from infrastructure.db import db
-from infrastructure.vicinity.vicinity_protocol import (
-    Place,
-    VicinityFetchResult,
-)
 from security.password_crypto import PasswordCrypto
 
 ME_PATH = "/api/users/me"

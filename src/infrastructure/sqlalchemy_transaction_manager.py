@@ -3,12 +3,10 @@ from contextlib import contextmanager
 
 from sqlalchemy.orm import Session
 
-from application.transactions.transaction_manager_protocol import (
-    SessionFactory,
-)
+from application.ports.transaction_manager import SessionFactory
 
 
-class TransactionManager:
+class SqlAlchemyTransactionManager:
     def __init__(self, session_factory: SessionFactory) -> None:
         self._session_factory = session_factory
 

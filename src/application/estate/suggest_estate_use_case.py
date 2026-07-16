@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_service import EstateService
 from schemas.estate_schemas.requests.estate_create_type import (

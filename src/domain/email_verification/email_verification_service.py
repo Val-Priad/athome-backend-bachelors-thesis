@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
+from application.ports.mailer import MailerProtocol
 from domain.email_verification.email_verification_repository import (
     EmailVerificationRepository,
 )
@@ -13,7 +14,6 @@ from exceptions.custom_exceptions.user_exceptions import (
     TokenVerificationError,
     UserAlreadyVerifiedError,
 )
-from infrastructure.email.mailer_protocol import MailerProtocol
 from security import TokenCrypto
 
 

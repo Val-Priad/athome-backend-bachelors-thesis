@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from application.estate.estate_response_mapper import EstateResponseMapper
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_repository import EstateRepository
 from domain.user.user_model import UserRole

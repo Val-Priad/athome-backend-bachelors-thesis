@@ -1,4 +1,4 @@
-from application.transactions import TransactionManagerProtocol
+from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.email_verification.email_verification_service import (
     EmailVerificationService,
 )

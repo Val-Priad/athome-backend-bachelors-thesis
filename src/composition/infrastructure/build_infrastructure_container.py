@@ -10,6 +10,7 @@ from infrastructure.email.mailer import Mailer
 from infrastructure.object_storage.noop_object_storage import (
     NoOpObjectStorage,
 )
+from infrastructure.object_storage.s3_object_storage import S3ObjectStorage
 from infrastructure.sqlalchemy_transaction_manager import (
     SqlAlchemyTransactionManager,
 )
@@ -38,11 +39,20 @@ def build_infrastructure_container(
             app_base_url=app.config["APP_BASE_URL"],
         )
     )
-    object_storage = (
-        overrides.object_storage
-        if overrides and overrides.object_storage is not None
-        else NoOpObjectStorage()
-    )
+    if overrides and overrides.object_storage is not None:
+        object_storage = overrides.object_storage
+    elif app.config.get("TESTING"):
+        object_storage = NoOpObjectStorage()
+    else:
+        object_storage = S3ObjectStorage(
+            bucket_name=app.config["S3_BUCKET_NAME"],
+            region=app.config["S3_REGION"],
+            access_key_id=app.config["S3_ACCESS_KEY_ID"],
+            secret_access_key=app.config["S3_SECRET_ACCESS_KEY"],
+            presigned_url_ttl_seconds=app.config[
+                "S3_PRESIGNED_URL_TTL_SECONDS"
+            ],
+        )
     vicinity_client = (
         overrides.vicinity_client
         if overrides and overrides.vicinity_client is not None

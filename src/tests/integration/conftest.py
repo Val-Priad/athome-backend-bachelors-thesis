@@ -34,6 +34,7 @@ AUTH_PATH = "/api/auth"
 ADMIN_USERS_PATH = "/api/admin/users"
 ADMIN_AGENTS_PATH = "/api/admin/agents"
 ADMIN_ESTATE_PATH = "/api/admin/estate"
+MEDIA_PATH = "/api/media"
 TEST_PASSWORD = "any_password"
 
 

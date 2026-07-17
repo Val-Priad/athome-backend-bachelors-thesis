@@ -18,6 +18,9 @@ from composition.modules.auth.build_auth_container import build_auth_container
 from composition.modules.estates.build_estates_container import (
     build_estates_container,
 )
+from composition.modules.media.build_media_container import (
+    build_media_container,
+)
 from composition.modules.users.build_users_container import (
     build_users_container,
 )
@@ -72,5 +75,11 @@ def build_application_container(
             repositories=repositories,
             services=services,
             estate_response_mapper=estate_response_mapper,
+        ),
+        media=build_media_container(
+            infrastructure=infrastructure,
+            presigned_url_ttl_seconds=app.config[
+                "S3_PRESIGNED_URL_TTL_SECONDS"
+            ],
         ),
     )

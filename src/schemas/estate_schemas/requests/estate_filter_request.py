@@ -334,6 +334,7 @@ class EstateBaseFilterRequest(RequestValidation):
             )
         )
 
+
 class EstatePublicFilterRequest(EstateBaseFilterRequest):
     agent_id: uuid.UUID | None = None
     saved_by_current_user: bool | None = None

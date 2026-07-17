@@ -563,37 +563,15 @@ def test_update_estate_forbidden_for_non_admin(
 
 def test_update_estate_unauthorized_without_token(
     client,
-    db_session,
-    test_password_hash,
 ):
-    seller = _create_test_user(
-        db_session,
-        password_hash=test_password_hash,
-        email="unauthorized_update_seller@example.com",
-        role=UserRole.user,
-    )
-    agent = _create_test_user(
-        db_session,
-        password_hash=test_password_hash,
-        email="unauthorized_update_agent@example.com",
-        role=UserRole.agent,
-    )
-
-    estate_id = create_filter_estate(
-        db_session,
-        title="Unauthorized update apartment",
-        status=ListingStatus.draft,
-        seller_id=seller.id,
-    )
-
     payload = base_payload(
         listing_status=ListingStatus.draft,
-        agent_id=agent.id,
+        agent_id=uuid4(),
     )
-    payload["seller_id"] = str(seller.id)
+    payload["seller_id"] = str(uuid4())
 
     response = client.put(
-        f"{ADMIN_ESTATE_PATH}/{estate_id}",
+        f"{ADMIN_ESTATE_PATH}/{uuid4()}",
         json=payload,
     )
 

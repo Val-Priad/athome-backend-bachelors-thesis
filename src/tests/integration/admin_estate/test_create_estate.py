@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from decimal import Decimal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import select
@@ -348,11 +348,10 @@ def test_create_estate_forbidden_for_non_admin(
     assert body["error"]["code"] == "forbidden"
 
 
-@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
-def test_create_estate_unauthorized_without_token(client, any_user):
+def test_create_estate_unauthorized_without_token(client):
     payload = base_payload(
         listing_status=ListingStatus.draft,
-        agent_id=any_user.id,
+        agent_id=uuid4(),
     )
 
     response = client.post(

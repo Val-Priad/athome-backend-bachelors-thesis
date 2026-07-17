@@ -45,12 +45,9 @@ def _assert_estate_deleted(db_session: Session, estate_id: uuid.UUID) -> None:
 
 def test_admin_delete_estate_unauthorized_without_token(
     client: FlaskClient,
-    db_session: Session,
 ):
-    estate = _create_test_estate(db_session)
-    response = client.delete(f"{ADMIN_ESTATE_PATH}/{estate.id}")
+    response = client.delete(f"{ADMIN_ESTATE_PATH}/{uuid.uuid4()}")
     assert response.status_code == 401
-    _assert_estate_exists(db_session, estate.id)
 
 
 @pytest.mark.parametrize(

@@ -1,37 +1,33 @@
 import pytest
-from sqlalchemy import select
 
 from domain.user.user_model import User
-from tests.integration.conftest import AUTH_PATH
-
-
-@pytest.fixture()
-def verified_user(db_session, client):
-    email = "user@example.com"
-    password = "12345678"  # NOSONAR
-    response = client.post(
-        f"{AUTH_PATH}/register",
-        json={"email": email, "password": password},
-    )
-    assert response.status_code == 202
-
-    user = db_session.scalar(select(User).where(User.email == email))
-    user.is_email_verified = True
-    db_session.flush()
-    return {"email": email, "password": password}
+from tests.integration.conftest import AUTH_PATH, TEST_PASSWORD
 
 
 @pytest.fixture
-def unverified_user(client):
-    email = "user@example.com"
-    password = "12345678"  # NOSONAR
-    response = client.post(
-        f"{AUTH_PATH}/register",
-        json={"email": email, "password": password},
+def verified_user(db_session, test_password_hash):
+    user = User(
+        email="user@example.com",
+        password_hash=test_password_hash,
+        is_email_verified=True,
     )
-    assert response.status_code == 202
+    db_session.add(user)
+    db_session.flush()
 
-    return {"email": email, "password": password}
+    return {"email": user.email, "password": TEST_PASSWORD}
+
+
+@pytest.fixture
+def unverified_user(db_session, test_password_hash):
+    user = User(
+        email="user@example.com",
+        password_hash=test_password_hash,
+        is_email_verified=False,
+    )
+    db_session.add(user)
+    db_session.flush()
+
+    return {"email": user.email, "password": TEST_PASSWORD}
 
 
 def test_login_and_log_out(client, verified_user):

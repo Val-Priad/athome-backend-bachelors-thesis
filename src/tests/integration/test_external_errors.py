@@ -4,7 +4,6 @@ import pytest
 from flask_jwt_extended import (
     create_access_token,
     decode_token,
-    jwt_required,
 )
 
 from infrastructure.jwt.jwt_config import jwt
@@ -144,17 +143,6 @@ def test_non_fresh_token_is_rejected_by_fresh_endpoint(
 ):
     endpoint = "/test/fresh-token-required"
 
-    @jwt_required(fresh=True)
-    def fresh_token_required():
-        return {"message": "OK"}
-
-    app.add_url_rule(
-        endpoint,
-        endpoint="test_fresh_token_required",
-        view_func=fresh_token_required,
-        methods=["GET"],
-    )
-
     with app.app_context():
         access_token = create_access_token(
             identity=str(any_user.id),
@@ -175,16 +163,6 @@ def test_non_fresh_token_is_rejected_by_fresh_endpoint(
 
 def test_unexpected_exception_returns_generic_500(client, app):
     endpoint = "/test/unexpected-error"
-
-    def raise_unexpected_error():
-        raise RuntimeError("Sensitive internal information")
-
-    app.add_url_rule(
-        endpoint,
-        endpoint="test_unexpected_error",
-        view_func=raise_unexpected_error,
-        methods=["GET"],
-    )
 
     response = client.get(endpoint)
 

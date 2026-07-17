@@ -55,11 +55,6 @@ def valid_contact_payload():
     }
 
 
-@pytest.fixture(autouse=True)
-def disable_rate_limiter(app):
-    app.config["RATELIMIT_ENABLED"] = False
-
-
 @pytest.fixture
 def sent_estate_contact_emails(fake_mailer):
     return fake_mailer.sent_estate_contact_emails

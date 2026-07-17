@@ -1,5 +1,5 @@
 import os
-from collections.abc import Collection, Iterator
+from collections.abc import Iterator
 from types import SimpleNamespace
 
 from dotenv import load_dotenv
@@ -10,19 +10,22 @@ from pytest import FixtureRequest, fixture
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import create_app
-from application.ports.vicinity_client import (
-    Place,
-    VicinityFetchResult,
-)
 from composition.application_container import ApplicationContainer
 from composition.build_application_container import build_application_container
 from composition.container_access import APPLICATION_CONTAINER_KEY
 from composition.dependency_overrides import DependencyOverrides
 from config import TestingConfig
-from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.services.password_hasher import PasswordHasher
 from domain.user.user_model import User, UserRole
 from infrastructure.db import db
+from tests.integration.fake_infrastructure.fake_mailer import FakeMailer
+from tests.integration.fake_infrastructure.fake_object_storage import (
+    FakeObjectStorage,
+)
+from tests.integration.fake_infrastructure.fake_vicinity_client import (
+    FakeVicinityClient,
+)
+from tests.integration.testing_blueprint import testing_bp
 
 ME_PATH = "/api/users/me"
 AGENTS_PATH = "/api/agents"
@@ -34,93 +37,22 @@ ADMIN_ESTATE_PATH = "/api/admin/estate"
 TEST_PASSWORD = "any_password"
 
 
-class FakeMailer:
-    def __init__(self) -> None:
-        self.verification_emails: list[tuple[str, str]] = []
-        self.reset_emails: list[tuple[str, str]] = []
-        self.sent_estate_contact_emails: list[dict[str, str]] = []
-
-    def send_verification_email(self, email_to: str, token: str) -> None:
-        self.verification_emails.append((email_to, token))
-
-    def send_reset_password_email(self, email_to: str, token: str) -> None:
-        self.reset_emails.append((email_to, token))
-
-    def send_estate_contact_email(
-        self,
-        agent_email: str,
-        estate_title: str,
-        estate_url: str,
-        estate_address: str,
-        sender_name: str,
-        sender_email: str,
-        sender_phone: str,
-        message: str,
-    ) -> None:
-        self.sent_estate_contact_emails.append(
-            {
-                "agent_email": agent_email,
-                "estate_title": estate_title,
-                "estate_url": estate_url,
-                "estate_address": estate_address,
-                "sender_name": sender_name,
-                "sender_email": sender_email,
-                "sender_phone": sender_phone,
-                "message": message,
-            }
-        )
-
-
-class FakeObjectStorage:
-    def delete_objects(self, object_keys: Collection[str]) -> None:
-        pass
-
-
-class FakeVicinityClient:
-    def fetch_vicinity(self, lat, lon, radius=10000):
-        return VicinityFetchResult(
-            ok=True,
-            data={
-                VicinityType.bus_stop: [
-                    Place(
-                        type=VicinityType.bus_stop,
-                        name="Test bus stop",
-                        latitude=lat + 0.001,
-                        longitude=lon + 0.001,
-                        id=1,
-                        distance_m=157,
-                    )
-                ],
-                VicinityType.closest: [
-                    Place(
-                        type=VicinityType.bus_stop,
-                        name="Test bus stop",
-                        latitude=lat + 0.001,
-                        longitude=lon + 0.001,
-                        id=1,
-                        distance_m=157,
-                    )
-                ],
-            },
-        )
-
-
-@fixture
+@fixture(scope="session")
 def fake_mailer() -> FakeMailer:
     return FakeMailer()
 
 
-@fixture
+@fixture(scope="session")
 def fake_vicinity_client() -> FakeVicinityClient:
     return FakeVicinityClient()
 
 
-@fixture
+@fixture(scope="session")
 def fake_object_storage() -> FakeObjectStorage:
     return FakeObjectStorage()
 
 
-@fixture
+@fixture(scope="session")
 def app(
     fake_mailer: FakeMailer,
     fake_vicinity_client: FakeVicinityClient,
@@ -144,6 +76,8 @@ def app(
         ),
     )
 
+    app.register_blueprint(testing_bp)
+
     try:
         yield app
     finally:
@@ -162,6 +96,8 @@ def db_session(
     fake_vicinity_client: FakeVicinityClient,
     fake_object_storage: FakeObjectStorage,
 ) -> Iterator[Session]:
+    fake_mailer.reset()
+
     with app.app_context():
         engine = db.get_engine(app)
         connection = engine.connect()

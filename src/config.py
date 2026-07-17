@@ -6,6 +6,12 @@ class FlaskConfig:
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
+    S3_BUCKET_NAME: str | None = None
+    S3_REGION: str | None = None
+    S3_ACCESS_KEY_ID: str | None = None
+    S3_SECRET_ACCESS_KEY: str | None = None
+    S3_PRESIGNED_URL_TTL_SECONDS = 300
+
     RATELIMIT_HEADERS_ENABLED = True
     RATELIMIT_STRATEGY = "sliding-window-counter"
     RATELIMIT_DEFAULT = "200/hour"

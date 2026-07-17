@@ -46,5 +46,10 @@ class Database:
     def get_session_factory(self, app: Flask) -> sessionmaker[Session]:
         return self.get_state(app).session_factory
 
+    def dispose(self, app: Flask) -> None:
+        state = self.get_state(app)
+        state.engine.dispose()
+        app.extensions.pop(self.extension_key, None)
+
 
 db = Database()

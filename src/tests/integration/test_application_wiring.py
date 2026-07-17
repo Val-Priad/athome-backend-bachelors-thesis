@@ -58,4 +58,6 @@ def test_two_apps_have_independent_containers_and_database_states(
         assert db.get_state(app) is not db.get_state(second_app)
         assert db.get_engine(app) is not db.get_engine(second_app)
     finally:
-        db.get_engine(second_app).dispose()
+        db.dispose(second_app)
+
+    assert db.extension_key not in second_app.extensions

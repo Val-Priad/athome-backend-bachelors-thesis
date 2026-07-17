@@ -147,7 +147,7 @@ def app(
     try:
         yield app
     finally:
-        db.get_engine(app).dispose()
+        db.dispose(app)
 
 
 @fixture

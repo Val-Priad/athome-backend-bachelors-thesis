@@ -52,7 +52,7 @@ class UpdateEstateUseCase:
 
         if removed_object_keys:
             try:
-                self._object_storage.delete_objects(removed_object_keys)
+                self._object_storage.delete_objects(list(removed_object_keys))
             except Exception:
                 logger.exception(
                     "Failed to delete removed estate media objects",

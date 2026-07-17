@@ -24,7 +24,7 @@ def build_service_container(
     repositories: RepositoryContainer,
 ) -> ServiceContainer:
     token_lifecycle = TokenLifecycleService()
-    token_hasher = TokenGenerator()
+    token_generator = TokenGenerator()
     password_hasher = PasswordHasher()
 
     return ServiceContainer(
@@ -34,14 +34,12 @@ def build_service_container(
         ),
         email_verification=EmailVerificationService(
             email_verification_repository=repositories.email_verifications,
-            mailer=infrastructure.mailer,
-            token_hasher=token_hasher,
+            token_generator=token_generator,
             token_lifecycle_service=token_lifecycle,
         ),
         password_reset=PasswordResetService(
             password_reset_repository=repositories.password_resets,
-            mailer=infrastructure.mailer,
-            token_hasher=token_hasher,
+            token_generator=token_generator,
             password_hasher=password_hasher,
             token_lifecycle_service=token_lifecycle,
         ),

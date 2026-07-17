@@ -36,13 +36,15 @@ TEST_PASSWORD = "any_password"
 
 class FakeMailer:
     def __init__(self) -> None:
+        self.verification_emails: list[tuple[str, str]] = []
+        self.reset_emails: list[tuple[str, str]] = []
         self.sent_estate_contact_emails: list[dict[str, str]] = []
 
     def send_verification_email(self, email_to: str, token: str) -> None:
-        pass
+        self.verification_emails.append((email_to, token))
 
     def send_reset_password_email(self, email_to: str, token: str) -> None:
-        pass
+        self.reset_emails.append((email_to, token))
 
     def send_estate_contact_email(
         self,

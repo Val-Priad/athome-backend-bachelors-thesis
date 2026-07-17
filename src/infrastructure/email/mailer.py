@@ -2,6 +2,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from exceptions.custom_exceptions.mailer_exceptions import EmailSendError
 from infrastructure.email.resend_client import (
     EmailClientProtocol,
     ResendClient,
@@ -27,6 +28,14 @@ class Mailer:
             autoescape=select_autoescape(["html"]),
         )
 
+    def _send(self, payload: dict[str, object]) -> None:
+        try:
+            self._client.send(payload)
+        except EmailSendError:
+            raise
+        except Exception as error:
+            raise EmailSendError() from error
+
     def send_verification_email(self, email_to: str, token: str) -> None:
         verification_url = f"{self._app_base_url}/verify-email?token={token}"
 
@@ -45,7 +54,7 @@ class Mailer:
             ),
         }
 
-        self._client.send(params)
+        self._send(params)
 
     def send_reset_password_email(self, email_to: str, token: str) -> None:
         reset_password_url = (
@@ -66,7 +75,7 @@ class Mailer:
             ),
         }
 
-        self._client.send(params)
+        self._send(params)
 
     def send_estate_contact_email(
         self,
@@ -113,4 +122,4 @@ class Mailer:
             "text": text,
         }
 
-        self._client.send(params)
+        self._send(params)

@@ -43,7 +43,7 @@ def previous_token(db_session, unverified_user):
 
 
 def test_resend_verification_valid(
-    client, unverified_user, db_session, previous_token
+    client, unverified_user, db_session, previous_token, fake_mailer
 ):
     previous_token_id = previous_token.id
     unverified_user_id = unverified_user.id
@@ -82,6 +82,8 @@ def test_resend_verification_valid(
     )
 
     assert previous_token_id == deactivated_token.id
+    assert len(fake_mailer.verification_emails) == 1
+    assert fake_mailer.verification_emails[0][0] == unverified_user.email
 
 
 def test_resend_verification_validation(client):
@@ -122,7 +124,7 @@ def test_resend_verification_on_server_error_returns_500(
 
     monkeypatch.setattr(
         application_container.auth.resend_verification._email_verification_service,
-        "get_resend_token",
+        "create_token",
         boom,
     )
 

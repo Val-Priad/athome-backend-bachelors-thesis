@@ -9,7 +9,7 @@ from domain.user.user_model import User
 from tests.integration.conftest import AUTH_PATH
 
 
-def test_register_valid(client, db_session):
+def test_register_valid(client, db_session, fake_mailer):
     password = "some_password"
     response = client.post(
         f"{AUTH_PATH}/register",
@@ -28,6 +28,8 @@ def test_register_valid(client, db_session):
         select(EmailVerification).where(EmailVerification.user_id == user.id)
     )
     assert email_verification is not None
+    assert len(fake_mailer.verification_emails) == 1
+    assert fake_mailer.verification_emails[0][0] == user.email
 
 
 def test_register_user_already_exists(client):

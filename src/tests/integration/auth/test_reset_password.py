@@ -25,7 +25,7 @@ def any_user(db_session):
     return {"user_id": user.id, "user_email": user.email}
 
 
-def test_reset_password_token_valid(client, any_user, db_session):
+def test_reset_password_token_valid(client, any_user, db_session, fake_mailer):
     response = client.post(
         f"{AUTH_PATH}/reset-password",
         json={"email": any_user["user_email"]},
@@ -51,6 +51,8 @@ def test_reset_password_token_valid(client, any_user, db_session):
         ).all()
     )
     assert qty_of_tokens == 2
+    assert len(fake_mailer.reset_emails) == 1
+    assert fake_mailer.reset_emails[0][0] == any_user["user_email"]
 
 
 def test_reset_password_token_no_user(client):

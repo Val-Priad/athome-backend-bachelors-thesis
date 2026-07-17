@@ -29,7 +29,12 @@ from domain.estate.enums.utilities_enums import (
 )
 from schemas.estate_schemas.validators_utils import make_value_error
 from schemas.parent_types import RequestValidation
-from schemas.types import NonNegativeArea, NonNegativeMoneyAmount, PositiveArea
+from schemas.types import (
+    AcceptanceYear,
+    NonNegativeArea,
+    NonNegativeMoneyAmount,
+    PositiveArea,
+)
 
 
 class EstateSortBy(str, Enum):
@@ -216,14 +221,8 @@ class EstateBaseFilterRequest(RequestValidation):
         min_length=1,
     )
 
-    acceptance_year_from: int | None = Field(
-        default=None,
-        ge=1800,
-    )
-    acceptance_year_to: int | None = Field(
-        default=None,
-        ge=1800,
-    )
+    acceptance_year_from: AcceptanceYear | None = None
+    acceptance_year_to: AcceptanceYear | None = None
 
     floors_from: int | None = Field(default=None, ge=1)
     floors_to: int | None = Field(default=None, ge=1)
@@ -257,8 +256,6 @@ class EstateBaseFilterRequest(RequestValidation):
     @model_validator(mode="after")
     def validate_filter_ranges(self):
         errors: list[InitErrorDetails] = []
-
-        self._validate_acceptance_year(errors)
 
         for from_field, to_field in self.RANGE_FILTERS:
             self._validate_range(errors, from_field, to_field)
@@ -336,33 +333,6 @@ class EstateBaseFilterRequest(RequestValidation):
                 input_value=exists_value,
             )
         )
-
-    def _validate_acceptance_year(
-        self,
-        errors: list[InitErrorDetails],
-    ) -> None:
-        max_year = datetime.date.today().year + 10
-
-        for field_name in ("acceptance_year_from", "acceptance_year_to"):
-            value = getattr(self, field_name)
-
-            if value is None:
-                continue
-
-            if value <= max_year:
-                continue
-
-            errors.append(
-                make_value_error(
-                    loc=(field_name,),
-                    message=(
-                        f"{field_name} cannot be greater than "
-                        "current year + 10"
-                    ),
-                    input_value=value,
-                )
-            )
-
 
 class EstatePublicFilterRequest(EstateBaseFilterRequest):
     agent_id: uuid.UUID | None = None

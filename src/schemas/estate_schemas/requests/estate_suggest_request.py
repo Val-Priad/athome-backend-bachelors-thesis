@@ -1,6 +1,12 @@
 from datetime import date
 
-from pydantic import ConfigDict, Field, ValidationError, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 from pydantic_core import InitErrorDetails
 
 from domain.estate.enums.estate_enums import EstateType, OfferType
@@ -54,6 +60,19 @@ class EstateSuggestRequest(RequestValidation):
         max_length=20,
     )
 
+    @field_validator("media")
+    @classmethod
+    def _validate_unique_media_object_keys(
+        cls,
+        media: list[EstateMediaSection],
+    ) -> list[EstateMediaSection]:
+        object_keys = [item.object_key for item in media]
+
+        if len(object_keys) != len(set(object_keys)):
+            raise ValueError("Media object_key values must be unique")
+
+        return media
+
     @model_validator(mode="after")
     def validate_estate_schema(self):
         errors: list[InitErrorDetails] = []
@@ -61,7 +80,6 @@ class EstateSuggestRequest(RequestValidation):
         self._validate_apartment_section(errors)
         self._validate_house_section(errors)
         self._validate_media_for_status(errors)
-        self._validate_unique_media_object_keys(errors)
         self._validate_available_from(errors)
 
         if errors:
@@ -119,21 +137,6 @@ class EstateSuggestRequest(RequestValidation):
                     loc=("apartment",),
                     message="House estate cannot contain apartment section",
                     input_value=self.apartment,
-                )
-            )
-
-    def _validate_unique_media_object_keys(
-        self,
-        errors: list[InitErrorDetails],
-    ) -> None:
-        object_keys = [media.object_key for media in self.media]
-
-        if len(object_keys) != len(set(object_keys)):
-            errors.append(
-                make_value_error(
-                    loc=("media",),
-                    message="Media object_key values must be unique",
-                    input_value=self.media,
                 )
             )
 

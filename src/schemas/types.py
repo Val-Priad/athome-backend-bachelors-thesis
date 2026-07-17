@@ -1,8 +1,9 @@
+from datetime import date
 from decimal import Decimal
 from typing import Annotated, TypeAlias
 from uuid import UUID
 
-from pydantic import BeforeValidator, EmailStr, Field
+from pydantic import AfterValidator, BeforeValidator, EmailStr, Field
 from pydantic_extra_types.phone_numbers import (
     PhoneNumber as PydanticPhoneNumber,
 )
@@ -15,7 +16,21 @@ from .validators.user_validators import (
     strip_string,
 )
 
+
+def _validate_acceptance_year(value: int) -> int:
+    if not 1800 <= value <= date.today().year + 10:
+        raise ValueError(
+            "acceptance_year must be between 1800 and current year + 10"
+        )
+
+    return value
+
+
 ID = Annotated[UUID, Field()]
+AcceptanceYear: TypeAlias = Annotated[
+    int,
+    AfterValidator(_validate_acceptance_year),
+]
 UserName = Annotated[
     str,
     Field(min_length=1, max_length=255),

@@ -68,6 +68,12 @@ def base_payload(
     return payload
 
 
+def set_media_uploader(payload, uploader_id) -> None:
+    payload["media"][0]["object_key"] = (
+        f"estate-media/{uploader_id}/{uuid4()}.webp"
+    )
+
+
 def get_created_estate(db_session, response) -> Estate:
     body = response.get_json()
 
@@ -103,6 +109,7 @@ def test_admin_create_estate_success(
         listing_status=listing_status,
         agent_id=any_user.id,
     )
+    set_media_uploader(payload, logged_in_user.id)
 
     response = client.post(
         ADMIN_ESTATE_PATH,
@@ -156,7 +163,7 @@ def test_admin_create_estate_success(
     assert estate.translations[0].title == "Test apartment"
 
     assert len(estate.media) == 1
-    assert estate.media[0].object_key == "estate-media/image.webp"
+    assert estate.media[0].object_key == payload["media"][0]["object_key"]
     assert estate.media[0].position == 0
 
     assert len(estate.vicinities) == 2
@@ -178,6 +185,7 @@ def test_admin_create_draft_estate_without_agent_success(
         listing_status=ListingStatus.draft,
         agent_id=None,
     )
+    set_media_uploader(payload, logged_in_user.id)
 
     response = client.post(
         ADMIN_ESTATE_PATH,
@@ -193,6 +201,97 @@ def test_admin_create_draft_estate_without_agent_success(
     assert estate.listing is not None
     assert estate.listing.status == ListingStatus.draft
     assert estate.listing.published_at is None
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
+def test_admin_create_estate_rejects_foreign_media_key(
+    client,
+    logged_in_user,
+    any_user,
+):
+    payload = base_payload(
+        listing_status=ListingStatus.draft,
+        agent_id=any_user.id,
+    )
+    payload["media"][0]["object_key"] = (
+        f"estate-media/{any_user.id}/{uuid4()}.webp"
+    )
+
+    response = client.post(
+        ADMIN_ESTATE_PATH,
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "invalid_media_object_key"
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
+def test_admin_create_estate_rejects_used_media_key(
+    client,
+    logged_in_user,
+    any_user,
+):
+    payload = base_payload(
+        listing_status=ListingStatus.draft,
+        agent_id=any_user.id,
+    )
+    set_media_uploader(payload, logged_in_user.id)
+
+    first_response = client.post(
+        ADMIN_ESTATE_PATH,
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+    second_response = client.post(
+        ADMIN_ESTATE_PATH,
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 409
+    assert (
+        second_response.get_json()["error"]["code"]
+        == "media_object_already_used"
+    )
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+@pytest.mark.parametrize("any_user", [UserRole.agent], indirect=True)
+def test_admin_create_active_estate_requires_image(
+    client,
+    logged_in_user,
+    any_user,
+):
+    payload = base_payload(
+        listing_status=ListingStatus.active,
+        agent_id=any_user.id,
+    )
+    payload["media"] = [
+        {
+            "object_key": f"estate-media/{logged_in_user.id}/{uuid4()}.mp4",
+            "media_type": "video",
+        }
+    ]
+
+    response = client.post(
+        ADMIN_ESTATE_PATH,
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"]["code"] == "request_validation_error"
+    assert any(
+        error["field"] == "media"
+        and "At least one image is required" in error["message"]
+        for error in body["error"].get("errors", [])
+    )
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)

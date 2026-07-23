@@ -6,6 +6,7 @@ from domain.email_verification.email_verification_service import (
 )
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
+from domain.media.media_service import MediaService
 from domain.password_reset.password_reset_service import PasswordResetService
 from domain.token.token_lifecycle_service import TokenLifecycleService
 from domain.user.services.agent_service import AgentService
@@ -24,5 +25,6 @@ class ServiceContainer:
     me: MeService
     admin_users: AdminUsersService
     agents: AgentService
+    media: MediaService
     estates: EstateService
     estate_participants: EstateParticipantsService

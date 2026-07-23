@@ -9,6 +9,7 @@ from domain.email_verification.email_verification_service import (
 )
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
+from domain.media.media_service import MediaService
 from domain.password_reset.password_reset_service import PasswordResetService
 from domain.token.token_generator import TokenGenerator
 from domain.token.token_lifecycle_service import TokenLifecycleService
@@ -26,6 +27,7 @@ def build_service_container(
     token_lifecycle = TokenLifecycleService()
     token_generator = TokenGenerator()
     password_hasher = PasswordHasher()
+    media_service = MediaService(infrastructure.object_storage)
 
     return ServiceContainer(
         token_lifecycle=token_lifecycle,
@@ -57,6 +59,7 @@ def build_service_container(
         agents=AgentService(
             user_repository=repositories.users,
         ),
+        media=media_service,
         estates=EstateService(
             estate_repository=repositories.estates,
             vicinity_client=infrastructure.vicinity_client,

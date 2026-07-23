@@ -2,7 +2,10 @@ from uuid import UUID
 
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.enums.estate_listing_enums import ListingStatus
+from domain.estate.estate_media_repository import EstateMediaRepository
 from domain.estate.estate_service import EstateService
+from domain.media.media_enums import MediaPurpose
+from domain.media.media_service import MediaService
 from schemas.estate_schemas.requests.estate_create_type import (
     EstateMutationType,
 )
@@ -19,9 +22,13 @@ class SuggestEstateUseCase:
         self,
         transactions: TransactionManagerProtocol,
         estate_service: EstateService,
+        media_service: MediaService,
+        estate_media_repository: EstateMediaRepository,
     ) -> None:
         self._transactions = transactions
         self._estate_service = estate_service
+        self._media_service = media_service
+        self._estate_media_repository = estate_media_repository
 
     def execute(
         self,
@@ -33,6 +40,12 @@ class SuggestEstateUseCase:
             data.location
         )
 
+        self._media_service.validate_objects(
+            media=data.media,
+            uploader_id=requester_id,
+            purpose=MediaPurpose.estate,
+        )
+
         with self._transactions.session() as session:
             creation_data = EstateMutationType(
                 **data.model_dump(),
@@ -41,6 +54,10 @@ class SuggestEstateUseCase:
                 listing_status=ListingStatus.suggested,
             )
 
+            self._estate_media_repository.ensure_object_keys_unused(
+                session,
+                [item.object_key for item in data.media],
+            )
             estate = self._estate_service.create_estate(
                 session, creation_data, vicinities
             )

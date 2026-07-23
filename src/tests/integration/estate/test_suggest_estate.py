@@ -9,6 +9,7 @@ from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.user.user_model import UserRole
 from tests.integration.admin_estate.test_create_estate import (
     get_created_estate,
+    set_media_uploader,
 )
 from tests.integration.conftest import ESTATE_PATH
 
@@ -67,6 +68,7 @@ def test_user_suggest_estate_success(
     db_session,
 ):
     payload = base_suggestion_payload()
+    set_media_uploader(payload, logged_in_user.id)
 
     response = client.post(
         f"{ESTATE_PATH}/suggestions",
@@ -115,7 +117,7 @@ def test_user_suggest_estate_success(
     assert estate.translations[0].title == "Test apartment"
 
     assert len(estate.media) == 1
-    assert estate.media[0].object_key == "estate-media/image.webp"
+    assert estate.media[0].object_key == payload["media"][0]["object_key"]
     assert estate.media[0].position == 0
 
     assert len(estate.vicinities) == 2

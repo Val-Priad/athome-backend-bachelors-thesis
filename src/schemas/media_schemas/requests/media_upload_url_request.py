@@ -4,6 +4,7 @@ from typing import Annotated
 from pydantic import Field, ValidationInfo, field_validator
 from pydantic.functional_validators import BeforeValidator
 
+from domain.media.media_enums import MediaPurpose
 from schemas.parent_types import RequestValidation
 from schemas.validators.user_validators import strip_string
 
@@ -36,13 +37,8 @@ class MediaContentType(str, Enum):
         return MAX_VIDEO_SIZE_BYTES
 
 
-class MediaUploadPurpose(str, Enum):
-    estate = "estate"
-    user_avatar = "user_avatar"
-
-
 class MediaUploadUrlRequest(RequestValidation):
-    purpose: MediaUploadPurpose
+    purpose: MediaPurpose
     filename: Annotated[
         str,
         BeforeValidator(strip_string),
@@ -59,7 +55,7 @@ class MediaUploadUrlRequest(RequestValidation):
         info: ValidationInfo,
     ) -> MediaContentType:
         if (
-            info.data.get("purpose") is MediaUploadPurpose.user_avatar
+            info.data.get("purpose") is MediaPurpose.user_avatar
             and not content_type.is_image
         ):
             raise ValueError("User avatar must be an image")

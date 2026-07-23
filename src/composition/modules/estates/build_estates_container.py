@@ -35,6 +35,8 @@ def build_estates_container(
         create=CreateEstateUseCase(
             transactions=transactions,
             estate_service=services.estates,
+            media_service=services.media,
+            estate_media_repository=repositories.estate_media,
             authorization_service=services.authorization,
             participants_service=services.estate_participants,
         ),
@@ -53,6 +55,8 @@ def build_estates_container(
         suggest=SuggestEstateUseCase(
             transactions=transactions,
             estate_service=services.estates,
+            media_service=services.media,
+            estate_media_repository=repositories.estate_media,
         ),
         get_one=GetEstateUseCase(
             transactions=transactions,

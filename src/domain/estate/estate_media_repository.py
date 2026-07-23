@@ -1,7 +1,12 @@
+from collections.abc import Sequence
+
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
 from domain.estate.models.estate_media_model import EstateMedia
+from exceptions.custom_exceptions.media_exceptions import (
+    MediaObjectAlreadyUsedError,
+)
 
 
 class EstateMediaRepository:
@@ -29,3 +34,14 @@ class EstateMediaRepository:
                 )
             )
         )
+
+    def ensure_object_keys_unused(
+        self,
+        session: Session,
+        object_keys: Sequence[str],
+    ) -> None:
+        if not object_keys:
+            return
+
+        if self.get_used_object_keys(session, list(object_keys)):
+            raise MediaObjectAlreadyUsedError()

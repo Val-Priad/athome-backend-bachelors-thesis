@@ -5,19 +5,14 @@ from application.ports.object_storage import (
     ObjectStorageError,
     ObjectStorageProtocol,
 )
+from domain.media.media_config import MEDIA_CONFIG_BY_PURPOSE
 from exceptions.custom_exceptions.media_exceptions import MediaUploadError
 from schemas.media_schemas.requests.media_upload_url_request import (
-    MediaUploadPurpose,
     MediaUploadUrlRequest,
 )
 from schemas.media_schemas.responses.presigned_upload_response import (
     PresignedUploadResponse,
 )
-
-PREFIX_BY_PURPOSE = {
-    MediaUploadPurpose.estate: "estate-media",
-    MediaUploadPurpose.user_avatar: "user-avatars",
-}
 
 
 class CreateMediaUploadUrlUseCase:
@@ -37,8 +32,9 @@ class CreateMediaUploadUrlUseCase:
         data: MediaUploadUrlRequest,
         requester_id: UUID,
     ) -> PresignedUploadResponse:
+        prefix = MEDIA_CONFIG_BY_PURPOSE[data.purpose].prefix
         object_key = (
-            f"{PREFIX_BY_PURPOSE[data.purpose]}/{requester_id}/"
+            f"{prefix}/{requester_id}/"
             f"{self._uuid_factory()}."
             f"{data.content_type.extension}"
         )

@@ -1,6 +1,3 @@
-from enum import Enum
+from domain.media.media_enums import MediaType
 
-
-class MediaType(str, Enum):
-    image = "image"
-    video = "video"
+__all__ = ["MediaType"]

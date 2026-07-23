@@ -41,6 +41,7 @@ class S3ObjectStorage:
         *,
         object_key: str,
         content_type: str,
+        size_bytes: int,
     ) -> str:
         try:
             return self._client.generate_presigned_url(
@@ -49,6 +50,7 @@ class S3ObjectStorage:
                     "Bucket": self._bucket_name,
                     "Key": object_key,
                     "ContentType": content_type,
+                    "ContentLength": size_bytes,
                 },
                 ExpiresIn=self._presigned_url_ttl_seconds,
                 HttpMethod="PUT",

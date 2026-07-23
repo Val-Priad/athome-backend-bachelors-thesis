@@ -43,6 +43,7 @@ def test_create_upload_url() -> None:
     result = storage.create_upload_url(
         object_key="estate-media/image.webp",
         content_type="image/webp",
+        size_bytes=5242880,
     )
 
     assert result == "https://upload.test/url"
@@ -52,6 +53,7 @@ def test_create_upload_url() -> None:
             "Bucket": "test-bucket",
             "Key": "estate-media/image.webp",
             "ContentType": "image/webp",
+            "ContentLength": 5242880,
         },
         ExpiresIn=600,
         HttpMethod="PUT",
@@ -67,6 +69,7 @@ def test_create_upload_url_wraps_sdk_errors() -> None:
         _storage(client).create_upload_url(
             object_key="estate-media/image.webp",
             content_type="image/webp",
+            size_bytes=5242880,
         )
 
     assert raised.value.__cause__ is error

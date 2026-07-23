@@ -4,6 +4,7 @@ class FakeObjectStorage:
         *,
         object_key: str,
         content_type: str,
+        size_bytes: int,
     ) -> str:
         return f"https://storage.test/{object_key}"
 

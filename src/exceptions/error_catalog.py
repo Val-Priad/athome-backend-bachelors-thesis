@@ -138,6 +138,9 @@ def _register_custom_errors():
     from exceptions.custom_exceptions.estate_exceptions import (
         register_estate_errors,
     )
+    from exceptions.custom_exceptions.media_exceptions import (
+        register_media_errors,
+    )
 
     from .custom_exceptions.user_exceptions import register_user_errors
     from .custom_exceptions.validation_exceptions import (
@@ -147,6 +150,7 @@ def _register_custom_errors():
     register_user_errors()
     register_validation_errors()
     register_estate_errors()
+    register_media_errors()
 
 
 def register_errors():

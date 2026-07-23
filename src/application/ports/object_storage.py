@@ -11,6 +11,7 @@ class ObjectStorageProtocol(Protocol):
         *,
         object_key: str,
         content_type: str,
+        size_bytes: int,
     ) -> str: ...
 
     def object_exists(self, object_key: str) -> bool: ...

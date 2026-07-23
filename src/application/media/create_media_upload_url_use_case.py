@@ -1,7 +1,11 @@
 from collections.abc import Callable
 from uuid import UUID, uuid4
 
-from application.ports.object_storage import ObjectStorageProtocol
+from application.ports.object_storage import (
+    ObjectStorageError,
+    ObjectStorageProtocol,
+)
+from exceptions.custom_exceptions.media_exceptions import MediaUploadError
 from schemas.media_schemas.requests.media_upload_url_request import (
     MediaUploadPurpose,
     MediaUploadUrlRequest,
@@ -38,10 +42,14 @@ class CreateMediaUploadUrlUseCase:
             f"{self._uuid_factory()}."
             f"{data.content_type.extension}"
         )
-        upload_url = self._object_storage.create_upload_url(
-            object_key=object_key,
-            content_type=data.content_type.value,
-        )
+        try:
+            upload_url = self._object_storage.create_upload_url(
+                object_key=object_key,
+                content_type=data.content_type.value,
+                size_bytes=data.size_bytes,
+            )
+        except ObjectStorageError as error:
+            raise MediaUploadError() from error
 
         return PresignedUploadResponse(
             upload_url=upload_url,

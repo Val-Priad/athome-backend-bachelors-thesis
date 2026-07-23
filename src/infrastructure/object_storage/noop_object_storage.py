@@ -4,6 +4,7 @@ class NoOpObjectStorage:
         *,
         object_key: str,
         content_type: str,
+        size_bytes: int,
     ) -> str:
         return ""
 

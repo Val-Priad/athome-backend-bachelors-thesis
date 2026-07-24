@@ -115,64 +115,42 @@ def test_object_exists_raises_for_non_not_found_errors(
     assert raised.value.__cause__ is error
 
 
-def test_iter_objects_handles_page_without_contents() -> None:
+def test_iter_objects_maps_across_pages_and_skips_empty_pages() -> None:
     client = Mock()
     paginator = client.get_paginator.return_value
-    paginator.paginate.return_value = [{}]
-
-    result = list(_storage(client).iter_objects(prefix="estate-media/"))
-
-    assert result == []
-    client.get_paginator.assert_called_once_with("list_objects_v2")
-    paginator.paginate.assert_called_once_with(
-        Bucket="test-bucket",
-        Prefix="estate-media/",
-    )
-
-
-def test_iter_objects_maps_key_and_last_modified_from_one_page() -> None:
-    client = Mock()
-    last_modified = datetime(2026, 7, 20, tzinfo=timezone.utc)
-    client.get_paginator.return_value.paginate.return_value = [
+    first_last_modified = datetime(2026, 7, 20, tzinfo=timezone.utc)
+    second_last_modified = datetime(2026, 7, 21, tzinfo=timezone.utc)
+    paginator.paginate.return_value = [
         {
             "Contents": [
                 {
-                    "Key": "estate-media/user/image.webp",
-                    "LastModified": last_modified,
+                    "Key": "user-avatars/one.webp",
+                    "LastModified": first_last_modified,
                 }
             ]
-        }
-    ]
-
-    result = list(_storage(client).iter_objects(prefix="estate-media/"))
-
-    assert len(result) == 1
-    assert result[0].object_key == "estate-media/user/image.webp"
-    assert result[0].last_modified == last_modified
-
-
-def test_iter_objects_yields_objects_from_multiple_pages() -> None:
-    client = Mock()
-    last_modified = datetime(2026, 7, 20, tzinfo=timezone.utc)
-    client.get_paginator.return_value.paginate.return_value = [
-        {
-            "Contents": [
-                {"Key": "user-avatars/one.webp", "LastModified": last_modified}
-            ]
         },
+        {},
         {
             "Contents": [
-                {"Key": "user-avatars/two.webp", "LastModified": last_modified}
+                {
+                    "Key": "user-avatars/two.webp",
+                    "LastModified": second_last_modified,
+                }
             ]
         },
     ]
 
     result = list(_storage(client).iter_objects(prefix="user-avatars/"))
 
-    assert [item.object_key for item in result] == [
-        "user-avatars/one.webp",
-        "user-avatars/two.webp",
+    assert [(item.object_key, item.last_modified) for item in result] == [
+        ("user-avatars/one.webp", first_last_modified),
+        ("user-avatars/two.webp", second_last_modified),
     ]
+    client.get_paginator.assert_called_once_with("list_objects_v2")
+    paginator.paginate.assert_called_once_with(
+        Bucket="test-bucket",
+        Prefix="user-avatars/",
+    )
 
 
 def test_iter_objects_wraps_sdk_errors() -> None:

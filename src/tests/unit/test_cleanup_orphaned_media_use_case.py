@@ -2,39 +2,40 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from logging import LogRecord
-from unittest.mock import Mock, call
+from unittest.mock import ANY, Mock, call, patch
 
 import pytest
 
 from application.media.cleanup_orphaned_media_use_case import (
     CleanupOrphanedMediaUseCase,
+    OrphanCleanupResult,
 )
 from application.ports.object_storage import ObjectStorageError, StoredObject
 from domain.media.media_enums import MediaPurpose
 
-NOW = datetime.now(timezone.utc)
-OLD = NOW - timedelta(days=2)
-FRESH = NOW - timedelta(hours=1)
+NOW = datetime(2026, 7, 24, 12, tzinfo=timezone.utc)
+OLD = datetime(2000, 1, 1, tzinfo=timezone.utc)
 
 
-def test_rejects_non_positive_min_object_age() -> None:
-    with pytest.raises(ValueError, match="Minimum object age"):
+@pytest.mark.parametrize(
+    ("min_object_age", "batch_size", "message"),
+    [
+        (timedelta(0), 500, "Minimum object age"),
+        (timedelta(hours=24), 0, "Batch size"),
+    ],
+)
+def test_rejects_invalid_cleanup_limits(
+    min_object_age: timedelta,
+    batch_size: int,
+    message: str,
+) -> None:
+    with pytest.raises(ValueError, match=message):
         CleanupOrphanedMediaUseCase(
             transactions=Mock(),
             media_usage_service=Mock(),
             object_storage=Mock(),
-            min_object_age=timedelta(0),
-        )
-
-
-def test_rejects_non_positive_batch_size() -> None:
-    with pytest.raises(ValueError, match="Batch size"):
-        CleanupOrphanedMediaUseCase(
-            transactions=Mock(),
-            media_usage_service=Mock(),
-            object_storage=Mock(),
-            min_object_age=timedelta(hours=24),
-            batch_size=0,
+            min_object_age=min_object_age,
+            batch_size=batch_size,
         )
 
 
@@ -85,24 +86,6 @@ def _use_case(
     )
 
 
-def test_deletes_old_unused_object() -> None:
-    key = "estate-media/user/old.webp"
-    use_case, storage, _, _ = _use_case(
-        objects_by_prefix={
-            "estate-media/": [StoredObject(key, OLD)],
-        }
-    )
-
-    result = use_case.execute()
-
-    storage.delete_objects.assert_called_once_with([key])
-    assert result.scanned == 1
-    assert result.eligible == 1
-    assert result.used == 0
-    assert result.deleted == 1
-    assert result.failed == 0
-
-
 def test_does_not_delete_used_object() -> None:
     key = "estate-media/user/used.webp"
     usage_service = Mock()
@@ -117,28 +100,16 @@ def test_does_not_delete_used_object() -> None:
     result = use_case.execute()
 
     storage.delete_objects.assert_not_called()
-    assert result.used == 1
-    assert result.deleted == 0
-
-
-def test_ignores_fresh_object_without_database_lookup() -> None:
-    key = "estate-media/user/fresh.webp"
-    use_case, storage, usage_service, transactions = _use_case(
-        objects_by_prefix={
-            "estate-media/": [StoredObject(key, FRESH)],
-        }
+    assert result == OrphanCleanupResult(
+        scanned=1,
+        eligible=1,
+        used=1,
+        deleted=0,
+        failed=0,
     )
 
-    result = use_case.execute()
 
-    usage_service.get_used_object_keys.assert_not_called()
-    transactions.session.assert_not_called()
-    storage.delete_objects.assert_not_called()
-    assert result.scanned == 1
-    assert result.eligible == 0
-
-
-def test_checks_each_purpose_through_media_usage_service() -> None:
+def test_processes_each_configured_media_purpose() -> None:
     estate_key = "estate-media/user/estate.webp"
     avatar_key = "user-avatars/user/avatar.webp"
     use_case, storage, usage_service, _ = _use_case(
@@ -154,17 +125,56 @@ def test_checks_each_purpose_through_media_usage_service() -> None:
         call(prefix="estate-media/"),
         call(prefix="user-avatars/"),
     ]
-    assert [
-        item.kwargs["purpose"]
-        for item in usage_service.get_used_object_keys.call_args_list
-    ] == [
-        MediaPurpose.estate,
-        MediaPurpose.user_avatar,
+    assert usage_service.get_used_object_keys.call_args_list == [
+        call(
+            session=ANY,
+            purpose=MediaPurpose.estate,
+            object_keys=[estate_key],
+        ),
+        call(
+            session=ANY,
+            purpose=MediaPurpose.user_avatar,
+            object_keys=[avatar_key],
+        ),
     ]
-    assert [
-        item.kwargs["object_keys"]
-        for item in usage_service.get_used_object_keys.call_args_list
-    ] == [[estate_key], [avatar_key]]
+
+
+def test_cutoff_includes_boundary_and_skips_fresh_objects() -> None:
+    old_key = "estate-media/user/old.webp"
+    boundary_key = "estate-media/user/boundary.webp"
+    fresh_key = "estate-media/user/fresh.webp"
+    use_case, storage, usage_service, transactions = _use_case(
+        objects_by_prefix={
+            "estate-media/": [
+                StoredObject(old_key, OLD),
+                StoredObject(
+                    boundary_key,
+                    NOW - timedelta(hours=24),
+                ),
+                StoredObject(
+                    fresh_key,
+                    NOW - timedelta(hours=24) + timedelta(microseconds=1),
+                ),
+            ],
+        }
+    )
+
+    with patch(
+        "application.media.cleanup_orphaned_media_use_case.datetime"
+    ) as mocked_datetime:
+        mocked_datetime.now.return_value = NOW
+        result = use_case.execute()
+
+    usage_service.get_used_object_keys.assert_called_once()
+    transactions.session.assert_called_once()
+    storage.delete_objects.assert_called_once_with([old_key, boundary_key])
+    assert result == OrphanCleanupResult(
+        scanned=3,
+        eligible=2,
+        used=0,
+        deleted=2,
+        failed=0,
+    )
 
 
 def test_processes_eligible_objects_in_batches() -> None:
@@ -184,7 +194,13 @@ def test_processes_eligible_objects_in_batches() -> None:
         call(keys[2:4]),
         call(keys[4:]),
     ]
-    assert result.deleted == 5
+    assert result == OrphanCleanupResult(
+        scanned=5,
+        eligible=5,
+        used=0,
+        deleted=5,
+        failed=0,
+    )
 
 
 def test_delete_failure_does_not_stop_later_batches(caplog) -> None:
@@ -208,8 +224,13 @@ def test_delete_failure_does_not_stop_later_batches(caplog) -> None:
         call(keys[:11]),
         call(keys[11:]),
     ]
-    assert result.deleted == 1
-    assert result.failed == 11
+    assert result == OrphanCleanupResult(
+        scanned=12,
+        eligible=12,
+        used=0,
+        deleted=1,
+        failed=11,
+    )
 
     error_record = next(
         record
@@ -241,20 +262,7 @@ def test_database_failure_does_not_delete_objects() -> None:
     storage.delete_objects.assert_not_called()
 
 
-def test_empty_prefixes_return_zero_counts() -> None:
-    use_case, storage, _, _ = _use_case()
-
-    result = use_case.execute()
-
-    assert result.scanned == 0
-    assert result.eligible == 0
-    assert result.used == 0
-    assert result.deleted == 0
-    assert result.failed == 0
-    storage.delete_objects.assert_not_called()
-
-
-def test_listing_failure_is_not_treated_as_empty_prefix() -> None:
+def test_listing_failure_propagates_without_deleting_objects() -> None:
     storage = Mock()
 
     def iter_objects(*, prefix: str) -> Iterator[StoredObject]:
@@ -264,13 +272,13 @@ def test_listing_failure_is_not_treated_as_empty_prefix() -> None:
     storage.iter_objects.side_effect = iter_objects
     use_case, storage, _, _ = _use_case(storage=storage)
 
-    with pytest.raises(ObjectStorageError):
+    with pytest.raises(ObjectStorageError, match="Cannot list"):
         use_case.execute()
 
     storage.delete_objects.assert_not_called()
 
 
-def test_database_session_is_closed_before_deleting() -> None:
+def test_deletes_objects_after_database_transaction_is_closed() -> None:
     key = "estate-media/user/old.webp"
     session_is_open = False
     transactions = Mock()

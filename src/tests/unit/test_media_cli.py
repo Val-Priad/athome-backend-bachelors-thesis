@@ -38,6 +38,7 @@ def test_cleanup_orphans_cli_executes_use_case_and_prints_result() -> None:
 
     assert result.exit_code == 0
     execute.assert_called_once_with()
+    assert "Cleanup completed" in result.output
     assert "scanned=10" in result.output
     assert "eligible=8" in result.output
     assert "used=3" in result.output
@@ -78,4 +79,5 @@ def test_cleanup_orphans_cli_returns_nonzero_on_fatal_error() -> None:
     )
 
     assert result.exit_code != 0
+    execute.assert_called_once_with()
     assert "Orphaned media cleanup failed" in result.output

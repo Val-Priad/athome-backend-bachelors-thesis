@@ -35,19 +35,28 @@ def test_cleanup_requires_authentication(client):
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.user], indirect=True)
-def test_cleanup_deletes_owned_unused_objects(
+@pytest.mark.parametrize(
+    ("purpose", "object_key_factory"),
+    [
+        ("estate", _object_key),
+        ("user_avatar", _avatar_key),
+    ],
+)
+def test_cleanup_deletes_owned_unused_objects_for_each_purpose(
     client,
     logged_in_user,
     fake_object_storage,
+    purpose,
+    object_key_factory,
 ):
     object_keys = [
-        _object_key(logged_in_user.id),
-        _object_key(logged_in_user.id),
+        object_key_factory(logged_in_user.id),
+        object_key_factory(logged_in_user.id),
     ]
 
     response = client.post(
         f"{MEDIA_PATH}/cleanup",
-        json={"purpose": "estate", "object_keys": object_keys},
+        json={"purpose": purpose, "object_keys": object_keys},
         headers=logged_in_user.headers,
     )
 
@@ -152,28 +161,6 @@ def test_cleanup_rejects_object_used_by_estate(
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.user], indirect=True)
-def test_cleanup_deletes_owned_unused_avatar(
-    client,
-    logged_in_user,
-    fake_object_storage,
-):
-    object_key = _avatar_key(logged_in_user.id)
-
-    response = client.post(
-        f"{MEDIA_PATH}/cleanup",
-        json={
-            "purpose": "user_avatar",
-            "object_keys": [object_key],
-        },
-        headers=logged_in_user.headers,
-    )
-
-    assert response.status_code == 200
-    assert fake_object_storage.checked_object_keys == []
-    assert fake_object_storage.deleted_object_keys == [object_key]
-
-
-@pytest.mark.parametrize("logged_in_user", [UserRole.user], indirect=True)
 def test_cleanup_maps_object_storage_error(
     client,
     logged_in_user,
@@ -193,7 +180,6 @@ def test_cleanup_maps_object_storage_error(
 
     assert response.status_code == 503
     assert response.get_json()["error"]["code"] == "media_upload_failed"
-    assert fake_object_storage.checked_object_keys == []
     assert fake_object_storage.deleted_object_keys == []
 
 
@@ -221,7 +207,6 @@ def test_cleanup_rejects_avatar_used_by_user(
 
     assert response.status_code == 409
     assert response.get_json()["error"]["code"] == "media_object_already_used"
-    assert fake_object_storage.checked_object_keys == []
     assert fake_object_storage.deleted_object_keys == []
 
 

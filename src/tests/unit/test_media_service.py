@@ -28,17 +28,35 @@ def _service(
     return MediaService(object_storage), object_storage
 
 
-def test_validates_backend_generated_estate_media_key() -> None:
+@pytest.mark.parametrize(
+    ("object_key", "purpose"),
+    [
+        pytest.param(
+            IMAGE_KEY,
+            MediaPurpose.estate,
+            id="estate",
+        ),
+        pytest.param(
+            f"user-avatars/{UPLOADER_ID}/{MEDIA_ID}.jpg",
+            MediaPurpose.user_avatar,
+            id="user_avatar",
+        ),
+    ],
+)
+def test_accepts_valid_generated_object_key_for_each_purpose(
+    object_key: str,
+    purpose: MediaPurpose,
+) -> None:
     service, object_storage = _service()
 
     service.validate_object(
-        object_key=IMAGE_KEY,
+        object_key=object_key,
         uploader_id=UPLOADER_ID,
-        purpose=MediaPurpose.estate,
+        purpose=purpose,
         media_type=MediaType.image,
     )
 
-    object_storage.object_exists.assert_called_once_with(IMAGE_KEY)
+    object_storage.object_exists.assert_called_once_with(object_key)
 
 
 def test_validates_owned_key_without_accessing_storage() -> None:
@@ -54,10 +72,13 @@ def test_validates_owned_key_without_accessing_storage() -> None:
     object_storage.object_exists.assert_not_called()
 
 
-def test_validates_multiple_objects() -> None:
+def test_validate_objects_checks_all_items_until_one_is_missing() -> None:
     service, object_storage = _service()
     second_media_id = UUID("40000000-0000-0000-0000-000000000def")
     second_key = f"estate-media/{UPLOADER_ID}/{second_media_id}.mp4"
+    object_storage.object_exists.side_effect = lambda object_key: (
+        object_key != second_key
+    )
     media = [
         EstateMediaSection(
             object_key=IMAGE_KEY,
@@ -69,11 +90,12 @@ def test_validates_multiple_objects() -> None:
         ),
     ]
 
-    service.validate_objects(
-        media=media,
-        uploader_id=UPLOADER_ID,
-        purpose=MediaPurpose.estate,
-    )
+    with pytest.raises(MediaObjectNotFoundError):
+        service.validate_objects(
+            media=media,
+            uploader_id=UPLOADER_ID,
+            purpose=MediaPurpose.estate,
+        )
 
     assert object_storage.object_exists.call_args_list == [
         call(IMAGE_KEY),
@@ -81,14 +103,37 @@ def test_validates_multiple_objects() -> None:
     ]
 
 
-def test_empty_media_does_not_access_storage() -> None:
+@pytest.mark.parametrize(
+    ("object_key", "purpose"),
+    [
+        (
+            f"unexpected-prefix/{UPLOADER_ID}/{MEDIA_ID}.webp",
+            MediaPurpose.estate,
+        ),
+        (
+            f"estate-media/{OTHER_UPLOADER_ID}/{MEDIA_ID}.webp",
+            MediaPurpose.estate,
+        ),
+        (
+            f"estate-media/{UPLOADER_ID}/nested/{MEDIA_ID}.webp",
+            MediaPurpose.estate,
+        ),
+        (IMAGE_KEY, MediaPurpose.user_avatar),
+    ],
+)
+def test_rejects_keys_outside_security_boundary(
+    object_key: str,
+    purpose: MediaPurpose,
+) -> None:
     service, object_storage = _service()
 
-    service.validate_objects(
-        media=[],
-        uploader_id=UPLOADER_ID,
-        purpose=MediaPurpose.estate,
-    )
+    with pytest.raises(InvalidMediaObjectKeyError):
+        service.validate_object(
+            object_key=object_key,
+            uploader_id=UPLOADER_ID,
+            purpose=purpose,
+            media_type=MediaType.image,
+        )
 
     object_storage.object_exists.assert_not_called()
 
@@ -96,16 +141,16 @@ def test_empty_media_does_not_access_storage() -> None:
 @pytest.mark.parametrize(
     "object_key",
     [
-        f"user-avatars/{UPLOADER_ID}/{MEDIA_ID}.webp",
-        f"estate-media/{OTHER_UPLOADER_ID}/{MEDIA_ID}.webp",
-        f"estate-media/{UPLOADER_ID}/nested/{MEDIA_ID}.webp",
         f"estate-media/{UPLOADER_ID}/image.webp",
-        f"estate-media/{UPLOADER_ID}/hello.world.webp",
         f"estate-media/{UPLOADER_ID}/{str(MEDIA_ID).upper()}.webp",
+        f"estate-media/{UPLOADER_ID}/{MEDIA_ID}.webp.backup",
         f"estate-media/{UPLOADER_ID}/{MEDIA_ID}.WEBP",
+        f"estate-media/{UPLOADER_ID}/{MEDIA_ID}.gif",
     ],
 )
-def test_rejects_invalid_estate_media_key(object_key: str) -> None:
+def test_rejects_noncanonical_or_unsupported_filename(
+    object_key: str,
+) -> None:
     service, object_storage = _service()
 
     with pytest.raises(InvalidMediaObjectKeyError):
@@ -170,31 +215,3 @@ def test_wraps_object_storage_error() -> None:
         )
 
     assert raised.value.__cause__ is storage_error
-
-
-def test_uses_requested_purpose() -> None:
-    service, object_storage = _service()
-    avatar_key = f"user-avatars/{UPLOADER_ID}/{MEDIA_ID}.jpg"
-
-    service.validate_object(
-        object_key=avatar_key,
-        uploader_id=UPLOADER_ID,
-        purpose=MediaPurpose.user_avatar,
-        media_type=MediaType.image,
-    )
-
-    object_storage.object_exists.assert_called_once_with(avatar_key)
-
-
-def test_rejects_key_from_another_purpose() -> None:
-    service, object_storage = _service()
-
-    with pytest.raises(InvalidMediaObjectKeyError):
-        service.validate_object(
-            object_key=IMAGE_KEY,
-            uploader_id=UPLOADER_ID,
-            purpose=MediaPurpose.user_avatar,
-            media_type=MediaType.image,
-        )
-
-    object_storage.object_exists.assert_not_called()

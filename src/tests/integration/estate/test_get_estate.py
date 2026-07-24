@@ -177,6 +177,9 @@ def test_get_active_estate_returns_full_public_data(
     assert "seller" in data
 
     assert data["agent_id"] == str(logged_in_user.id)
+    assert data["agent"]["avatar_url"] == (
+        "https://media.test/avatars/default/user_1.png"
+    )
     assert data["estate_type"] == EstateType.apartment.value
     assert data["offer_type"] == OfferType.sale.value
 

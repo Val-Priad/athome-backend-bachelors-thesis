@@ -1,5 +1,6 @@
 from application.users.delete_me_use_case import DeleteMeUseCase
 from application.users.get_me_use_case import GetMeUseCase
+from application.users.mapping.user_response_mapper import UserResponseMapper
 from application.users.update_password_use_case import UpdatePasswordUseCase
 from application.users.update_personal_data_use_case import (
     UpdatePersonalDataUseCase,
@@ -16,6 +17,7 @@ def build_users_container(
     infrastructure: InfrastructureContainer,
     repositories: RepositoryContainer,
     services: ServiceContainer,
+    user_response_mapper: UserResponseMapper,
 ) -> UsersContainer:
     transactions = infrastructure.transactions
 
@@ -23,6 +25,7 @@ def build_users_container(
         get_me=GetMeUseCase(
             transactions=transactions,
             user_repository=repositories.users,
+            response_mapper=user_response_mapper,
         ),
         delete_me=DeleteMeUseCase(
             transactions=transactions,
@@ -35,5 +38,7 @@ def build_users_container(
         update_personal_data=UpdatePersonalDataUseCase(
             transactions=transactions,
             me_service=services.me,
+            media_service=services.media,
+            response_mapper=user_response_mapper,
         ),
     )

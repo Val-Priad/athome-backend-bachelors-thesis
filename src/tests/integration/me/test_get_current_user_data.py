@@ -10,10 +10,9 @@ def test_get_current_user_data_valid(client, logged_in_user, db_session):
     assert response.status_code == 200
 
     user = db_session.scalar(select(User).where(User.id == logged_in_user.id))
-    assert (
-        MeResponse.from_model(user).model_dump(mode="json")
-        == response.get_json()["data"]
-    )
+    expected = MeResponse.from_model(user).model_dump(mode="json")
+    expected["avatar_url"] = f"https://media.test/{user.avatar_key}"
+    assert expected == response.get_json()["data"]
 
 
 def test_get_current_user_data_csrf_absent(client):

@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from application.ports.transaction_manager import TransactionManagerProtocol
+from application.users.mapping.user_response_mapper import UserResponseMapper
 from domain.user.services.authorization import AuthorizationService
 from domain.user.user_model import UserRole
 from domain.user.user_repository import UserRepository
@@ -19,10 +20,12 @@ class ListAgentsUseCase:
         transactions: TransactionManagerProtocol,
         user_repository: UserRepository,
         authorization_service: AuthorizationService,
+        response_mapper: UserResponseMapper,
     ) -> None:
         self._transactions = transactions
         self._user_repository = user_repository
         self._authorization_service = authorization_service
+        self._response_mapper = response_mapper
 
     def execute(
         self, requester_id: UUID, query: AgentListRequest
@@ -35,15 +38,7 @@ class ListAgentsUseCase:
 
             return AgentListResponse(
                 items=[
-                    AgentsListItem(
-                        id=row.id,
-                        email=row.email,
-                        name=row.name,
-                        phone_number=row.phone_number,
-                        avatar_key=row.avatar_key,
-                        estate_qty=row.estate_qty,
-                        created_at=row.created_at,
-                    )
+                    self._response_mapper.to_response(AgentsListItem, row)
                     for row in agents
                 ],
                 total=total,

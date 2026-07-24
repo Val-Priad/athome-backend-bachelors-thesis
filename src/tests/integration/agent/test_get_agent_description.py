@@ -13,7 +13,11 @@ from tests.integration.conftest import AGENTS_PATH
     [UserRole.agent, UserRole.user, UserRole.admin],
     indirect=True,
 )
-def test_get_agent_description_successful(client, logged_in_user, any_user):
+def test_get_agent_description_successful(
+    client, logged_in_user, any_user, db_session
+):
+    any_user.avatar_key = f"user-avatars/{any_user.id}/{uuid4()}.webp"
+    db_session.flush()
     response = client.get(
         f"{AGENTS_PATH}/{any_user.id}",
         headers=logged_in_user.headers,
@@ -22,6 +26,7 @@ def test_get_agent_description_successful(client, logged_in_user, any_user):
         any_user
     )
     agent_json = agent_dto.model_dump(mode="json")
+    agent_json["avatar_url"] = f"https://media.test/{any_user.avatar_key}"
 
     assert response.status_code == 200
     assert response.get_json()["data"] == agent_json

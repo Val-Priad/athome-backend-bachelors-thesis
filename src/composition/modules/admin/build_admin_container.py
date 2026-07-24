@@ -9,6 +9,7 @@ from application.admin.list_users_use_case import ListUsersUseCase
 from application.estate.mapping.estate_response_mapper import (
     EstateResponseMapper,
 )
+from application.users.mapping.user_response_mapper import UserResponseMapper
 from composition.infrastructure.infrastructure_container import (
     InfrastructureContainer,
 )
@@ -22,6 +23,7 @@ def build_admin_container(
     repositories: RepositoryContainer,
     services: ServiceContainer,
     estate_response_mapper: EstateResponseMapper,
+    user_response_mapper: UserResponseMapper,
 ) -> AdminContainer:
     transactions = infrastructure.transactions
     authorization = services.authorization
@@ -31,6 +33,7 @@ def build_admin_container(
             transactions=transactions,
             authorization_service=authorization,
             user_repository=repositories.users,
+            response_mapper=user_response_mapper,
         ),
         change_user_role=ChangeUserRoleUseCase(
             transactions=transactions,
@@ -46,11 +49,13 @@ def build_admin_container(
             transactions=transactions,
             user_repository=repositories.users,
             authorization_service=authorization,
+            response_mapper=user_response_mapper,
         ),
         list_agents=ListAgentsUseCase(
             transactions=transactions,
             user_repository=repositories.users,
             authorization_service=authorization,
+            response_mapper=user_response_mapper,
         ),
         get_filtered_estates=GetAdminFilteredEstateUseCase(
             transactions=transactions,

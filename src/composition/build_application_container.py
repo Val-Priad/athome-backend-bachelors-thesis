@@ -1,5 +1,6 @@
 from flask import Flask
 
+from application.media.media_url_builder import MediaUrlBuilder
 from composition.application_container import ApplicationContainer
 from composition.dependency_overrides import DependencyOverrides
 from composition.infrastructure.build_infrastructure_container import (
@@ -7,6 +8,9 @@ from composition.infrastructure.build_infrastructure_container import (
 )
 from composition.mappers.build_estate_response_mapper import (
     build_estate_response_mapper,
+)
+from composition.mappers.build_user_response_mapper import (
+    build_user_response_mapper,
 )
 from composition.modules.admin.build_admin_container import (
     build_admin_container,
@@ -46,7 +50,12 @@ def build_application_container(
         infrastructure=infrastructure,
         repositories=repositories,
     )
-    estate_response_mapper = build_estate_response_mapper(infrastructure)
+    media_url_builder = MediaUrlBuilder(infrastructure.urls.media_base_url)
+    user_response_mapper = build_user_response_mapper(media_url_builder)
+    estate_response_mapper = build_estate_response_mapper(
+        media_url_builder,
+        user_response_mapper,
+    )
 
     return ApplicationContainer(
         auth=build_auth_container(
@@ -58,17 +67,20 @@ def build_application_container(
             infrastructure=infrastructure,
             repositories=repositories,
             services=services,
+            user_response_mapper=user_response_mapper,
         ),
         admin=build_admin_container(
             infrastructure=infrastructure,
             repositories=repositories,
             services=services,
             estate_response_mapper=estate_response_mapper,
+            user_response_mapper=user_response_mapper,
         ),
         agents=build_agents_container(
             infrastructure=infrastructure,
             services=services,
             estate_response_mapper=estate_response_mapper,
+            user_response_mapper=user_response_mapper,
         ),
         estates=build_estates_container(
             infrastructure=infrastructure,

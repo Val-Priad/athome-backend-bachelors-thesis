@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 
-from application.estate.mapping.media_url_builder import MediaUrlBuilder
+from application.media.media_url_builder import MediaUrlBuilder
+from application.users.mapping.user_response_mapper import UserResponseMapper
 from domain.estate.enums.estate_media_enums import MediaType
 from domain.estate.estate_model import Estate
 from domain.estate.models.estate_media_model import EstateMedia
@@ -11,6 +12,7 @@ from schemas.estate_schemas.responses.estate_filter_response import (
 from schemas.estate_schemas.responses.estate_get_response import (
     EstateGeneralGetResponse,
     EstateGetResponseWithSeller,
+    EstateUserResponse,
 )
 from schemas.estate_schemas.responses.estate_media_response import (
     EstateMediaResponse,
@@ -18,8 +20,13 @@ from schemas.estate_schemas.responses.estate_media_response import (
 
 
 class EstateResponseMapper:
-    def __init__(self, media_url_builder: MediaUrlBuilder) -> None:
+    def __init__(
+        self,
+        media_url_builder: MediaUrlBuilder,
+        user_response_mapper: UserResponseMapper,
+    ) -> None:
         self._media_url_builder = media_url_builder
+        self._user_response_mapper = user_response_mapper
 
     def to_public_estate(self, estate: Estate) -> EstateGeneralGetResponse:
         return EstateGeneralGetResponse.model_validate(
@@ -29,7 +36,7 @@ class EstateResponseMapper:
     def to_staff_estate(self, estate: Estate) -> EstateGetResponseWithSeller:
         data = self._get_estate_data(estate)
         data.update(
-            seller=estate.seller,
+            seller=self._to_user(estate.seller),
             seller_id=estate.seller_id,
         )
         return EstateGetResponseWithSeller.model_validate(data)
@@ -67,7 +74,7 @@ class EstateResponseMapper:
             "offer_type": estate.offer_type,
             "created_at": estate.created_at,
             "updated_at": estate.updated_at,
-            "agent": estate.agent,
+            "agent": self._to_user(estate.agent),
             "location": estate.location,
             "pricing": estate.pricing,
             "listing": estate.listing,
@@ -79,6 +86,11 @@ class EstateResponseMapper:
             "media": [self.to_media(media) for media in estate.media],
             "vicinities": estate.vicinities,
         }
+
+    def _to_user(self, user: object | None) -> EstateUserResponse | None:
+        if user is None:
+            return None
+        return self._user_response_mapper.to_response(EstateUserResponse, user)
 
     def _to_filter_item(self, estate: Estate) -> EstateFilterItem:
         preview = self._get_preview(estate.media)

@@ -128,6 +128,9 @@ def test_list_agents_admin_success_defaults(
 
     first_item = data["items"][0]
     AgentsListItem.model_validate(first_item)
+    assert first_item["avatar_url"] == (
+        f"https://media.test/{first_item['avatar_key']}"
+    )
 
     assert set(first_item) == {
         "id",
@@ -135,6 +138,7 @@ def test_list_agents_admin_success_defaults(
         "name",
         "phone_number",
         "avatar_key",
+        "avatar_url",
         "estate_qty",
         "created_at",
     }

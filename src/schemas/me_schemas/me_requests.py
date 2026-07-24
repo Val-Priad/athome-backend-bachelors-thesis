@@ -1,5 +1,3 @@
-from typing import Optional
-
 from schemas.parent_types import RequestValidation
 from schemas.types import (
     E164PhoneNumberType,
@@ -16,7 +14,7 @@ class PasswordRequest(RequestValidation):
 
 
 class UpdateUserPersonalDataRequest(RequestValidation):
-    name: Optional[UserName] = None
-    phone_number: Optional[E164PhoneNumberType] = None
-    avatar_key: Optional[ImageKey] = None
-    description: Optional[UserDescription] = None
+    name: UserName | None = None
+    phone_number: E164PhoneNumberType | None = None
+    avatar_key: ImageKey | None = None
+    description: UserDescription | None = None

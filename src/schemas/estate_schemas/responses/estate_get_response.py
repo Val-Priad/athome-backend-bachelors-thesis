@@ -47,6 +47,7 @@ class EstateUserResponse(EstateBaseResponse):
     name: UserName | None
     phone_number: E164PhoneNumberType | None
     avatar_key: ImageKey | None
+    avatar_url: str | None = None
     description: UserDescription | None
 
 

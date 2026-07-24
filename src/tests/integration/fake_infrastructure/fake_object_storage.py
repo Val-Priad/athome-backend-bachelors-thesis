@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 
-from application.ports.object_storage import StoredObject
+from application.ports.object_storage import ObjectStorageError, StoredObject
 
 
 class FakeObjectStorage:
@@ -10,6 +10,7 @@ class FakeObjectStorage:
     def reset(self) -> None:
         self.existing_object_keys: set[str] | None = None
         self.checked_object_keys: list[str] = []
+        self.object_exists_error: ObjectStorageError | None = None
         self.deleted_object_keys: list[str] = []
         self.delete_error: Exception | None = None
         self.stored_objects: list[StoredObject] = []
@@ -25,6 +26,8 @@ class FakeObjectStorage:
 
     def object_exists(self, object_key: str) -> bool:
         self.checked_object_keys.append(object_key)
+        if self.object_exists_error is not None:
+            raise self.object_exists_error
         return (
             True
             if self.existing_object_keys is None

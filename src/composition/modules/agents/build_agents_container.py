@@ -7,6 +7,7 @@ from application.estate.get_agent_own_estates_use_case import (
 from application.estate.mapping.estate_response_mapper import (
     EstateResponseMapper,
 )
+from application.users.mapping.user_response_mapper import UserResponseMapper
 from composition.infrastructure.infrastructure_container import (
     InfrastructureContainer,
 )
@@ -18,6 +19,7 @@ def build_agents_container(
     infrastructure: InfrastructureContainer,
     services: ServiceContainer,
     estate_response_mapper: EstateResponseMapper,
+    user_response_mapper: UserResponseMapper,
 ) -> AgentsContainer:
     transactions = infrastructure.transactions
 
@@ -25,6 +27,7 @@ def build_agents_container(
         get_description=GetAgentDescriptionUseCase(
             transactions=transactions,
             agent_service=services.agents,
+            response_mapper=user_response_mapper,
         ),
         get_own_estates=GetAgentOwnEstatesUseCase(
             transactions=transactions,

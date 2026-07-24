@@ -12,6 +12,7 @@ class AgentsListItem(ResponseValidation):
     name: UserName | None
     phone_number: E164PhoneNumberType | None
     avatar_key: str | None
+    avatar_url: str | None = None
     estate_qty: int = 0
     created_at: datetime
 

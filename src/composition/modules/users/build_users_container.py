@@ -1,3 +1,6 @@
+from application.users.cleanup_unverified_users_use_case import (
+    CleanupUnverifiedUsersUseCase,
+)
 from application.users.delete_me_use_case import DeleteMeUseCase
 from application.users.get_me_use_case import GetMeUseCase
 from application.users.mapping.user_response_mapper import UserResponseMapper
@@ -40,5 +43,9 @@ def build_users_container(
             me_service=services.me,
             media_service=services.media,
             response_mapper=user_response_mapper,
+        ),
+        cleanup_unverified=CleanupUnverifiedUsersUseCase(
+            transactions=transactions,
+            user_repository=repositories.users,
         ),
     )

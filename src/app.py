@@ -4,7 +4,7 @@ from flask import Flask
 
 from api.blueprints import register_blueprints
 from api.error_handlers import register_error_handler
-from cli import register_media_commands
+from cli import register_media_commands, register_user_commands
 from composition.build_application_container import build_application_container
 from composition.container_access import APPLICATION_CONTAINER_KEY
 from composition.dependency_overrides import DependencyOverrides
@@ -43,5 +43,6 @@ def create_app(
     register_error_handler(app)
     register_blueprints(app)
     register_media_commands(app)
+    register_user_commands(app)
 
     return app

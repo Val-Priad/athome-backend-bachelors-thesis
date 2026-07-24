@@ -1,7 +1,18 @@
 from collections.abc import Sequence
+from datetime import datetime
+from typing import cast
 from uuid import UUID
 
-from sqlalchemy import RowMapping, asc, desc, exists, func, select
+from sqlalchemy import (
+    CursorResult,
+    RowMapping,
+    asc,
+    delete,
+    desc,
+    exists,
+    func,
+    select,
+)
 from sqlalchemy.orm import Session
 
 from domain.estate.enums.estate_listing_enums import ListingStatus
@@ -18,6 +29,22 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
 
 
 class UserRepository:
+    def delete_unverified_created_before(
+        self,
+        session: Session,
+        cutoff: datetime,
+    ) -> int:
+        result = cast(
+            CursorResult,
+            session.execute(
+                delete(User).where(
+                    User.is_email_verified.is_(False),
+                    User.created_at < cutoff,
+                )
+            ),
+        )
+        return result.rowcount
+
     def get_used_avatar_keys(
         self,
         session: Session,

@@ -15,18 +15,21 @@ ENVIRONMENT_CONFIG_MAPPING = {
     "S3_SECRET_ACCESS_KEY": "S3_SECRET_ACCESS_KEY",
 }
 
+INTEGER_ENVIRONMENT_KEYS = (
+    "MEDIA_ORPHAN_MIN_AGE_HOURS",
+    "S3_PRESIGNED_URL_TTL_SECONDS",
+)
+
 
 def load_environment_config(app: Flask) -> None:
     environment_values: dict[str, object] = {
         config_key: os.getenv(environment_key)
         for config_key, environment_key in ENVIRONMENT_CONFIG_MAPPING.items()
     }
-    s3_presigned_url_ttl = os.getenv("S3_PRESIGNED_URL_TTL_SECONDS")
-
-    if s3_presigned_url_ttl is not None:
-        environment_values["S3_PRESIGNED_URL_TTL_SECONDS"] = int(
-            s3_presigned_url_ttl
-        )
+    for environment_key in INTEGER_ENVIRONMENT_KEYS:
+        value = os.getenv(environment_key)
+        if value is not None:
+            environment_values[environment_key] = int(value)
 
     if app.config.get("TESTING"):
         environment_values["DATABASE_URL"] = os.getenv(

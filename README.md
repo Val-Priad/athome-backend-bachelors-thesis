@@ -2,7 +2,7 @@
 
 ## Installation
 
-Necessary env variables are:
+Required environment variables:
 
 ```
 APP_BASE_URL=
@@ -27,5 +27,22 @@ S3_BUCKET_NAME=
 S3_REGION=
 S3_ACCESS_KEY_ID=
 S3_SECRET_ACCESS_KEY=
-S3_PRESIGNED_URL_TTL_SECONDS=300
 ```
+
+Optional environment variables:
+
+```
+S3_PRESIGNED_URL_TTL_SECONDS=300
+MEDIA_ORPHAN_MIN_AGE_HOURS=24
+```
+
+## Orphaned media cleanup
+
+Run the internal cleanup job with:
+
+```bash
+PYTHONPATH=src uv run flask --app wsgi:app media cleanup-orphans
+```
+
+Schedule this command externally, for example with cron or a platform
+scheduler. Running it once per day is sufficient.

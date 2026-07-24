@@ -11,6 +11,7 @@ class FlaskConfig:
     S3_ACCESS_KEY_ID: str | None = None
     S3_SECRET_ACCESS_KEY: str | None = None
     S3_PRESIGNED_URL_TTL_SECONDS = 300
+    MEDIA_ORPHAN_MIN_AGE_HOURS = 24
 
     RATELIMIT_HEADERS_ENABLED = True
     RATELIMIT_STRATEGY = "sliding-window-counter"

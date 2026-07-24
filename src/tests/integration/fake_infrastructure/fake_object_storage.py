@@ -1,3 +1,8 @@
+from collections.abc import Iterator
+
+from application.ports.object_storage import StoredObject
+
+
 class FakeObjectStorage:
     def __init__(self) -> None:
         self.reset()
@@ -7,6 +12,7 @@ class FakeObjectStorage:
         self.checked_object_keys: list[str] = []
         self.deleted_object_keys: list[str] = []
         self.delete_error: Exception | None = None
+        self.stored_objects: list[StoredObject] = []
 
     def create_upload_url(
         self,
@@ -23,6 +29,13 @@ class FakeObjectStorage:
             True
             if self.existing_object_keys is None
             else object_key in self.existing_object_keys
+        )
+
+    def iter_objects(self, *, prefix: str) -> Iterator[StoredObject]:
+        yield from (
+            stored_object
+            for stored_object in self.stored_objects
+            if stored_object.object_key.startswith(prefix)
         )
 
     def delete_object(self, object_key: str) -> None:

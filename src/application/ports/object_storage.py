@@ -1,4 +1,13 @@
+from collections.abc import Iterable
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
+
+
+@dataclass(frozen=True, slots=True)
+class StoredObject:
+    object_key: str
+    last_modified: datetime
 
 
 class ObjectStorageError(RuntimeError):
@@ -15,6 +24,8 @@ class ObjectStorageProtocol(Protocol):
     ) -> str: ...
 
     def object_exists(self, object_key: str) -> bool: ...
+
+    def iter_objects(self, *, prefix: str) -> Iterable[StoredObject]: ...
 
     def delete_object(self, object_key: str) -> None: ...
 

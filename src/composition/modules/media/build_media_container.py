@@ -1,4 +1,9 @@
+from datetime import timedelta
+
 from application.media.cleanup_media_use_case import CleanupMediaUseCase
+from application.media.cleanup_orphaned_media_use_case import (
+    CleanupOrphanedMediaUseCase,
+)
 from application.media.create_media_upload_url_use_case import (
     CreateMediaUploadUrlUseCase,
 )
@@ -14,6 +19,7 @@ def build_media_container(
     infrastructure: InfrastructureContainer,
     services: ServiceContainer,
     presigned_url_ttl_seconds: int,
+    media_orphan_min_age_hours: int,
 ) -> MediaContainer:
     return MediaContainer(
         create_upload_url=CreateMediaUploadUrlUseCase(
@@ -25,5 +31,13 @@ def build_media_container(
             media_service=services.media,
             media_usage_service=services.media_usage,
             object_storage=infrastructure.object_storage,
+        ),
+        cleanup_orphans=CleanupOrphanedMediaUseCase(
+            transactions=infrastructure.transactions,
+            media_usage_service=services.media_usage,
+            object_storage=infrastructure.object_storage,
+            min_object_age=timedelta(
+                hours=media_orphan_min_age_hours,
+            ),
         ),
     )

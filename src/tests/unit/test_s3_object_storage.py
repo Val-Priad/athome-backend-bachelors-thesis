@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from unittest.mock import Mock, call
 
 import pytest
@@ -110,6 +111,77 @@ def test_object_exists_raises_for_non_not_found_errors(
 
     with pytest.raises(ObjectStorageError) as raised:
         _storage(client).object_exists("estate-media/image.webp")
+
+    assert raised.value.__cause__ is error
+
+
+def test_iter_objects_handles_page_without_contents() -> None:
+    client = Mock()
+    paginator = client.get_paginator.return_value
+    paginator.paginate.return_value = [{}]
+
+    result = list(_storage(client).iter_objects(prefix="estate-media/"))
+
+    assert result == []
+    client.get_paginator.assert_called_once_with("list_objects_v2")
+    paginator.paginate.assert_called_once_with(
+        Bucket="test-bucket",
+        Prefix="estate-media/",
+    )
+
+
+def test_iter_objects_maps_key_and_last_modified_from_one_page() -> None:
+    client = Mock()
+    last_modified = datetime(2026, 7, 20, tzinfo=timezone.utc)
+    client.get_paginator.return_value.paginate.return_value = [
+        {
+            "Contents": [
+                {
+                    "Key": "estate-media/user/image.webp",
+                    "LastModified": last_modified,
+                }
+            ]
+        }
+    ]
+
+    result = list(_storage(client).iter_objects(prefix="estate-media/"))
+
+    assert len(result) == 1
+    assert result[0].object_key == "estate-media/user/image.webp"
+    assert result[0].last_modified == last_modified
+
+
+def test_iter_objects_yields_objects_from_multiple_pages() -> None:
+    client = Mock()
+    last_modified = datetime(2026, 7, 20, tzinfo=timezone.utc)
+    client.get_paginator.return_value.paginate.return_value = [
+        {
+            "Contents": [
+                {"Key": "user-avatars/one.webp", "LastModified": last_modified}
+            ]
+        },
+        {
+            "Contents": [
+                {"Key": "user-avatars/two.webp", "LastModified": last_modified}
+            ]
+        },
+    ]
+
+    result = list(_storage(client).iter_objects(prefix="user-avatars/"))
+
+    assert [item.object_key for item in result] == [
+        "user-avatars/one.webp",
+        "user-avatars/two.webp",
+    ]
+
+
+def test_iter_objects_wraps_sdk_errors() -> None:
+    client = Mock()
+    error = EndpointConnectionError(endpoint_url="https://s3.test")
+    client.get_paginator.side_effect = error
+
+    with pytest.raises(ObjectStorageError) as raised:
+        list(_storage(client).iter_objects(prefix="estate-media/"))
 
     assert raised.value.__cause__ is error
 

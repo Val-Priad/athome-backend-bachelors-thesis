@@ -1,9 +1,10 @@
+from collections.abc import Iterator
 from typing import Any
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
-from application.ports.object_storage import ObjectStorageError
+from application.ports.object_storage import ObjectStorageError, StoredObject
 
 _NOT_FOUND_ERROR_CODES = frozenset({"404", "NoSuchKey", "NotFound"})
 _MAX_DELETE_OBJECTS = 1000
@@ -78,6 +79,22 @@ class S3ObjectStorage:
             raise ObjectStorageError("Failed to check an S3 object") from error
 
         return True
+
+    def iter_objects(self, *, prefix: str) -> Iterator[StoredObject]:
+        try:
+            paginator = self._client.get_paginator("list_objects_v2")
+            pages = paginator.paginate(
+                Bucket=self._bucket_name,
+                Prefix=prefix,
+            )
+            for page in pages:
+                for item in page.get("Contents", []):
+                    yield StoredObject(
+                        object_key=item["Key"],
+                        last_modified=item["LastModified"],
+                    )
+        except (BotoCoreError, ClientError) as error:
+            raise ObjectStorageError("Failed to list S3 objects") from error
 
     def delete_object(self, object_key: str) -> None:
         try:

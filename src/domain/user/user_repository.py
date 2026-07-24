@@ -21,6 +21,22 @@ from schemas.admin_schemas.admin_users_schemas.admin_users_requests import (
 
 
 class UserRepository:
+    def get_used_avatar_keys(
+        self,
+        session: Session,
+        object_keys: Sequence[str],
+    ) -> set[str]:
+        if not object_keys:
+            return set()
+
+        return {
+            object_key
+            for object_key in session.scalars(
+                select(User.avatar_key).where(User.avatar_key.in_(object_keys))
+            )
+            if object_key is not None
+        }
+
     def ensure_avatar_keys_unused(
         self,
         session: Session,

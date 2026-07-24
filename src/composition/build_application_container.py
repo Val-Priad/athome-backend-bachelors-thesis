@@ -82,5 +82,8 @@ def build_application_container(
             presigned_url_ttl_seconds=app.config[
                 "S3_PRESIGNED_URL_TTL_SECONDS"
             ],
+            media_orphan_min_age_hours=app.config[
+                "MEDIA_ORPHAN_MIN_AGE_HOURS"
+            ],
         ),
     )

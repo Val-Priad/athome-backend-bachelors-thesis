@@ -24,6 +24,28 @@ def test_ensure_object_keys_unused_accepts_unused_keys() -> None:
     get_used_object_keys.assert_called_once_with(session, [OBJECT_KEY])
 
 
+def test_get_used_object_keys_returns_only_database_matches() -> None:
+    session = Mock()
+    session.scalars.return_value = iter([OBJECT_KEY])
+
+    result = EstateMediaRepository().get_used_object_keys(
+        session,
+        [OBJECT_KEY, "estate-media/uploader/unused.webp"],
+    )
+
+    assert result == {OBJECT_KEY}
+    session.scalars.assert_called_once()
+
+
+def test_get_used_object_keys_returns_empty_set_without_query() -> None:
+    session = Mock()
+
+    result = EstateMediaRepository().get_used_object_keys(session, [])
+
+    assert result == set()
+    session.scalars.assert_not_called()
+
+
 def test_ensure_object_keys_unused_rejects_used_key() -> None:
     repository = EstateMediaRepository()
 

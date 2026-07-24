@@ -5,7 +5,6 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import select
 
-from application.ports.object_storage import ObjectStorageError
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.enums.estate_vicinity_enums import VicinityType
@@ -156,9 +155,12 @@ def test_admin_update_estate_success(
     assert len(estate.media) == 1
     assert estate.media[0].object_key == payload["media"][0]["object_key"]
     assert estate.media[0].position == 0
-    assert fake_object_storage.deleted_object_keys == [
-        "estate-media/old-apartment.webp"
-    ]
+    removed_media = db_session.scalar(
+        select(EstateMedia).where(
+            EstateMedia.object_key == "estate-media/old-apartment.webp"
+        )
+    )
+    assert removed_media is None
 
     assert len(estate.vicinities) == 2
     assert estate.vicinities[0].type == VicinityType.bus_stop
@@ -755,41 +757,3 @@ def test_admin_update_does_not_revalidate_existing_media(
 
     _assert_ok_id_response(response, estate_id)
     assert fake_object_storage.checked_object_keys == []
-
-
-@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_admin_update_succeeds_when_removed_media_cleanup_fails(
-    client,
-    db_session,
-    logged_in_user,
-    fake_object_storage,
-):
-    old_object_key = "estate-media/old-cleanup-failure.webp"
-    estate_id = create_filter_estate(
-        db_session,
-        title="Update cleanup failure",
-        status=ListingStatus.draft,
-        media=[
-            EstateMedia(
-                object_key=old_object_key,
-                media_type=MediaType.image,
-                position=0,
-            )
-        ],
-    )
-    payload = base_payload(listing_status=ListingStatus.draft)
-    set_media_uploader(payload, logged_in_user.id)
-    new_object_key = payload["media"][0]["object_key"]
-    fake_object_storage.delete_error = ObjectStorageError("S3 unavailable")
-
-    response = client.put(
-        f"{ADMIN_ESTATE_PATH}/{estate_id}",
-        json=payload,
-        headers=logged_in_user.headers,
-    )
-
-    _assert_ok_id_response(response, estate_id)
-    db_session.expire_all()
-    estate = _get_estate(db_session, estate_id)
-    assert [item.object_key for item in estate.media] == [new_object_key]
-    assert old_object_key not in fake_object_storage.deleted_object_keys

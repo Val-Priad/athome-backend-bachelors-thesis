@@ -19,8 +19,5 @@ class NoOpObjectStorage:
     def iter_objects(self, *, prefix: str) -> Iterator[StoredObject]:
         yield from ()
 
-    def delete_object(self, object_key: str) -> None:
-        pass
-
     def delete_objects(self, object_keys: list[str]) -> None:
         pass

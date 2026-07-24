@@ -1,12 +1,7 @@
-import logging
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from application.ports.object_storage import (
-    ObjectStorageError,
-    ObjectStorageProtocol,
-)
 from application.ports.transaction_manager import TransactionManagerProtocol
 from domain.estate.estate_media_repository import EstateMediaRepository
 from domain.estate.estate_participants_service import EstateParticipantsService
@@ -23,8 +18,6 @@ from schemas.estate_schemas.responses.estate_create_response import (
     EstateIDResponse,
 )
 
-logger = logging.getLogger(__name__)
-
 
 class UpdateEstateUseCase:
     def __init__(
@@ -33,7 +26,6 @@ class UpdateEstateUseCase:
         estate_service: EstateService,
         authorization_service: AuthorizationService,
         participants_service: EstateParticipantsService,
-        object_storage: ObjectStorageProtocol,
         media_service: MediaService,
         estate_media_repository: EstateMediaRepository,
         estate_repository: EstateRepository,
@@ -42,7 +34,6 @@ class UpdateEstateUseCase:
         self._estate_service = estate_service
         self._authorization_service = authorization_service
         self._participants_service = participants_service
-        self._object_storage = object_storage
         self._media_service = media_service
         self._estate_media_repository = estate_media_repository
         self._estate_repository = estate_repository
@@ -86,26 +77,12 @@ class UpdateEstateUseCase:
                 session,
                 [item.object_key for item in added_media],
             )
-            estate, removed_object_keys = self._estate_service.update_estate(
+            estate = self._estate_service.update_estate(
                 session=session,
                 estate_id=estate_id,
                 data=data,
             )
-            response = EstateIDResponse.from_model(estate)
-
-        if removed_object_keys:
-            try:
-                self._object_storage.delete_objects(list(removed_object_keys))
-            except ObjectStorageError:
-                logger.exception(
-                    "Failed to delete removed estate media objects",
-                    extra={
-                        "estate_id": str(estate_id),
-                        "object_keys": list(removed_object_keys),
-                    },
-                )
-
-        return response
+            return EstateIDResponse.from_model(estate)
 
     def _ensure_rights_and_data_validity(
         self,

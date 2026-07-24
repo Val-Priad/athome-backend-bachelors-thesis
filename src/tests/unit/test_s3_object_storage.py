@@ -164,17 +164,6 @@ def test_iter_objects_wraps_sdk_errors() -> None:
     assert raised.value.__cause__ is error
 
 
-def test_delete_object_wraps_sdk_errors() -> None:
-    client = Mock()
-    error = _client_error("AccessDenied", operation="DeleteObject", status=403)
-    client.delete_object.side_effect = error
-
-    with pytest.raises(ObjectStorageError) as raised:
-        _storage(client).delete_object("estate-media/image.webp")
-
-    assert raised.value.__cause__ is error
-
-
 def test_delete_objects_uses_batches_of_at_most_1000() -> None:
     client = Mock()
     client.delete_objects.return_value = {}

@@ -37,26 +37,3 @@ class MediaUsageService:
             )
 
         raise ValueError(f"Unsupported media purpose: {purpose}")
-
-    def ensure_object_keys_unused(
-        self,
-        *,
-        session: Session,
-        purpose: MediaPurpose,
-        object_keys: Sequence[str],
-    ) -> None:
-        if purpose == MediaPurpose.estate:
-            self._estate_media_repository.ensure_object_keys_unused(
-                session,
-                object_keys,
-            )
-            return
-
-        if purpose == MediaPurpose.user_avatar:
-            self._user_repository.ensure_avatar_keys_unused(
-                session,
-                object_keys,
-            )
-            return
-
-        raise ValueError(f"Unsupported media purpose: {purpose}")

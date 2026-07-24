@@ -4,9 +4,6 @@ from flask_jwt_extended import jwt_required
 from api.responses import construct_response
 from composition.container_access import get_application_container
 from infrastructure.jwt.jwt_utils import get_jwt_user_uuid
-from schemas.media_schemas.requests.media_cleanup_request import (
-    MediaCleanupRequest,
-)
 from schemas.media_schemas.requests.media_upload_url_request import (
     MediaUploadUrlRequest,
 )
@@ -22,13 +19,3 @@ def create_upload_url():
     container = get_application_container()
     response = container.media.create_upload_url.execute(data, requester_id)
     return construct_response(data=response)
-
-
-@bp.post("/cleanup")
-@jwt_required()
-def cleanup_media():
-    requester_id = get_jwt_user_uuid()
-    data = MediaCleanupRequest.from_request(request.json)
-    container = get_application_container()
-    container.media.cleanup.execute(data, requester_id)
-    return construct_response()

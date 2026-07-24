@@ -6,7 +6,6 @@ from flask.testing import FlaskClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from application.ports.object_storage import ObjectStorageError
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.estate_model import Estate
 from domain.estate.models.estate_media_model import EstateMedia
@@ -94,51 +93,22 @@ def test_admin_delete_estate_success(
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_admin_delete_estate_deletes_media_objects(
+def test_admin_delete_estate_deletes_related_media_records(
     client: FlaskClient,
     db_session: Session,
     logged_in_user,
-    fake_object_storage,
 ):
     estate = _create_test_estate(db_session)
     object_key = f"estate-media/{logged_in_user.id}/{uuid.uuid4()}.webp"
-    estate.media = [
-        EstateMedia(
-            object_key=object_key,
-            media_type=MediaType.image,
-            position=0,
-        )
-    ]
-    db_session.flush()
-
-    response = client.delete(
-        f"{ADMIN_ESTATE_PATH}/{estate.id}",
-        headers=logged_in_user.headers,
+    media = EstateMedia(
+        object_key=object_key,
+        media_type=MediaType.image,
+        position=0,
     )
-
-    _assert_ok_response(response)
-    assert fake_object_storage.deleted_object_keys == [object_key]
-
-
-@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
-def test_admin_delete_estate_succeeds_when_media_cleanup_fails(
-    client: FlaskClient,
-    db_session: Session,
-    logged_in_user,
-    fake_object_storage,
-):
-    estate = _create_test_estate(db_session)
-    estate_id = estate.id
-    object_key = f"estate-media/{logged_in_user.id}/{uuid.uuid4()}.webp"
-    estate.media = [
-        EstateMedia(
-            object_key=object_key,
-            media_type=MediaType.image,
-            position=0,
-        )
-    ]
+    estate.media = [media]
     db_session.flush()
-    fake_object_storage.delete_error = ObjectStorageError("S3 unavailable")
+    media_id = media.id
+    estate_id = estate.id
 
     response = client.delete(
         f"{ADMIN_ESTATE_PATH}/{estate_id}",
@@ -147,7 +117,7 @@ def test_admin_delete_estate_succeeds_when_media_cleanup_fails(
 
     _assert_ok_response(response)
     _assert_estate_deleted(db_session, estate_id)
-    assert fake_object_storage.deleted_object_keys == []
+    assert db_session.get(EstateMedia, media_id) is None
 
 
 @pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)

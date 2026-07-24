@@ -38,12 +38,6 @@ class FakeObjectStorage:
             if stored_object.object_key.startswith(prefix)
         )
 
-    def delete_object(self, object_key: str) -> None:
-        if self.delete_error is not None:
-            raise self.delete_error
-
-        self.deleted_object_keys.append(object_key)
-
     def delete_objects(self, object_keys: list[str]) -> None:
         if self.delete_error is not None:
             raise self.delete_error

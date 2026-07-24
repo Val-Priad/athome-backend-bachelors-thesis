@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import exists, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from domain.estate.models.estate_media_model import EstateMedia
@@ -10,15 +10,6 @@ from exceptions.custom_exceptions.media_exceptions import (
 
 
 class EstateMediaRepository:
-    def object_key_exists(
-        self,
-        session: Session,
-        object_key: str,
-    ) -> bool:
-        return session.execute(
-            select(exists().where(EstateMedia.object_key == object_key))
-        ).scalar_one()
-
     def get_used_object_keys(
         self,
         session: Session,

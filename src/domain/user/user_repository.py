@@ -8,9 +8,6 @@ from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.estate_model import Estate
 from domain.estate.models.estate_listing_model import EstateListing
 from domain.user.user_model import User, UserRole
-from exceptions.custom_exceptions.media_exceptions import (
-    MediaObjectAlreadyUsedError,
-)
 from exceptions.custom_exceptions.user_exceptions import UserNotFoundError
 from schemas.admin_schemas.admin_users_schemas.admin_agents_request import (
     AgentListRequest,
@@ -36,20 +33,6 @@ class UserRepository:
             )
             if object_key is not None
         }
-
-    def ensure_avatar_keys_unused(
-        self,
-        session: Session,
-        object_keys: Sequence[str],
-    ) -> None:
-        if not object_keys:
-            return
-
-        avatar_key_used = session.execute(
-            select(exists().where(User.avatar_key.in_(object_keys)))
-        ).scalar_one()
-        if avatar_key_used:
-            raise MediaObjectAlreadyUsedError()
 
     def exists_by_email(self, session: Session, email: str) -> bool:
         return session.execute(

@@ -52,18 +52,12 @@ class EstateRepository:
         self,
         session: Session,
         estate_id: UUID,
-    ) -> set[str]:
-        estate = session.scalar(
-            select(Estate)
-            .where(Estate.id == estate_id)
-            .options(selectinload(Estate.media))
-        )
+    ) -> None:
+        estate = session.get(Estate, estate_id)
         if estate is None:
             raise EstateNotFoundError()
 
-        object_keys = {item.object_key for item in estate.media}
         session.delete(estate)
-        return object_keys
 
     def get_public_estates_by_filters(
         self,

@@ -161,17 +161,12 @@ class EstateService:
         session: Session,
         estate_id: UUID,
         data: EstateUpdateRequest,
-    ) -> tuple[Estate, set[str]]:
+    ) -> Estate:
 
         estate = self.estate_repository.get_full_estate_by_id(
             session=session,
             estate_id=estate_id,
         )
-        removed_object_keys = self._get_removed_media_object_keys(
-            estate.media,
-            data.media,
-        )
-
         old_status = estate.listing.status
 
         estate.seller_id = data.seller_id
@@ -209,7 +204,7 @@ class EstateService:
 
         session.flush()
 
-        return estate, removed_object_keys
+        return estate
 
     def _update_property_type_sections(self, estate: Estate, data) -> None:
         if data.estate_type == EstateType.apartment:
@@ -244,15 +239,6 @@ class EstateService:
         estate.media = []
         session.flush()
         estate.media = self._create_media(data.media)
-
-    @staticmethod
-    def _get_removed_media_object_keys(
-        current_media,
-        new_media,
-    ) -> set[str]:
-        current_object_keys = {item.object_key for item in current_media}
-        new_object_keys = {item.object_key for item in new_media}
-        return current_object_keys - new_object_keys
 
     @staticmethod
     def _create_media(media_items) -> list[EstateMedia]:

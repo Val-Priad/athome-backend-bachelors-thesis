@@ -96,17 +96,6 @@ class S3ObjectStorage:
         except (BotoCoreError, ClientError) as error:
             raise ObjectStorageError("Failed to list S3 objects") from error
 
-    def delete_object(self, object_key: str) -> None:
-        try:
-            self._client.delete_object(
-                Bucket=self._bucket_name,
-                Key=object_key,
-            )
-        except (BotoCoreError, ClientError) as error:
-            raise ObjectStorageError(
-                "Failed to delete an S3 object"
-            ) from error
-
     def delete_objects(self, object_keys: list[str]) -> None:
         for offset in range(0, len(object_keys), _MAX_DELETE_OBJECTS):
             batch = object_keys[offset : offset + _MAX_DELETE_OBJECTS]

@@ -5,12 +5,18 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import select
 
+from application.ports.object_storage import ObjectStorageError
 from domain.estate.enums.estate_enums import EstateType, OfferType
 from domain.estate.enums.estate_listing_enums import ListingStatus
 from domain.estate.enums.estate_vicinity_enums import VicinityType
 from domain.estate.estate_model import Estate
+from domain.estate.models.estate_media_model import EstateMedia
+from domain.media.media_enums import MediaType
 from domain.user.user_model import User, UserRole
-from tests.integration.admin_estate.test_create_estate import base_payload
+from tests.integration.admin_estate.test_create_estate import (
+    base_payload,
+    set_media_uploader,
+)
 from tests.integration.conftest import ADMIN_ESTATE_PATH
 from tests.integration.estate.test_filter_estate import create_filter_estate
 
@@ -53,6 +59,7 @@ def test_admin_update_estate_success(
     db_session,
     logged_in_user,
     test_password_hash,
+    fake_object_storage,
 ):
     seller = _create_test_user(
         db_session,
@@ -98,7 +105,7 @@ def test_admin_update_estate_success(
     ]
     payload["media"] = [
         {
-            "object_key": "estate-media/updated-main.webp",
+            "object_key": f"estate-media/{logged_in_user.id}/{uuid4()}.webp",
             "media_type": "image",
         }
     ]
@@ -147,8 +154,11 @@ def test_admin_update_estate_success(
     assert estate.translations[0].title == "Updated apartment"
 
     assert len(estate.media) == 1
-    assert estate.media[0].object_key == "estate-media/updated-main.webp"
+    assert estate.media[0].object_key == payload["media"][0]["object_key"]
     assert estate.media[0].position == 0
+    assert fake_object_storage.deleted_object_keys == [
+        "estate-media/old-apartment.webp"
+    ]
 
     assert len(estate.vicinities) == 2
     assert estate.vicinities[0].type == VicinityType.bus_stop
@@ -191,6 +201,7 @@ def test_admin_update_draft_to_active_sets_published_at(
         agent_id=agent.id,
     )
     payload["seller_id"] = str(seller.id)
+    set_media_uploader(payload, logged_in_user.id)
 
     response = client.put(
         f"{ADMIN_ESTATE_PATH}/{estate_id}",
@@ -245,6 +256,7 @@ def test_admin_update_active_to_draft_clears_published_at(
         agent_id=agent.id,
     )
     payload["seller_id"] = str(seller.id)
+    set_media_uploader(payload, logged_in_user.id)
 
     response = client.put(
         f"{ADMIN_ESTATE_PATH}/{estate_id}",
@@ -299,6 +311,7 @@ def test_admin_update_active_to_archived_keeps_published_at(
         agent_id=agent.id,
     )
     payload["seller_id"] = str(seller.id)
+    set_media_uploader(payload, logged_in_user.id)
 
     response = client.put(
         f"{ADMIN_ESTATE_PATH}/{estate_id}",
@@ -348,6 +361,7 @@ def test_admin_update_estate_allows_past_available_from(
         agent_id=agent.id,
     )
     payload["seller_id"] = str(seller.id)
+    set_media_uploader(payload, logged_in_user.id)
     payload["listing"]["available_from"] = (
         date.today() - timedelta(days=30)
     ).isoformat()
@@ -620,3 +634,162 @@ def test_admin_update_estate_validation_error(
 
     assert response.status_code == 400
     assert response.get_json()["error"]["code"] == "request_validation_error"
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_admin_update_rejects_new_media_owned_by_another_uploader(
+    client,
+    db_session,
+    logged_in_user,
+):
+    estate_id = create_filter_estate(
+        db_session,
+        title="Foreign media update",
+        status=ListingStatus.draft,
+    )
+    payload = base_payload(listing_status=ListingStatus.draft)
+    foreign_object_key = f"estate-media/{uuid4()}/{uuid4()}.webp"
+    payload["media"][0]["object_key"] = foreign_object_key
+
+    response = client.put(
+        f"{ADMIN_ESTATE_PATH}/{estate_id}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "invalid_media_object_key"
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_admin_update_rejects_missing_new_media_object(
+    client,
+    db_session,
+    logged_in_user,
+    fake_object_storage,
+):
+    estate_id = create_filter_estate(
+        db_session,
+        title="Missing media update",
+        status=ListingStatus.draft,
+    )
+    payload = base_payload(listing_status=ListingStatus.draft)
+    set_media_uploader(payload, logged_in_user.id)
+    fake_object_storage.existing_object_keys = set()
+
+    response = client.put(
+        f"{ADMIN_ESTATE_PATH}/{estate_id}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["code"] == "media_object_not_found"
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_admin_update_rejects_media_used_by_another_estate(
+    client,
+    db_session,
+    logged_in_user,
+):
+    used_object_key = f"estate-media/{logged_in_user.id}/{uuid4()}.webp"
+    create_filter_estate(
+        db_session,
+        title="Owner of reused media",
+        status=ListingStatus.draft,
+        media=[
+            EstateMedia(
+                object_key=used_object_key,
+                media_type=MediaType.image,
+                position=0,
+            )
+        ],
+    )
+    target_estate_id = create_filter_estate(
+        db_session,
+        title="Reuse target",
+        status=ListingStatus.draft,
+    )
+    payload = base_payload(listing_status=ListingStatus.draft)
+    payload["media"][0]["object_key"] = used_object_key
+
+    response = client.put(
+        f"{ADMIN_ESTATE_PATH}/{target_estate_id}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    assert response.status_code == 409
+    assert response.get_json()["error"]["code"] == "media_object_already_used"
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_admin_update_does_not_revalidate_existing_media(
+    client,
+    db_session,
+    logged_in_user,
+    fake_object_storage,
+):
+    existing_object_key = "estate-media/legacy-existing.webp"
+    estate_id = create_filter_estate(
+        db_session,
+        title="Existing media update",
+        status=ListingStatus.draft,
+        media=[
+            EstateMedia(
+                object_key=existing_object_key,
+                media_type=MediaType.image,
+                position=0,
+            )
+        ],
+    )
+    payload = base_payload(listing_status=ListingStatus.draft)
+    payload["media"][0]["object_key"] = existing_object_key
+
+    response = client.put(
+        f"{ADMIN_ESTATE_PATH}/{estate_id}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    _assert_ok_id_response(response, estate_id)
+    assert fake_object_storage.checked_object_keys == []
+
+
+@pytest.mark.parametrize("logged_in_user", [UserRole.admin], indirect=True)
+def test_admin_update_succeeds_when_removed_media_cleanup_fails(
+    client,
+    db_session,
+    logged_in_user,
+    fake_object_storage,
+):
+    old_object_key = "estate-media/old-cleanup-failure.webp"
+    estate_id = create_filter_estate(
+        db_session,
+        title="Update cleanup failure",
+        status=ListingStatus.draft,
+        media=[
+            EstateMedia(
+                object_key=old_object_key,
+                media_type=MediaType.image,
+                position=0,
+            )
+        ],
+    )
+    payload = base_payload(listing_status=ListingStatus.draft)
+    set_media_uploader(payload, logged_in_user.id)
+    new_object_key = payload["media"][0]["object_key"]
+    fake_object_storage.delete_error = ObjectStorageError("S3 unavailable")
+
+    response = client.put(
+        f"{ADMIN_ESTATE_PATH}/{estate_id}",
+        json=payload,
+        headers=logged_in_user.headers,
+    )
+
+    _assert_ok_id_response(response, estate_id)
+    db_session.expire_all()
+    estate = _get_estate(db_session, estate_id)
+    assert [item.object_key for item in estate.media] == [new_object_key]
+    assert old_object_key not in fake_object_storage.deleted_object_keys

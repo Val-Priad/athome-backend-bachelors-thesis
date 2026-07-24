@@ -36,6 +36,22 @@ class MediaService:
         purpose: MediaPurpose,
         media_type: MediaType,
     ) -> None:
+        self.validate_owned_object_key(
+            object_key=object_key,
+            uploader_id=uploader_id,
+            purpose=purpose,
+            media_type=media_type,
+        )
+        self._ensure_object_exists(object_key)
+
+    def validate_owned_object_key(
+        self,
+        *,
+        object_key: str,
+        uploader_id: UUID,
+        purpose: MediaPurpose,
+        media_type: MediaType | None = None,
+    ) -> None:
         config = MEDIA_CONFIG_BY_PURPOSE[purpose]
         filename = self._extract_filename(
             object_key=object_key,
@@ -43,12 +59,20 @@ class MediaService:
             config=config,
         )
         extension = self._validate_generated_filename(filename)
-        self._validate_extension(
-            extension=extension,
-            media_type=media_type,
-            config=config,
-        )
-        self._ensure_object_exists(object_key)
+        if media_type is None:
+            allowed_extensions = {
+                allowed_extension
+                for extensions in config.extensions_by_media_type.values()
+                for allowed_extension in extensions
+            }
+            if extension not in allowed_extensions:
+                raise InvalidMediaObjectKeyError()
+        else:
+            self._validate_extension(
+                extension=extension,
+                media_type=media_type,
+                config=config,
+            )
 
     def validate_objects(
         self,

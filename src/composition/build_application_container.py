@@ -78,6 +78,7 @@ def build_application_container(
         ),
         media=build_media_container(
             infrastructure=infrastructure,
+            services=services,
             presigned_url_ttl_seconds=app.config[
                 "S3_PRESIGNED_URL_TTL_SECONDS"
             ],

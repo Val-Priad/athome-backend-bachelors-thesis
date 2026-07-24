@@ -41,6 +41,19 @@ def test_validates_backend_generated_estate_media_key() -> None:
     object_storage.object_exists.assert_called_once_with(IMAGE_KEY)
 
 
+def test_validates_owned_key_without_accessing_storage() -> None:
+    service, object_storage = _service()
+
+    service.validate_owned_object_key(
+        object_key=IMAGE_KEY,
+        uploader_id=UPLOADER_ID,
+        purpose=MediaPurpose.estate,
+        media_type=MediaType.image,
+    )
+
+    object_storage.object_exists.assert_not_called()
+
+
 def test_validates_multiple_objects() -> None:
     service, object_storage = _service()
     second_media_id = UUID("40000000-0000-0000-0000-000000000def")

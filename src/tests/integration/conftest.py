@@ -98,6 +98,7 @@ def db_session(
     fake_object_storage: FakeObjectStorage,
 ) -> Iterator[Session]:
     fake_mailer.reset()
+    fake_object_storage.reset()
 
     with app.app_context():
         engine = db.get_engine(app)

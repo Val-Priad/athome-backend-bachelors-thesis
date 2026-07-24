@@ -10,6 +10,7 @@ from domain.email_verification.email_verification_service import (
 from domain.estate.estate_participants_service import EstateParticipantsService
 from domain.estate.estate_service import EstateService
 from domain.media.media_service import MediaService
+from domain.media.media_usage_service import MediaUsageService
 from domain.password_reset.password_reset_service import PasswordResetService
 from domain.token.token_generator import TokenGenerator
 from domain.token.token_lifecycle_service import TokenLifecycleService
@@ -60,6 +61,10 @@ def build_service_container(
             user_repository=repositories.users,
         ),
         media=media_service,
+        media_usage=MediaUsageService(
+            estate_media_repository=repositories.estate_media,
+            user_repository=repositories.users,
+        ),
         estates=EstateService(
             estate_repository=repositories.estates,
             vicinity_client=infrastructure.vicinity_client,

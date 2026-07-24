@@ -46,11 +46,15 @@ def build_estates_container(
             authorization_service=services.authorization,
             participants_service=services.estate_participants,
             object_storage=infrastructure.object_storage,
+            media_service=services.media,
+            estate_media_repository=repositories.estate_media,
+            estate_repository=repositories.estates,
         ),
         delete=DeleteEstateUseCase(
             transactions=transactions,
             estate_repository=repositories.estates,
             authorization_service=services.authorization,
+            object_storage=infrastructure.object_storage,
         ),
         suggest=SuggestEstateUseCase(
             transactions=transactions,
